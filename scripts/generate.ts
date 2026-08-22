@@ -294,7 +294,7 @@ async function run() {
   const generated = await generateContent(weather, commute, territories, intel, articles, sources);
   
   // Merge AI output with master territories list to ensure no territories are dropped
-  const mergedTerritories = territories.map(t => {
+  const mergedTerritories = territories.map((t: { name: string, logo: string }) => {
     const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
     return {
       name: t.name,
