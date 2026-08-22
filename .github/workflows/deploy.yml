@@ -37,7 +37,6 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-
       - name: Build Next.js Static Export
         run: npm run build
 
