@@ -1,0 +1,32 @@
+[
+  {
+    "id": "11111111-1111-1111-1111-111111111111",
+    "name": "DHS Office of Intelligence & Analysis (I&A)",
+    "description": "Equips the Homeland Security Enterprise with the timely intelligence and information it needs to keep the Homeland safe, secure, and resilient.",
+    "priority": 1
+  },
+  {
+    "id": "22222222-2222-2222-2222-222222222222",
+    "name": "Federal Emergency Management Agency (FEMA)",
+    "description": "Helping people before, during, and after disasters.",
+    "priority": 1
+  },
+  {
+    "id": "33333333-3333-3333-3333-333333333333",
+    "name": "Homeland Security Operational Analysis Center (HSOAC) & HSSEDI",
+    "description": "Federally funded research and development centers for DHS.",
+    "priority": 1
+  },
+  {
+    "id": "44444444-4444-4444-4444-444444444444",
+    "name": "U.S. Department of Homeland Security Headquarters",
+    "description": "Department-wide DHS initiatives, leadership, and enterprise IT.",
+    "priority": 1
+  },
+  {
+    "id": "55555555-5555-5555-5555-555555555555",
+    "name": "U.S. Secret Service (USSS)",
+    "description": "Safeguards the nation's financial infrastructure and payment systems, and protects national leaders, visiting heads of state and government.",
+    "priority": 1
+  }
+]

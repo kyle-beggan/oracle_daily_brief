@@ -1,0 +1,42 @@
+[
+  {
+    "id": "source-dhs-press",
+    "name": "DHS Press Releases",
+    "url": "https://www.dhs.gov/news-releases/rss.xml",
+    "tier": 1,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-fema-press",
+    "name": "FEMA Press Releases",
+    "url": "https://www.fema.gov/about/news-multimedia/press-releases/rss.xml",
+    "tier": 1,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-sam-gov",
+    "name": "SAM.gov Opportunities",
+    "url": "https://sam.gov/api/prod/opportunities/v2/search",
+    "tier": 1,
+    "type": "api",
+    "is_active": true
+  },
+  {
+    "id": "source-nyt-us",
+    "name": "NYT US News",
+    "url": "https://rss.nytimes.com/services/xml/rss/nyt/US.xml",
+    "tier": 2,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-wapo-national",
+    "name": "Washington Post National",
+    "url": "https://feeds.washingtonpost.com/rss/national",
+    "tier": 2,
+    "type": "rss",
+    "is_active": true
+  }
+]

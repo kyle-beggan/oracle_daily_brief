@@ -1,0 +1,391 @@
+[
+  {
+    "id": "intel_1787403517202_t5k7gk76h",
+    "article_id": "art_1787372591878_gme5u2zli",
+    "analyzed_at": "2026-08-22T12:58:37.202Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses former President Trump's support for Darline Graham in South Carolina and his encouragement to Republicans to act as though he is on the ballot for the upcoming midterm elections. The primary focus is on political dynamics rather than technology or business.",
+    "stakeholders": [],
+    "commercial_signal": "The article is centered on political campaign activities with no direct relevance to Oracle's cloud or AI business interests or potential commercial opportunities within DHS or related territories.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403519033_wn3gikcde",
+    "article_id": "art_1787372591878_9jyz13a3o",
+    "analyzed_at": "2026-08-22T12:58:39.033Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Policy",
+      "Government"
+    ],
+    "summary": "The article discusses a finalized plan by the Postal Service to restrict mail ballots in response to an executive order by former President Trump. The order was blocked by federal courts and is currently under review by the Supreme Court.",
+    "stakeholders": [
+      "US Postal Service",
+      "Federal Courts",
+      "Supreme Court"
+    ],
+    "commercial_signal": "Why Kyle Should Care",
+    "recommendations": [
+      "Focus on monitoring changes in federal policies that may indirectly affect agency cloud computing needs.",
+      "Explore engagements with government legal and justice departments for cloud services."
+    ]
+  },
+  {
+    "id": "intel_1787403520281_p29sc6n2m",
+    "article_id": "art_1787372591878_8ze1467i0",
+    "analyzed_at": "2026-08-22T12:58:40.281Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "A federal judge has invalidated a policy from the Trump administration that banned visas for citizens of 75 countries, stating that it exceeded legal authority.",
+    "stakeholders": [],
+    "commercial_signal": "This ruling is a political and legal matter with no direct commercial implications for Oracle's federal cloud or AI business opportunities.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403542896_swk2ptw2m",
+    "article_id": "art_1787372591878_adwoe618j",
+    "analyzed_at": "2026-08-22T12:59:02.896Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Public Health",
+      "Food Safety"
+    ],
+    "summary": "The article discusses an outbreak of illnesses linked to alfalfa sprouts contaminated with E. coli and salmonella in 15 states, as reported by the FDA. This prompted investigations into food safety and public health measures.",
+    "stakeholders": [
+      "FDA",
+      "Public Health Agencies",
+      "Food Safety Authorities"
+    ],
+    "commercial_signal": "Why Kyle Should Care: There is no direct commercial signal related to Oracle's cloud or AI business as the content is primarily focused on public health.",
+    "recommendations": [
+      "No immediate action required as this is unrelated to Oracle's cloud/AI business."
+    ]
+  },
+  {
+    "id": "intel_1787403564068_qehjr2gm4",
+    "article_id": "art_1787372591878_ino46s9wm",
+    "analyzed_at": "2026-08-22T12:59:24.068Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses California Governor Gavin Newsom's unexpected support for President Trump's new children's savings accounts.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not directly pertain to Oracle's business interests in federal markets, especially in the realm of cloud or AI.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403586005_0udf3tay0",
+    "article_id": "art_1787372591878_dnjgflms0",
+    "analyzed_at": "2026-08-22T12:59:46.005Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Politics",
+      "Leadership"
+    ],
+    "summary": "Vice President JD Vance campaigns for Republicans in his hometown, emphasising his personal connection to his Rust Belt roots.",
+    "stakeholders": [
+      "JD Vance",
+      "Republican Party"
+    ],
+    "commercial_signal": "The article focuses on political campaigning which does not directly impact Oracle's federal cloud/AI contracts or initiatives.",
+    "recommendations": [
+      "Track any policy changes advocated by JD Vance that could impact technology or information systems.",
+      "Stay informed about political climates which could indirectly affect federal contract and acquisition policies."
+    ]
+  },
+  {
+    "id": "intel_1787403607714_yhu5twn84",
+    "article_id": "art_1787372591878_ztkz8o5nd",
+    "analyzed_at": "2026-08-22T13:00:07.714Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the Pentagon's firing of the editor and publisher of Stars and Stripes, an independent military publication, as well as a Middle East correspondent. This action reflects efforts to reduce the publication's editorial independence.",
+    "stakeholders": [],
+    "commercial_signal": "The content of Stars and Stripes and any changes in its editorial policy are unlikely to impact Oracle's federal business interests.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403629012_drbxn6i8b",
+    "article_id": "art_1787372591878_4u60qejlt",
+    "analyzed_at": "2026-08-22T13:00:29.012Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the defense strategy in the Lindsay Clancy murder trial, focusing on whether she was experiencing psychosis when the crime occurred.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not provide any commercial signals or implications for Oracle's cloud or AI business.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403650519_ywtjsvh4k",
+    "article_id": "art_1787372591878_my9thi7sv",
+    "analyzed_at": "2026-08-22T13:00:50.519Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "An appeals court reduced the financial award that Alex Jones was ordered to pay to the parents of a Sandy Hook victim, from $49 million to $6 million, citing a Texas damages cap.",
+    "stakeholders": [],
+    "commercial_signal": "This article is not relevant to Oracle's business interests or federal cloud account strategies as it pertains to a legal case with no direct connection to the cloud, AI, or federal government contracts.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403672330_oerkebslj",
+    "article_id": "art_1787372591878_l8pl7t7ii",
+    "analyzed_at": "2026-08-22T13:01:12.330Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Leadership"
+    ],
+    "summary": "The article discusses the conclusion of a rapid primary election season in the United States, drawing comparisons to European-style election cycles.",
+    "stakeholders": [
+      "Political Analysts",
+      "Election Campaigners"
+    ],
+    "commercial_signal": "This news does not pertain to Oracle's cloud or AI businesses or its market opportunities within any DHS territories.",
+    "recommendations": [
+      "Focus on articles related to technology implementations in DHS sectors.",
+      "Monitor news on government cloud contracts and AI initiatives relevant to Oracle."
+    ]
+  },
+  {
+    "id": "intel_1787403693428_q8hn5904k",
+    "article_id": "art_1787372591878_h6r0pf7zv",
+    "analyzed_at": "2026-08-22T13:01:33.428Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The Massachusetts Supreme Judicial Court has ruled against the installation of Catholic saint statues in a public building in Quincy, following opposition from both religious figures and residents in the city.",
+    "stakeholders": [],
+    "commercial_signal": "Why Kyle Should Care",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403714639_afnverrie",
+    "article_id": "art_1787372591878_e04l7ipeq",
+    "analyzed_at": "2026-08-22T13:01:54.639Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the U.S. government's decision to pay Liberia $5 million in connection to deportees, a decision made during the Trump administration. The payment was approved after Liberia expressed willingness to consider accepting migrants from other countries.",
+    "stakeholders": [],
+    "commercial_signal": "The article has no commercial relevance to Oracle's cloud/AI business or its engagement with any DHS territories.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403735873_fc7c93nii",
+    "article_id": "art_1787372591878_ba3mv7f5c",
+    "analyzed_at": "2026-08-22T13:02:15.873Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses a prolonged power outage in Gary, Indiana, caused by floods from thunderstorms. The city's large impoverished population is significantly affected by the outage.",
+    "stakeholders": [],
+    "commercial_signal": "This incident is not directly related to Oracle's business or Federal Cloud initiatives within any DHS territories.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403736944_fojb5b6p1",
+    "article_id": "art_1787372591878_uspt83ezx",
+    "analyzed_at": "2026-08-22T13:02:16.944Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "A small aircraft carrying military personnel and contractors crashed in Alaska, resulting in eight fatalities.",
+    "stakeholders": [],
+    "commercial_signal": "This incident does not present any direct commercial opportunities for Oracle's cloud or AI divisions.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403758349_ldphtpcvf",
+    "article_id": "art_1787372591878_zprrqou09",
+    "analyzed_at": "2026-08-22T13:02:38.349Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses donations made by The GEO Group to a political action committee supporting the president, following the awarding of large contracts by ICE. It highlights potential ethical concerns related to political donations and contract allocations.",
+    "stakeholders": [],
+    "commercial_signal": "Why Kyle Should Care: The article involves political and ethical aspects of government contracts, but it doesn't directly relate to Oracle's cloud or AI markets.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403779341_25f9xiflm",
+    "article_id": "art_1787372591878_7l022hjv1",
+    "analyzed_at": "2026-08-22T13:02:59.341Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses Chief Justice allowing a construction project at the White House to proceed. It involves a large ballroom linked to renovating an underground military bunker.",
+    "stakeholders": [],
+    "commercial_signal": "Why Kyle Should Care",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403800540_ki53210eo",
+    "article_id": "art_1787372591878_rixc2nlej",
+    "analyzed_at": "2026-08-22T13:03:20.540Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses a thriller novel set in the Boundary Waters written by William Kent Krueger.",
+    "stakeholders": [],
+    "commercial_signal": "This article focuses on entertainment and literature, which are irrelevant to Oracle's federal cloud business.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403821880_o5s0i2o9t",
+    "article_id": "art_1787372591878_u5wzqns3g",
+    "analyzed_at": "2026-08-22T13:03:41.880Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Legal",
+      "Regulations"
+    ],
+    "summary": "The state fined Blackbird Mountain Guides $151,300 after a fatal skiing trip in the Sierra Nevada led to nine deaths due to an avalanche.",
+    "stakeholders": [
+      "Blackbird Mountain Guides"
+    ],
+    "commercial_signal": "The article does not provide a direct commercial opportunity for Oracle's cloud or AI business.",
+    "recommendations": [
+      "No action is required as the article does not pertain to Oracle's interests in federal cloud territories."
+    ]
+  },
+  {
+    "id": "intel_1787403843536_i2jk4k0tm",
+    "article_id": "art_1787372591878_9miayqcsg",
+    "analyzed_at": "2026-08-22T13:04:03.536Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Leadership"
+    ],
+    "summary": "The article discusses the installation of gazebos from Uzbekistan in West Potomac Park, related to President Trump's initiative for a National Garden of American Heroes.",
+    "stakeholders": [
+      "Donald Trump",
+      "Uzbekistan Government"
+    ],
+    "commercial_signal": "This article does not have any direct commercial implications or signals relevant to Oracle's business in the DHS context.",
+    "recommendations": [
+      "Monitor public-private partnership opportunities for DHS-related infrastructure projects.",
+      "Keep track of DHS-related political developments for any changes that might indirectly affect Oracle's federal cloud business."
+    ]
+  },
+  {
+    "id": "intel_1787403864570_gcfhyz1so",
+    "article_id": "art_1787372591878_xcr9hbbk6",
+    "analyzed_at": "2026-08-22T13:04:24.570Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses former President Donald Trump's threat of a defamation lawsuit over a report involving the National Guard, reflecting his attempt to intimidate critics through legal means.",
+    "stakeholders": [],
+    "commercial_signal": "The article does not present any direct commercial opportunities or threats for Oracle's cloud/AI business.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403886908_pefme02pb",
+    "article_id": "art_1787372591878_4ls2tzkkw",
+    "analyzed_at": "2026-08-22T13:04:46.908Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the Trump administration's proposal to allow online gun sales directly to consumers, which has raised concerns from small gun dealers about industry disruption and public safety risks.",
+    "stakeholders": [
+      "Trump Administration",
+      "Small Gun Dealers"
+    ],
+    "commercial_signal": "The topic is politically significant but has no direct implications for Oracle's cloud or AI business, nor its engagement with DHS.",
+    "recommendations": [
+      "Monitor similar policy developments related to digital commerce or public safety that could indirectly impact Oracle's target sectors.",
+      "Focus on other governmental developments related to technology use within federal agencies."
+    ]
+  },
+  {
+    "id": "intel_1787403908001_y9p0jr1rs",
+    "article_id": "art_1787372591878_vdv9rxczx",
+    "analyzed_at": "2026-08-22T13:05:08.001Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses a privacy case involving Samuel Tunick, who faces charges for deleting phone data during a customs search, raising concerns about privacy rights.",
+    "stakeholders": [],
+    "commercial_signal": "The content does not directly relate to Oracle's business interests or federal cloud/AI strategies.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403929099_3zff9on5p",
+    "article_id": "art_1787372591878_q8loeltw8",
+    "analyzed_at": "2026-08-22T13:05:29.099Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses Bryan Johnson, a longevity guru, and his health journey, which is not directly related to the business operations of Oracle's cloud or AI sectors within any DHS territory.",
+    "stakeholders": [],
+    "commercial_signal": "Why Kyle Should Care",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403950295_pj9ss9f4o",
+    "article_id": "art_1787372591878_iyxetzmpg",
+    "analyzed_at": "2026-08-22T13:05:50.295Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the impact of slowed federal funding on Harvard University due to its conflict with the Trump administration.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not provide information regarding Oracle's cloud or AI business or any direct link to the DHS territories.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403971616_1fsxvexwm",
+    "article_id": "art_1787372600130_1vjtz9etv",
+    "analyzed_at": "2026-08-22T13:06:11.616Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses Texas Governor Greg Abbott's call for a Justice Department probe into Muslim washing stations at major airports in the state.",
+    "stakeholders": [],
+    "commercial_signal": "This issue does not relate directly to Oracle's business, particularly in cloud or AI services within the DHS sectors.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787403992790_pbda80tty",
+    "article_id": "art_1787372600130_jeh2kxgv5",
+    "analyzed_at": "2026-08-22T13:06:32.790Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses water usage restrictions on Arizona, California, and Nevada due to low levels in the Colorado River. These states must reduce water usage starting in 2027.",
+    "stakeholders": [],
+    "commercial_signal": "The article does not directly relate to Oracle's cloud/AI business or the interests of federal sectors related to the Department of Homeland Security.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787404014526_o41zggs6h",
+    "article_id": "art_1787372600130_9k6u2fwfs",
+    "analyzed_at": "2026-08-22T13:06:54.526Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [
+      "Space Policy"
+    ],
+    "summary": "The Trump administration's new space transportation policy aims to increase the number of launches and collaborate with the commercial space industry for missions to Mars.",
+    "stakeholders": [
+      "NASA",
+      "Commercial Space Industry",
+      "White House"
+    ],
+    "commercial_signal": "Why Kyle Should Care: The space policy primarily focuses on space exploration and increasing launches which do not directly align with Oracle's business interests, particularly in cloud or AI services related to terrestrial security domains.",
+    "recommendations": [
+      "Monitor for potential secondary impacts on related technologies like satellite-based cloud infrastructure, but no immediate action is needed."
+    ]
+  }
+]
