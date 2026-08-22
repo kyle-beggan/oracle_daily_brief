@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Pause, FileText, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw } from "lucide-react";
 
 interface TerritoryBrief {
   name: string;
@@ -88,7 +89,7 @@ export default function Home() {
     const pat = process.env.NEXT_PUBLIC_GITHUB_PAT;
     
     if (!owner || !repo || !pat) {
-      alert("GitHub configuration missing in .env.local. Please set NEXT_PUBLIC_REPO_OWNER, NEXT_PUBLIC_REPO_NAME, and NEXT_PUBLIC_GITHUB_PAT.");
+      toast.error("GitHub configuration missing in .env.local. Please set NEXT_PUBLIC_REPO_OWNER, NEXT_PUBLIC_REPO_NAME, and NEXT_PUBLIC_GITHUB_PAT.");
       setIsRefreshing(false);
       return;
     }
@@ -107,15 +108,15 @@ export default function Home() {
       });
 
       if (response.ok) {
-        alert("Data pipeline triggered! The site will update in a few minutes.");
+        toast.success("Data pipeline triggered! The site will update in a few minutes.");
       } else {
         const err = await response.text();
         console.error("Failed to trigger pipeline:", err);
-        alert("Failed to trigger pipeline. Check console.");
+        toast.error("Failed to trigger pipeline. Check console.");
       }
     } catch (error) {
       console.error("Error triggering pipeline:", error);
-      alert("Error triggering pipeline.");
+      toast.error("Error triggering pipeline.");
     } finally {
       setIsRefreshing(false);
     }
@@ -157,7 +158,8 @@ export default function Home() {
             {data?.territories ? data.territories.map((territory, idx) => (
               <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
                 <div className="flex items-center gap-3 mb-4">
-                  <img src={territory.logo} alt="Logo" className="h-8 w-8 rounded-full" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
                   <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
                 </div>
                 <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
@@ -207,6 +209,7 @@ export default function Home() {
                     if (!audio || duration === 0) return;
                     const rect = e.currentTarget.getBoundingClientRect();
                     const percent = (e.clientX - rect.left) / rect.width;
+                    // eslint-disable-next-line react-hooks/immutability
                     audio.currentTime = percent * duration;
                     setCurrentTime(percent * duration);
                   }}

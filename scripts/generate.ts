@@ -104,7 +104,7 @@ interface IntelligenceItem {
 }
 
 // 4. Generate Content with OpenAI
-async function generateContent(weatherStr: string, commuteStr: string, territories: any[], intelligenceData: IntelligenceItem[]) {
+async function generateContent(weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[]) {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is required for generation.');
   }
@@ -133,7 +133,7 @@ Here is the context for today:
 [Commute]: ${commuteStr}
 
 [My Territories]:
-${territories.map((t: any) => `- ${t.name} (Logo URL: ${t.logo})`).join('\n')}
+${territories.map((t: { name: string, logo: string }) => `- ${t.name} (Logo URL: ${t.logo})`).join('\n')}
 
 [Intelligence Items]:
 ${JSON.stringify(relevantIntel, null, 2)}
