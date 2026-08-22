@@ -197,28 +197,6 @@ export default function Home() {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* Main Content Area */}
-          <div className="md:col-span-2 space-y-6">
-            {data?.territories ? data.territories.map((territory, idx) => (
-              <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
-                  <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
-                </div>
-                <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
-                  <div dangerouslySetInnerHTML={{ __html: territory.html }} />
-                </div>
-              </div>
-            )) : (
-              <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 animate-pulse space-y-4">
-                <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
-                <div className="h-4 bg-zinc-800 rounded w-full"></div>
-                <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
-              </div>
-            )}
-          </div>
-
           {/* Side Panel Area */}
           <div className="space-y-6">
             {/* Audio Player Card */}
@@ -325,6 +303,29 @@ export default function Home() {
                </ul>
             </div>
           </div>
+          {/* Main Content Area */}
+          <div className="md:col-span-2 space-y-6">
+            {data?.territories ? data.territories.map((territory, idx) => (
+              <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
+                  <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
+                </div>
+                <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
+                  <div dangerouslySetInnerHTML={{ __html: territory.html }} />
+                </div>
+              </div>
+            )) : (
+              <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 animate-pulse space-y-4">
+                <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+                <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
+              </div>
+            )}
+          </div>
+
+
           
         </div>
       </main>
