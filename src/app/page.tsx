@@ -24,10 +24,11 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshTimeLeft, setRefreshTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
-    // Fetch static data on mount
-    fetch("/data/daily-brief.json")
+    // Fetch static data on mount with a cache buster so live site gets freshest data
+    fetch(`/data/daily-brief.json?t=${new Date().getTime()}`)
       .then(res => res.json())
       .then(data => setData(data))
       .catch(err => console.error("Could not load brief data", err));
@@ -56,6 +57,24 @@ export default function Home() {
       podcastAudio.removeEventListener("ended", handleEnded);
     };
   }, []);
+
+  useEffect(() => {
+    if (refreshTimeLeft === null) return;
+    
+    if (refreshTimeLeft <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRefreshTimeLeft(null);
+      setIsRefreshing(false);
+      window.location.reload();
+      return;
+    }
+    
+    const timer = setInterval(() => {
+      setRefreshTimeLeft(prev => prev !== null ? prev - 1 : null);
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [refreshTimeLeft]);
 
   const togglePlay = () => {
     if (!audio) return;
@@ -112,16 +131,17 @@ export default function Home() {
       });
 
       if (response.ok) {
-        toast.success("Data pipeline triggered! The site will update in a few minutes.");
+        toast.success("Data pipeline triggered! The site will update in ~5.5 minutes.");
+        setRefreshTimeLeft(330);
       } else {
         const err = await response.text();
         console.error("Failed to trigger pipeline:", err);
         toast.error("Failed to trigger pipeline. Check console.");
+        setIsRefreshing(false);
       }
     } catch (error) {
       console.error("Error triggering pipeline:", error);
       toast.error("Error triggering pipeline.");
-    } finally {
       setIsRefreshing(false);
     }
   };
@@ -144,16 +164,33 @@ export default function Home() {
             <p className="text-xl text-zinc-400">{formattedDate}</p>
           </div>
           
-          <div className="flex flex-col items-start md:items-end gap-2">
+          <div className="flex flex-col items-start md:items-end gap-2 min-w-[240px]">
             <span className="text-xs text-zinc-500 font-medium tracking-wide">Last updated: {lastUpdated}</span>
-            <button 
-              onClick={triggerRefresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
-              {isRefreshing ? 'Triggering...' : 'Refresh Feed'}
-            </button>
+            {refreshTimeLeft !== null ? (
+              <div className="w-full bg-zinc-900/80 border border-zinc-800 rounded-lg p-3 shadow-xl backdrop-blur-md">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs font-semibold tracking-wide text-sky-400 uppercase animate-pulse">Running Pipeline...</span>
+                  <span className="text-xs text-zinc-400 font-medium">
+                    {Math.floor(refreshTimeLeft / 60)}:{(refreshTimeLeft % 60).toString().padStart(2, '0')}
+                  </span>
+                </div>
+                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-sky-500 rounded-full transition-all duration-1000 ease-linear"
+                    style={{ width: `${((330 - refreshTimeLeft) / 330) * 100}%` }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <button 
+                onClick={triggerRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md w-full justify-center md:w-auto md:justify-start"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
+                {isRefreshing ? 'Triggering...' : 'Refresh Feed'}
+              </button>
+            )}
           </div>
         </header>
 
