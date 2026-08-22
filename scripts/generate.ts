@@ -12,6 +12,7 @@ const openai = new OpenAI({
 const DATA_DIR = path.join(process.cwd(), 'data');
 const PUBLIC_DATA_DIR = path.join(process.cwd(), 'public', 'data');
 const INTELLIGENCE_FILE = path.join(DATA_DIR, 'intelligence.json');
+const TERRITORIES_FILE = path.join(DATA_DIR, 'territories.json');
 const BRIEF_JSON_FILE = path.join(PUBLIC_DATA_DIR, 'daily-brief.json');
 const PODCAST_AUDIO_FILE = path.join(PUBLIC_DATA_DIR, 'podcast.mp3');
 
@@ -87,13 +88,23 @@ async function loadIntelligence() {
   }
 }
 
+async function loadTerritories() {
+  try {
+    const data = await fs.readFile(TERRITORIES_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    if ((error as { code?: string }).code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
 interface IntelligenceItem {
   relevance_score: number;
   [key: string]: unknown;
 }
 
 // 4. Generate Content with OpenAI
-async function generateContent(weatherStr: string, commuteStr: string, intelligenceData: IntelligenceItem[]) {
+async function generateContent(weatherStr: string, commuteStr: string, territories: any[], intelligenceData: IntelligenceItem[]) {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is required for generation.');
   }
@@ -111,11 +122,18 @@ Your task is to review the following intelligence items and produce a JSON respo
    - MUST STRICTLY EXCLUDE any political partisan drama. Focus ONLY on executive orders, legislation, and updates that have a direct effect on selling Oracle technology and services.
    - The script must be concise enough to be spoken in under 20 minutes (maximum 2500 words).
    - Keep the tone professional, energetic, and highly relevant to Oracle sales.
-2. "executive_summary": A bulleted markdown string summarizing the key points for a visual dashboard.
+2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.
+   - "name": The exact name of the territory from the context.
+   - "logo": The exact logo URL of the territory from the context.
+   - "html": A richly formatted HTML string summarizing the key points for the visual dashboard using standard <ul><li> for the bullet points. Do NOT include any <h3> headers in this string, only the bulleted list. If there is no news, output a single bullet: <li>No significant activity to report today.</li>
+   - If an intelligence item has a source URL, you MUST provide a <a href="URL" target="_blank" rel="noopener noreferrer">(link)</a> at the very end of the bullet point.
 
 Here is the context for today:
 [Weather]: ${weatherStr}
 [Commute]: ${commuteStr}
+
+[My Territories]:
+${territories.map((t: any) => `- ${t.name} (Logo URL: ${t.logo})`).join('\n')}
 
 [Intelligence Items]:
 ${JSON.stringify(relevantIntel, null, 2)}
@@ -135,9 +153,21 @@ ${JSON.stringify(relevantIntel, null, 2)}
           type: "object",
           properties: {
             podcast_script: { type: "string" },
-            executive_summary: { type: "string" }
+            territories: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  logo: { type: "string" },
+                  html: { type: "string" }
+                },
+                required: ["name", "logo", "html"],
+                additionalProperties: false
+              }
+            }
           },
-          required: ["podcast_script", "executive_summary"],
+          required: ["podcast_script", "territories"],
           additionalProperties: false
         },
         strict: true
@@ -176,14 +206,18 @@ async function run() {
   
   const intel = await loadIntelligence();
   console.log(`Loaded ${intel.length} intelligence items.`);
+
+  const territories = await loadTerritories();
   
   console.log('Generating content via OpenAI...');
-  const generated = await generateContent(weather, commute, intel);
+  const generated = await generateContent(weather, commute, territories, intel);
   
   // Save JSON for dashboard
   const briefPayload = {
     date: new Date().toISOString(),
-    executive_summary: generated.executive_summary
+    weather: weather,
+    commute: commute,
+    territories: generated.territories
   };
   await fs.writeFile(BRIEF_JSON_FILE, JSON.stringify(briefPayload, null, 2));
   console.log(`Saved brief payload to ${BRIEF_JSON_FILE}`);

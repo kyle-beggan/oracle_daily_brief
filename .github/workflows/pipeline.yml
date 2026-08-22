@@ -1,10 +1,10 @@
-name: Daily Brief Pipeline & Deploy
+name: Data Pipeline Refresh
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch: # Allows manual triggering from the GitHub Actions tab
+  schedule:
+    # Run every morning at 5:00 AM EST (10:00 UTC)
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Allows manual triggering from UI or Actions tab
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
+  run-pipeline-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,6 +33,11 @@ jobs:
 
       - name: Install Dependencies
         run: npm install
+
+      - name: Run Data Pipeline
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: npm run generate
 
       - name: Build Next.js Static Export
         run: npm run build

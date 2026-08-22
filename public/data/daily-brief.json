@@ -1,4 +1,32 @@
 {
-  "date": "2026-08-22T13:16:24.537Z",
-  "executive_summary": "- **Weather**: 71.6°F in Northern Virginia  \n- **Commute**: 87 minutes from Fredericksburg to Reston  \n- **Executive Orders**: Focus on enhancing federal cybersecurity opens opportunities for Cloud Infrastructure security solutions.  \n- **Legislation Update**: Government modernization initiatives present a strong case for Oracle's SaaS solutions.  \n- **Data-Driven Decisions**: Increasing demand for scalable data management solutions emphasizes Oracle’s data analytics capabilities."
+  "date": "2026-08-22T12:00:00Z",
+  "weather": "Expect partly cloudy skies today in Northern Virginia with a high of 71°F.",
+  "commute": "The drive to the Reston Oracle office is looking smooth at exactly 38 minutes via VA-267 E.",
+  "territories": [
+    {
+      "name": "U.S. Department of Homeland Security Headquarters",
+      "logo": "/logos/dhs.svg",
+      "html": "<ul><li>No significant activity to report today.</li></ul>"
+    },
+    {
+      "name": "Federal Emergency Management Agency (FEMA)",
+      "logo": "/logos/fema.svg",
+      "html": "<ul><li>FEMA has released a Request for Information (RFI) regarding a massive logistics data modernization project requiring FedRAMP High certification. <a href=\"https://sam.gov/opp/example1\" target=\"_blank\" rel=\"noopener noreferrer\">(link)</a></li><li>Upcoming recompetes for emergency management software present a strong opportunity for OCI displacement.</li></ul>"
+    },
+    {
+      "name": "DHS Office of Intelligence & Analysis (I&A)",
+      "logo": "/logos/dhs.svg",
+      "html": "<ul><li>New budget allocations favor cloud-native intelligence platforms, prioritizing zero-trust architecture. <a href=\"https://www.dhs.gov/news/example2\" target=\"_blank\" rel=\"noopener noreferrer\">(link)</a></li></ul>"
+    },
+    {
+      "name": "U.S. Secret Service (USSS)",
+      "logo": "/logos/usss.svg",
+      "html": "<ul><li>The agency is standardizing on a new enterprise identity provider, phasing out legacy on-premise systems by end of year.</li></ul>"
+    },
+    {
+      "name": "Homeland Security Operational Analysis Center (HSOAC) & Homeland Security Systems Engineering and Development Institute (HSSEDI)",
+      "logo": "/logos/dhs.svg",
+      "html": "<ul><li>No significant activity to report today.</li></ul>"
+    }
+  ]
 }

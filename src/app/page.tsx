@@ -1,17 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Pause, FileText, Activity, ShieldAlert, Cpu } from "lucide-react";
+import { Play, Pause, FileText, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw } from "lucide-react";
+
+interface TerritoryBrief {
+  name: string;
+  logo: string;
+  html: string;
+}
 
 interface BriefData {
   date: string;
-  executive_summary: string;
+  weather?: string;
+  commute?: string;
+  territories: TerritoryBrief[];
 }
 
 export default function Home() {
   const [data, setData] = useState<BriefData | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     // Fetch static data on mount
@@ -22,13 +33,26 @@ export default function Home() {
       
     // Initialize audio
     const podcastAudio = new Audio("/data/podcast.mp3");
-    podcastAudio.addEventListener("ended", () => setIsPlaying(false));
+    
+    const handleLoadedMetadata = () => setDuration(podcastAudio.duration);
+    const handleTimeUpdate = () => setCurrentTime(podcastAudio.currentTime);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    podcastAudio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    podcastAudio.addEventListener("timeupdate", handleTimeUpdate);
+    podcastAudio.addEventListener("ended", handleEnded);
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setAudio(podcastAudio);
 
     return () => {
       podcastAudio.pause();
-      podcastAudio.removeEventListener("ended", () => setIsPlaying(false));
+      podcastAudio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      podcastAudio.removeEventListener("timeupdate", handleTimeUpdate);
+      podcastAudio.removeEventListener("ended", handleEnded);
     };
   }, []);
 
@@ -42,48 +66,87 @@ export default function Home() {
     setIsPlaying(!isPlaying);
   };
 
+  const formatTime = (time: number) => {
+    if (isNaN(time)) return "0:00";
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   const formattedDate = data?.date ? new Date(data.date).toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   }) : new Date().toLocaleDateString('en-US', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
+  const triggerRefresh = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    
+    const owner = process.env.NEXT_PUBLIC_REPO_OWNER;
+    const repo = process.env.NEXT_PUBLIC_REPO_NAME;
+    const pat = process.env.NEXT_PUBLIC_GITHUB_PAT;
+    
+    if (!owner || !repo || !pat) {
+      alert("GitHub configuration missing in .env.local. Please set NEXT_PUBLIC_REPO_OWNER, NEXT_PUBLIC_REPO_NAME, and NEXT_PUBLIC_GITHUB_PAT.");
+      setIsRefreshing(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/pipeline.yml/dispatches`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${pat}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ref: "main"
+        })
+      });
+
+      if (response.ok) {
+        alert("Data pipeline triggered! The site will update in a few minutes.");
+      } else {
+        const err = await response.text();
+        console.error("Failed to trigger pipeline:", err);
+        alert("Failed to trigger pipeline. Check console.");
+      }
+    } catch (error) {
+      console.error("Error triggering pipeline:", error);
+      alert("Error triggering pipeline.");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-rose-500/30">
       {/* Background ambient light */}
       <div className="fixed top-[-50%] left-[-20%] w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800/20 via-zinc-950 to-zinc-950 -z-10 blur-3xl pointer-events-none" />
 
-      <main className="max-w-5xl mx-auto px-6 py-12 md:py-24">
+      <main className="max-w-[1224px] mx-auto px-6 py-12 md:py-24">
         
         {/* Header Section */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6">
+        <header className="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <span className="h-px w-8 bg-rose-500"></span>
-              <span className="text-sm font-semibold tracking-widest text-rose-500 uppercase">Oracle Federal Cloud</span>
+              <span className="h-px w-8 bg-sky-400"></span>
+              <span className="text-base font-semibold tracking-widest text-sky-400 uppercase">Oracle Federal Cloud</span>
             </div>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">Daily Brief</h1>
-            <p className="text-lg text-zinc-400">{formattedDate}</p>
+            <p className="text-xl text-zinc-400">{formattedDate}</p>
           </div>
           
-          {/* Audio Player Card */}
-          <div className="w-full md:w-auto bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-2xl p-4 flex items-center gap-4 hover:border-zinc-700 transition-colors shadow-2xl">
-            <button 
-              onClick={togglePlay}
-              className="h-14 w-14 rounded-full bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(244,63,94,0.3)]"
-            >
-              {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
-            </button>
-            <div>
-              <h3 className="font-medium text-zinc-100">Morning Podcast</h3>
-              <p className="text-sm text-zinc-400">Weather, Commute & Intel</p>
-            </div>
-            <div className="ml-4 h-8 flex items-end gap-1 px-2">
-              <div className={`w-1 bg-rose-500/50 rounded-full ${isPlaying ? 'animate-[bounce_1s_infinite]' : 'h-2'}`}></div>
-              <div className={`w-1 bg-rose-500/70 rounded-full ${isPlaying ? 'animate-[bounce_1.2s_infinite]' : 'h-4'}`}></div>
-              <div className={`w-1 bg-rose-500/50 rounded-full ${isPlaying ? 'animate-[bounce_0.8s_infinite]' : 'h-1'}`}></div>
-            </div>
-          </div>
+          <button 
+            onClick={triggerRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
+            {isRefreshing ? 'Triggering...' : 'Refresh Feed'}
+          </button>
         </header>
 
         {/* Dashboard Grid */}
@@ -91,34 +154,99 @@ export default function Home() {
           
           {/* Main Content Area */}
           <div className="md:col-span-2 space-y-6">
-            <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-rose-500/10 rounded-lg text-rose-500">
-                  <FileText className="h-5 w-5" />
+            {data?.territories ? data.territories.map((territory, idx) => (
+              <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <img src={territory.logo} alt="Logo" className="h-8 w-8 rounded-full" />
+                  <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
                 </div>
-                <h2 className="text-2xl font-semibold">Executive Summary</h2>
+                <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
+                  <div dangerouslySetInnerHTML={{ __html: territory.html }} />
+                </div>
               </div>
-              
-              <div className="prose prose-invert prose-zinc max-w-none">
-                {data?.executive_summary ? (
-                  <div dangerouslySetInnerHTML={{ __html: data.executive_summary }} />
-                ) : (
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
-                    <div className="h-4 bg-zinc-800 rounded w-full"></div>
-                    <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
-                    <div className="h-4 bg-zinc-800 rounded w-full"></div>
-                  </div>
-                )}
+            )) : (
+              <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 animate-pulse space-y-4">
+                <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
+                <div className="h-4 bg-zinc-800 rounded w-full"></div>
+                <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Side Panel Area */}
           <div className="space-y-6">
+            {/* Audio Player Card */}
+            <div className="w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6 flex flex-col gap-5 hover:border-zinc-700 transition-colors shadow-2xl">
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={togglePlay}
+                  className="h-14 w-14 rounded-full shrink-0 bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(244,63,94,0.3)]"
+                >
+                  {isPlaying ? <Pause className="h-6 w-6" /> : <Play className="h-6 w-6 ml-1" />}
+                </button>
+                <div className="flex-1">
+                  <h3 className="font-medium text-lg text-zinc-100">Morning Podcast</h3>
+                  <p className="text-base text-zinc-400">Audio Brief</p>
+                </div>
+                <div className="h-8 flex items-end gap-1">
+                  <div className={`w-1 bg-rose-500/50 rounded-full ${isPlaying ? 'animate-[bounce_1s_infinite]' : 'h-2'}`}></div>
+                  <div className={`w-1 bg-rose-500/70 rounded-full ${isPlaying ? 'animate-[bounce_1.2s_infinite]' : 'h-4'}`}></div>
+                  <div className={`w-1 bg-rose-500/50 rounded-full ${isPlaying ? 'animate-[bounce_0.8s_infinite]' : 'h-1'}`}></div>
+                </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="w-full space-y-1.5">
+                <div className="flex justify-between text-xs text-zinc-500 font-medium tracking-wide">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+                <div 
+                  className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden cursor-pointer"
+                  onClick={(e) => {
+                    if (!audio || duration === 0) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const percent = (e.clientX - rect.left) / rect.width;
+                    audio.currentTime = percent * duration;
+                    setCurrentTime(percent * duration);
+                  }}
+                >
+                  <div 
+                    className="h-full bg-rose-500 rounded-full transition-all duration-100 ease-linear" 
+                    style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Local Conditions Card */}
+            <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Local Conditions</h3>
+               <ul className="space-y-4">
+                 <li className="flex items-start gap-3">
+                    <div className="p-2 bg-sky-500/10 rounded-lg text-sky-400 mt-0.5">
+                      <Cloud className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-base">Weather</p>
+                      <p className="text-sm text-zinc-400">{data?.weather || "Loading..."}</p>
+                    </div>
+                 </li>
+                 <li className="flex items-start gap-3">
+                    <div className="p-2 bg-rose-500/10 rounded-lg text-rose-500 mt-0.5">
+                      <Car className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-base">Commute</p>
+                      <p className="text-sm text-zinc-400">{data?.commute || "Loading..."}</p>
+                    </div>
+                 </li>
+               </ul>
+            </div>
+
             {/* Quick Stats Card */}
             <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
-               <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-4">Market Signals</h3>
+               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Market Signals</h3>
                <ul className="space-y-4">
                  <li className="flex items-start gap-3">
                     <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 mt-0.5">
