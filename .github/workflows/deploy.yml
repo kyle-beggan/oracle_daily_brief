@@ -35,6 +35,10 @@ jobs:
         run: npm install
 
       - name: Build Next.js Static Export
+        env:
+          NEXT_PUBLIC_GITHUB_PAT: ${{ secrets.NEXT_PUBLIC_GITHUB_PAT }}
+          NEXT_PUBLIC_REPO_OWNER: kyle-beggan
+          NEXT_PUBLIC_REPO_NAME: oracle_daily_brief
         run: npm run build
 
       - name: Setup Pages
