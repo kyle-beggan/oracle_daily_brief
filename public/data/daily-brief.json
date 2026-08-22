@@ -1,32 +1,32 @@
 {
-  "date": "2026-08-22T12:00:00Z",
-  "weather": "Expect partly cloudy skies today in Northern Virginia with a high of 71°F.",
-  "commute": "The drive to the Reston Oracle office is looking smooth at exactly 38 minutes via VA-267 E.",
+  "date": "2026-08-22T18:07:45.822Z",
+  "weather": "The current temperature in Northern Virginia is 74.7 degrees Fahrenheit.",
+  "commute": "Your estimated commute time from Fredericksburg to Reston is 99 minutes.",
   "territories": [
     {
       "name": "U.S. Department of Homeland Security Headquarters",
       "logo": "/logos/dhs.svg",
-      "html": "<ul><li>No significant activity to report today.</li></ul>"
+      "html": "<ul><li>No significant activity to report this week.</li></ul>"
     },
     {
       "name": "Federal Emergency Management Agency (FEMA)",
       "logo": "/logos/fema.svg",
-      "html": "<ul><li>FEMA has released a Request for Information (RFI) regarding a massive logistics data modernization project requiring FedRAMP High certification. <a href=\"https://sam.gov/opp/example1\" target=\"_blank\" rel=\"noopener noreferrer\">(link)</a></li><li>Upcoming recompetes for emergency management software present a strong opportunity for OCI displacement.</li></ul>"
+      "html": "<ul><li>The aftermath of a storm in Indiana has left thousands without power, highlighting the need for FEMA's logistical support and recovery efforts. This situation could stimulate opportunities for Oracle's disaster recovery and cloud solutions. <code>(Washington Post National - <a href=\"https://www.washingtonpost.com/nation/2026/08/22/thousands-indiana-residents-still-without-power-10-days-after-storm/\" target=\"_blank\" rel=\"noopener noreferrer\">link</a>)</code></li></ul>"
     },
     {
       "name": "DHS Office of Intelligence & Analysis (I&A)",
       "logo": "/logos/dhs.svg",
-      "html": "<ul><li>New budget allocations favor cloud-native intelligence platforms, prioritizing zero-trust architecture. <a href=\"https://www.dhs.gov/news/example2\" target=\"_blank\" rel=\"noopener noreferrer\">(link)</a></li></ul>"
+      "html": "<ul><li>No significant activity to report this week.</li></ul>"
     },
     {
       "name": "U.S. Secret Service (USSS)",
       "logo": "/logos/usss.svg",
-      "html": "<ul><li>The agency is standardizing on a new enterprise identity provider, phasing out legacy on-premise systems by end of year.</li></ul>"
+      "html": "<ul><li>No significant activity to report this week.</li></ul>"
     },
     {
       "name": "Homeland Security Operational Analysis Center (HSOAC) & Homeland Security Systems Engineering and Development Institute (HSSEDI)",
-      "logo": "/logos/dhs.svg",
-      "html": "<ul><li>No significant activity to report today.</li></ul>"
+      "logo": "/logos/dhs.png",
+      "html": "<ul><li>No significant activity to report this week.</li></ul>"
     }
   ]
 }

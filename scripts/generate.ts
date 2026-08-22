@@ -13,6 +13,8 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const PUBLIC_DATA_DIR = path.join(process.cwd(), 'public', 'data');
 const INTELLIGENCE_FILE = path.join(DATA_DIR, 'intelligence.json');
 const TERRITORIES_FILE = path.join(DATA_DIR, 'territories.json');
+const ARTICLES_FILE = path.join(DATA_DIR, 'articles.json');
+const SOURCES_FILE = path.join(DATA_DIR, 'sources.json');
 const BRIEF_JSON_FILE = path.join(PUBLIC_DATA_DIR, 'daily-brief.json');
 const PODCAST_AUDIO_FILE = path.join(PUBLIC_DATA_DIR, 'podcast.mp3');
 
@@ -98,20 +100,90 @@ async function loadTerritories() {
   }
 }
 
+
+async function loadArticles() {
+  try {
+    const data = await fs.readFile(ARTICLES_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    if ((error as { code?: string }).code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+async function loadSources() {
+  try {
+    const data = await fs.readFile(SOURCES_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    if ((error as { code?: string }).code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
 interface IntelligenceItem {
   relevance_score: number;
-  [key: string]: unknown;
+  article_id: string;
+  territory_id: string;
+  category: string[];
+  summary: string;
+  stakeholders: string[];
+  commercial_signal: string;
+  recommendations: string[];
+  analyzed_at: string;
+}
+
+interface Article {
+  id: string;
+  source_id: string;
+  url: string;
+  title: string;
+  published_at: string;
+}
+
+interface Source {
+  id: string;
+  name: string;
 }
 
 // 4. Generate Content with OpenAI
-async function generateContent(weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[]) {
+async function generateContent(weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[], articles: Article[], sources: Source[]) {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is required for generation.');
   }
 
-  // Filter intelligence to highly relevant ones (e.g. score > 60)
-  const relevantIntel = intelligenceData.filter(item => item.relevance_score > 60);
-  
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  const articleMap = new Map(articles.map(a => [a.id, a]));
+  const sourceMap = new Map(sources.map(s => [s.id, s]));
+
+  const enrichedIntel = intelligenceData
+    .filter(item => item.relevance_score > 60)
+    .map(item => {
+      const article = articleMap.get(item.article_id as string);
+      return { ...item, article };
+    })
+    .filter(item => {
+      if (!item.article || !item.article.published_at) return false;
+      const pubDate = new Date(item.article.published_at).getTime();
+      return (now - pubDate) <= SEVEN_DAYS_MS;
+    })
+    .map(item => {
+      const source = item.article ? sourceMap.get(item.article.source_id) : undefined;
+      return {
+        territory_id: item.territory_id,
+        category: item.category,
+        summary: item.summary,
+        relevance_score: item.relevance_score,
+        title: item.article!.title,
+        url: item.article!.url,
+        published_at: item.article!.published_at,
+        source_name: source ? source.name : "Unknown Source"
+      };
+    })
+    .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
+
   const systemPrompt = `
 You are the host of a daily podcast and executive briefing for Kyle, an Oracle Federal Cloud Account Executive.
 Your task is to review the following intelligence items and produce a JSON response containing two things:
@@ -125,8 +197,10 @@ Your task is to review the following intelligence items and produce a JSON respo
 2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.
    - "name": The exact name of the territory from the context.
    - "logo": The exact logo URL of the territory from the context.
-   - "html": A richly formatted HTML string summarizing the key points for the visual dashboard using standard <ul><li> for the bullet points. Do NOT include any <h3> headers in this string, only the bulleted list. If there is no news, output a single bullet: <li>No significant activity to report today.</li>
-   - If an intelligence item has a source URL, you MUST provide a <a href="URL" target="_blank" rel="noopener noreferrer">(link)</a> at the very end of the bullet point.
+   - "html": A richly formatted HTML string summarizing the key points for the visual dashboard using standard <ul><li> for the bullet points. Do NOT include any <h3> headers in this string, only the bulleted list. If there is no news for a territory within the last 7 days, output a single bullet: <li>No significant activity to report this week.</li>
+   - Order the bullets with the most recent news on top.
+   - IMPORTANT: If an intelligence item has a source URL, you MUST provide the source name and link at the very end of the bullet point in this exact format: <code>(Source Name - <a href="URL" target="_blank" rel="noopener noreferrer">link</a>)</code>.
+   - 
 
 Here is the context for today:
 [Weather]: ${weatherStr}
@@ -136,7 +210,7 @@ Here is the context for today:
 ${territories.map((t: { name: string, logo: string }) => `- ${t.name} (Logo URL: ${t.logo})`).join('\n')}
 
 [Intelligence Items]:
-${JSON.stringify(relevantIntel, null, 2)}
+${JSON.stringify(enrichedIntel, null, 2)}
 `;
 
   const response = await openai.chat.completions.create({
@@ -210,7 +284,9 @@ async function run() {
   const territories = await loadTerritories();
   
   console.log('Generating content via OpenAI...');
-  const generated = await generateContent(weather, commute, territories, intel);
+  const articles = await loadArticles();
+  const sources = await loadSources();
+  const generated = await generateContent(weather, commute, territories, intel, articles, sources);
   
   // Save JSON for dashboard
   const briefPayload = {

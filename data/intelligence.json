@@ -387,5 +387,238 @@
     "recommendations": [
       "Monitor for potential secondary impacts on related technologies like satellite-based cloud infrastructure, but no immediate action is needed."
     ]
+  },
+  {
+    "id": "intel_1787422033369_nhsxvhq3c",
+    "article_id": "art_1787372600130_8f8c149m9",
+    "analyzed_at": "2026-08-22T18:07:13.369Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the financial situation of the Democratic National Committee compared to the Republican National Committee, which is not directly related to any federal market opportunities or specific DHS territories.",
+    "stakeholders": [],
+    "commercial_signal": "The article does not relate to any specific needs or projects within DHS territories that would resonate with Oracle's cloud or AI business.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422034897_2ya4e9sxd",
+    "article_id": "art_1787372600130_mqfqi3p2k",
+    "analyzed_at": "2026-08-22T18:07:14.897Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "This article discusses California's legislative efforts to restrict social media features deemed addictive for teen protection, reflecting broader societal concerns but lacking direct relevance to DHS operations or Oracle's business.",
+    "stakeholders": [],
+    "commercial_signal": "This article highlights societal issues related to technology but does not impact Oracle's cloud or AI offerings in federal markets directly.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422036740_n5d2gul2s",
+    "article_id": "art_1787372600130_u51m3lzgp",
+    "analyzed_at": "2026-08-22T18:07:16.740Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses a police investigation concerning an incident involving Rep. Max Miller's daughter. It details the challenges faced by investigators in identifying a perpetrator but does not touch on matters relevant to the Department of Homeland Security or Oracle's cloud and AI solutions.",
+    "stakeholders": [],
+    "commercial_signal": "The article is not relevant to Oracle’s federal cloud or AI business as it does not involve any aspects of national security, disaster management, or governmental contracts.",
+    "recommendations": [
+      "Monitor future articles related to law enforcement investigations that may involve technology or cloud services.",
+      "Consider engaging with organizations that focus on technology solutions for law enforcement, if applicable."
+    ]
+  },
+  {
+    "id": "intel_1787422038786_rle5ggo8b",
+    "article_id": "art_1787372600130_7i5ky177i",
+    "analyzed_at": "2026-08-22T18:07:18.786Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses Texas Governor Greg Abbott's opposition to Muslim washing stations in airports, framing it as part of a broader anti-Muslim sentiment. It focuses on legal opinions regarding the claims made by the governor rather than on any specific policies related to DHS operations, budgets, or acquisitions.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not pertain to any federal market concerns relevant to Oracle's cloud or AI business in the context of the Department of Homeland Security.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422040219_tfvcj7dyh",
+    "article_id": "art_1787420991404_44uufenhm",
+    "analyzed_at": "2026-08-22T18:07:20.219Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the personal stories of individuals who spent decades in prison and does not relate to any specific DHS territory or Oracle's business in cloud or AI.",
+    "stakeholders": [],
+    "commercial_signal": "This article has no relevance to Oracle's cloud or AI business, and there are no applicable stakeholders or security implications.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422041958_3zd4wzmjp",
+    "article_id": "art_1787420991404_z4nekycfc",
+    "analyzed_at": "2026-08-22T18:07:21.958Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the death of Frank Smith, a former prisoner, and does not relate to the operations or interests of the Department of Homeland Security or Oracle's cloud/AI business.",
+    "stakeholders": [],
+    "commercial_signal": "This article is not relevant to Oracle's interests or the DHS.",
+    "recommendations": [
+      "Monitor news related to DHS operations and Oracle's relevant technologies",
+      "Focus on articles that discuss criminal justice reform and technology applications",
+      "Shift attention towards federal contracts in cloud and AI sectors."
+    ]
+  },
+  {
+    "id": "intel_1787422043622_183i2mth3",
+    "article_id": "art_1787420991404_ktsla7fqz",
+    "analyzed_at": "2026-08-22T18:07:23.622Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the impact of the Grand Prix on traffic and other disruptions in Washington, D.C., but it does not address any topics related to Oracle's cloud or AI business in the context of the Department of Homeland Security territories.",
+    "stakeholders": [],
+    "commercial_signal": "This article has no direct relevance to Oracle's business goals or the interests of federal customers in cloud or AI technology.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422045952_yp7ptcr5j",
+    "article_id": "art_1787420991404_yie55rp53",
+    "analyzed_at": "2026-08-22T18:07:25.952Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses controversies surrounding a police chief's use of racist slurs and the impact of these revelations on public trust and law enforcement agencies. However, it does not directly relate to federal market opportunities or Oracle's business interests.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not present any direct relevance to Oracle's cloud or AI business operations and initiatives within the DHS framework.",
+    "recommendations": [
+      "Monitor public sentiment and responses related to law enforcement to gauge potential implications for federal market contracts.",
+      "Track legislation or policy changes that may arise from this controversy, as they could indirectly impact federal funding priorities."
+    ]
+  },
+  {
+    "id": "intel_1787422047284_bp0ebx61d",
+    "article_id": "art_1787420991404_i0xk4zr4j",
+    "analyzed_at": "2026-08-22T18:07:27.284Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses a Florida politician's success in a primary election, which is not directly related to any specific activities or needs of the DHS territories or Oracle's cloud/AI business.",
+    "stakeholders": [],
+    "commercial_signal": "No immediate relevance for Oracle's federal cloud or AI initiatives in the DHS territories.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422048540_2bmxdnsm5",
+    "article_id": "art_1787420991404_niadeoh6u",
+    "analyzed_at": "2026-08-22T18:07:28.540Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the fading celebrity status of Prince Harry and Meghan Markle in Hollywood, which has no direct impact on the Department of Homeland Security or Oracle's cloud/AI business.",
+    "stakeholders": [],
+    "commercial_signal": "This article has no relevance to Kyle as it does not pertain to federal markets, technology services, or any related sectors.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422049845_qa2e5rngy",
+    "article_id": "art_1787420991404_x9ifsoe91",
+    "analyzed_at": "2026-08-22T18:07:29.845Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses the implications of increased ICE presence and the use of ankle monitors on the Haitian community in Ohio. It focuses on the emotional and social impacts rather than on technology or federal operations pertaining to DHS authorities.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not appear to have any direct relevance to Oracle's cloud or AI business within the DHS territories.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422051180_66wnvh7b1",
+    "article_id": "art_1787420991404_oetmzb4vi",
+    "analyzed_at": "2026-08-22T18:07:31.180Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article focuses on the issues surrounding polling and predictions in American politics, which do not directly relate to the operations or objectives of the Department of Homeland Security or Oracle's cloud and AI business.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not provide insights that would directly impact Oracle's cloud or AI business in relation to the Department of Homeland Security.",
+    "recommendations": []
+  },
+  {
+    "id": "intel_1787422053122_nb2volwu5",
+    "article_id": "art_1787420991404_uyje2pysf",
+    "analyzed_at": "2026-08-22T18:07:33.122Z",
+    "territory_id": "unassigned",
+    "relevance_score": 15,
+    "category": [
+      "Leadership",
+      "Policy"
+    ],
+    "summary": "The article discusses Joe Lonsdale's influence on homelessness policy, but lacks direct relevance to Oracle's cloud or AI business. It highlights the intersection of politics and policy rather than funding or technology advancements that would benefit Oracle's core services.",
+    "stakeholders": [
+      "Joe Lonsdale",
+      "Cicero Institute",
+      "Republican policymakers"
+    ],
+    "commercial_signal": "Why Kyle Should Care: While the article highlights a shift in homelessness policy, it does not directly connect to Oracle's capabilities in cloud or AI, which may influence future data-related projects pertaining to social services but is too indirect to be actionable.",
+    "recommendations": [
+      "Monitor homelessness technology initiatives",
+      "Engage in discussions on social data solutions",
+      "Explore partnerships with organizations focused on social policy innovations"
+    ]
+  },
+  {
+    "id": "intel_1787422054860_x9pabys12",
+    "article_id": "art_1787420991404_crbfmq1v1",
+    "analyzed_at": "2026-08-22T18:07:34.860Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article discusses a criminal trial involving a mother charged with killing her children, sparking national debates. It does not relate to any DHS territories.",
+    "stakeholders": [],
+    "commercial_signal": "This event does not have direct implications for Oracle's cloud or AI business in federal sectors.",
+    "recommendations": [
+      "Monitor societal trends surrounding mental health and legal responses in family cases, as they may indirectly affect public policy discussions.",
+      "Identify potential public sector partnerships focused on mental health support solutions in the future."
+    ]
+  },
+  {
+    "id": "intel_1787422056703_fkk6mvss0",
+    "article_id": "art_1787421000537_gd5qkwsjs",
+    "analyzed_at": "2026-08-22T18:07:36.703Z",
+    "territory_id": "unassigned",
+    "relevance_score": 0,
+    "category": [],
+    "summary": "The article covers the life of Violet Hensley, highlighting her contributions to American folk music and her recent Opry debut at the age of 99. It focuses on her personal story rather than any governmental or commercial implications.",
+    "stakeholders": [],
+    "commercial_signal": "This article does not relate to Oracle's cloud or AI business in any federal market context.",
+    "recommendations": [
+      "Focus on articles that discuss technology advancements or federal contracts related to cloud and AI.",
+      "Consider cultural and historical articles for community engagement rather than direct business relevance."
+    ]
+  },
+  {
+    "id": "intel_1787422058518_axnc5ht57",
+    "article_id": "art_1787421000537_4wradqpsv",
+    "analyzed_at": "2026-08-22T18:07:38.518Z",
+    "territory_id": "2",
+    "relevance_score": 65,
+    "category": [
+      "FEMA",
+      "Disaster Recovery",
+      "Cloud",
+      "Data"
+    ],
+    "summary": "The article discusses the aftermath of a storm in Indiana, focusing on residents' struggles with power outages and recovery efforts, which are likely to involve FEMA's resources and logistics support.",
+    "stakeholders": [
+      "FEMA",
+      "State Emergency Management Agencies",
+      "Local Governments",
+      "Disaster Response Organizations"
+    ],
+    "commercial_signal": "Why Kyle Should Care: FEMA's response to the disaster highlights potential opportunities for Oracle's cloud solutions in disaster recovery, data management, and resource allocation.",
+    "recommendations": [
+      "Engage with FEMA for potential cloud solutions in disaster recovery planning.",
+      "Offer AI tools for better resource allocation and logistical support in disaster scenarios.",
+      "Monitor state and local recovery contracts related to this incident."
+    ]
   }
 ]
