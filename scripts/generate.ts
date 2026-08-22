@@ -87,8 +87,13 @@ async function loadIntelligence() {
   }
 }
 
+interface IntelligenceItem {
+  relevance_score: number;
+  [key: string]: unknown;
+}
+
 // 4. Generate Content with OpenAI
-async function generateContent(weatherStr: string, commuteStr: string, intelligenceData: unknown[]) {
+async function generateContent(weatherStr: string, commuteStr: string, intelligenceData: IntelligenceItem[]) {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is required for generation.');
   }
