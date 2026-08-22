@@ -80,6 +80,10 @@ export default function Home() {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
 
+  const lastUpdated = data?.date ? new Date(data.date).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZoneName: 'short'
+  }) : 'Unknown';
+
   const triggerRefresh = async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
@@ -140,14 +144,17 @@ export default function Home() {
             <p className="text-xl text-zinc-400">{formattedDate}</p>
           </div>
           
-          <button 
-            onClick={triggerRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
-            {isRefreshing ? 'Triggering...' : 'Refresh Feed'}
-          </button>
+          <div className="flex flex-col items-start md:items-end gap-2">
+            <span className="text-xs text-zinc-500 font-medium tracking-wide">Last updated: {lastUpdated}</span>
+            <button 
+              onClick={triggerRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
+              {isRefreshing ? 'Triggering...' : 'Refresh Feed'}
+            </button>
+          </div>
         </header>
 
         {/* Dashboard Grid */}

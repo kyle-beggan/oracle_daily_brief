@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "ingest": "tsx scripts/ingest.ts",
+    "generate": "tsx scripts/generate.ts",
+    "pipeline": "npm run ingest && npm run generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
