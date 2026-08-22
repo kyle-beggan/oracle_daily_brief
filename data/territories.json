@@ -31,7 +31,7 @@
     "id": "33333333-3333-3333-3333-333333333333",
     "name": "Homeland Security Operational Analysis Center (HSOAC) & Homeland Security Systems Engineering and Development Institute (HSSEDI)",
     "description": "Federally funded research and development centers for DHS.",
-    "logo": "/logos/dhs.png",
+    "logo": "/logos/dhs.svg",
     "priority": 5
   }
 ]
