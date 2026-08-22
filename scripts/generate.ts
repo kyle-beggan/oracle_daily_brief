@@ -68,7 +68,12 @@ async function fetchCommuteTime() {
     if (data.routes && data.routes.length > 0) {
       const durationSeconds = parseInt(data.routes[0].duration.replace('s', ''));
       const minutes = Math.floor(durationSeconds / 60);
-      return `Your estimated commute time from Fredericksburg to Reston is ${minutes} minutes.`;
+      
+      // Calculate arrival time
+      const arrivalDate = new Date(Date.now() + durationSeconds * 1000);
+      const arrivalTime = arrivalDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+      return `Your estimated commute time from Fredericksburg to Reston is ${minutes} minutes. If you leave right now, you will arrive at ${arrivalTime}.`;
     } else {
       console.warn('Google Maps API returned unexpected data:', data);
       return 'Your estimated commute time could not be calculated.';
@@ -288,12 +293,23 @@ async function run() {
   const sources = await loadSources();
   const generated = await generateContent(weather, commute, territories, intel, articles, sources);
   
+  // Merge AI output with master territories list to ensure no territories are dropped
+  const mergedTerritories = territories.map(t => {
+    const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
+    return {
+      name: t.name,
+      logo: t.logo,
+      html: aiMatch ? aiMatch.html : "<ul><li>No significant activity to report this week.</li></ul>"
+    };
+  });
+  
   // Save JSON for dashboard
   const briefPayload = {
     date: new Date().toISOString(),
     weather: weather,
     commute: commute,
-    territories: generated.territories
+    territories: mergedTerritories,
+    podcast_script: generated.podcast_script
   };
   await fs.writeFile(BRIEF_JSON_FILE, JSON.stringify(briefPayload, null, 2));
   console.log(`Saved brief payload to ${BRIEF_JSON_FILE}`);

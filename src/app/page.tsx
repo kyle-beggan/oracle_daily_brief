@@ -15,6 +15,7 @@ interface BriefData {
   weather?: string;
   commute?: string;
   territories: TerritoryBrief[];
+  podcast_script?: string;
 }
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
   const [duration, setDuration] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTimeLeft, setRefreshTimeLeft] = useState<number | null>(null);
+  const [showScript, setShowScript] = useState(false);
 
   useEffect(() => {
     // Fetch static data on mount with a cache buster so live site gets freshest data
@@ -242,6 +244,24 @@ export default function Home() {
                   />
                 </div>
               </div>
+
+              {data?.podcast_script && (
+                <div className="w-full mt-2">
+                  <button 
+                    onClick={() => setShowScript(!showScript)}
+                    className="text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors w-full text-center py-2 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/30"
+                  >
+                    {showScript ? 'Hide Script' : 'Read Script'}
+                  </button>
+                  {showScript && (
+                    <div className="mt-4 p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 text-sm text-zinc-300 leading-relaxed max-h-64 overflow-y-auto">
+                      {data.podcast_script.split('\n').map((paragraph, i) => (
+                        <p key={i} className="mb-3 last:mb-0">{paragraph}</p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Local Conditions Card */}
