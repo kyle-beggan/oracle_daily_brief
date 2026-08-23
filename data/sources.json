@@ -110,5 +110,45 @@
     "tier": 2,
     "type": "rss",
     "is_active": true
+  },
+  {
+    "id": "source-govexec-tech",
+    "name": "GovExec Technology",
+    "url": "https://govexec.com/rss/technology/",
+    "tier": 2,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-nextgov",
+    "name": "Nextgov/FCW",
+    "url": "https://nextgov.com/rss/all/",
+    "tier": 2,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-cisa-advisories",
+    "name": "CISA Advisories",
+    "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml",
+    "tier": 1,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-defensescoop",
+    "name": "DefenseScoop",
+    "url": "https://defensescoop.com/feed/",
+    "tier": 2,
+    "type": "rss",
+    "is_active": true
+  },
+  {
+    "id": "source-statetech",
+    "name": "StateTech Magazine",
+    "url": "https://feeds.feedburner.com/StateTech",
+    "tier": 3,
+    "type": "rss",
+    "is_active": true
   }
 ]
