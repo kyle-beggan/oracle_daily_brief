@@ -27,7 +27,9 @@ const DATA_DIR = path.join(process.cwd(), 'data');
 const SOURCES_FILE = path.join(DATA_DIR, 'sources.json');
 const ARTICLES_FILE = path.join(DATA_DIR, 'articles.json');
 
-const parser = new Parser();
+const parser = new Parser({
+  timeout: 10000, // 10 seconds timeout
+});
 
 async function loadSources(): Promise<Source[]> {
   const data = await fs.readFile(SOURCES_FILE, 'utf-8');
@@ -124,4 +126,7 @@ async function runIngestion() {
   console.log('Ingestion pipeline complete.');
 }
 
-runIngestion().catch(console.error);
+runIngestion().then(() => process.exit(0)).catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
