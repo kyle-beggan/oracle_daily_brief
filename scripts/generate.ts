@@ -197,6 +197,7 @@ Your task is to review the following intelligence items and produce a JSON respo
    - MUST then include the provided weather and commute updates.
    - MUST then smoothly transition into a concise, engaging summary of the most important news.
    - MUST STRICTLY EXCLUDE any political partisan drama. Focus ONLY on executive orders, legislation, and updates that have a direct effect on selling Oracle technology and services.
+   - MUST NOT read any code, URLs, or hyperlinks aloud. If referencing external resources, simply say: "Check out more using a link on your dashboard."
    - The script must be concise enough to be spoken in under 20 minutes (maximum 2500 words).
    - Keep the tone professional, energetic, and highly relevant to Oracle sales.
 2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.

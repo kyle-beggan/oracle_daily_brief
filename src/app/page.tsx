@@ -133,8 +133,8 @@ export default function Home() {
       });
 
       if (response.ok) {
-        toast.success("Data pipeline triggered! The site will update in ~5.5 minutes.");
-        setRefreshTimeLeft(330);
+        toast.success("Data pipeline triggered! The site will update in ~7.5 minutes.");
+        setRefreshTimeLeft(450);
       } else {
         const err = await response.text();
         console.error("Failed to trigger pipeline:", err);
@@ -179,7 +179,7 @@ export default function Home() {
                 <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-sky-500 rounded-full transition-all duration-1000 ease-linear"
-                    style={{ width: `${((330 - refreshTimeLeft) / 330) * 100}%` }}
+                    style={{ width: `${((450 - refreshTimeLeft) / 450) * 100}%` }}
                   />
                 </div>
               </div>
