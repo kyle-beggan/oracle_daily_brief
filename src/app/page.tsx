@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon } from "lucide-react";
+import sourcesData from "../../data/sources.json";
 
 interface TerritoryBrief {
   name: string;
@@ -320,6 +321,36 @@ export default function Home() {
                       <p className="text-xs text-zinc-400">Steady volume across FEMA</p>
                     </div>
                  </li>
+               </ul>
+            </div>
+
+            {/* Data Sources Card */}
+            <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Data Sources</h3>
+               <ul className="space-y-3">
+                 {sourcesData.map((source, idx) => {
+                   let rootUrl = source.url;
+                   try {
+                     rootUrl = new URL(source.url).origin;
+                   } catch (e) {
+                     // fallback to original if parsing fails
+                   }
+                   return (
+                     <li key={idx} className="flex items-center gap-3 group">
+                        <div className="p-1.5 bg-zinc-800/50 rounded-lg text-zinc-500 group-hover:text-sky-400 transition-colors">
+                          <LinkIcon className="h-3 w-3" />
+                        </div>
+                        <a 
+                          href={rootUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-zinc-300 hover:text-sky-400 transition-colors truncate"
+                        >
+                          {source.name}
+                        </a>
+                     </li>
+                   );
+                 })}
                </ul>
             </div>
           </div>

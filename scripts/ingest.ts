@@ -29,6 +29,10 @@ const ARTICLES_FILE = path.join(DATA_DIR, 'articles.json');
 
 const parser = new Parser({
   timeout: 10000, // 10 seconds timeout
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/rss+xml, application/rdf+xml;q=0.8, application/atom+xml;q=0.6, application/xml;q=0.4, text/xml;q=0.4'
+  }
 });
 
 async function loadSources(): Promise<Source[]> {
@@ -68,14 +72,61 @@ async function fetchRss(source: Source): Promise<Partial<Article>[]> {
   }
 }
 
-// Fetch SAM.gov API (Mock for now since it requires an API key, we will just simulate finding an opportunity)
+// Fetch SAM.gov API
 async function fetchSamGovApi(source: Source): Promise<Partial<Article>[]> {
   console.log(`Fetching API for ${source.name} from ${source.url}`);
-  // In a real implementation, you would need an API key from SAM.gov
-  // https://api.sam.gov/prod/opportunities/v2/search?api_key=YOUR_KEY&postedFrom=yesterday
+  const apiKey = process.env.SAM_API_KEY;
   
-  // For MVP demonstration, return an empty array to avoid API key errors.
-  return [];
+  if (!apiKey) {
+    console.warn("No SAM_API_KEY found, skipping SAM.gov API fetch.");
+    return [];
+  }
+
+  // Calculate dynamic dates (last 7 days)
+  const today = new Date();
+  const lastWeek = new Date(today);
+  lastWeek.setDate(today.getDate() - 7);
+  
+  const formatDate = (date: Date) => {
+    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
+  };
+
+  const postedFrom = formatDate(lastWeek);
+  const postedTo = formatDate(today);
+
+  // Construct URL
+  const searchUrl = new URL(source.url);
+  searchUrl.searchParams.append('api_key', apiKey);
+  searchUrl.searchParams.append('ptype', 'r'); // RFI
+  searchUrl.searchParams.append('organizationName', 'Department of Homeland Security');
+  searchUrl.searchParams.append('postedFrom', postedFrom);
+  searchUrl.searchParams.append('postedTo', postedTo);
+  searchUrl.searchParams.append('limit', '1000');
+
+  try {
+    const response = await fetch(searchUrl.toString());
+    if (!response.ok) {
+      console.error(`SAM API returned ${response.status}: ${await response.text()}`);
+      return [];
+    }
+    const data = await response.json();
+    
+    if (!data.opportunitiesData) {
+      console.log('No opportunities found from SAM.gov');
+      return [];
+    }
+
+    return data.opportunitiesData.map((opp: any) => ({
+      source_id: source.id,
+      url: opp.uiLink || `https://sam.gov/opp/${opp.noticeId}/view`,
+      title: opp.title || 'Untitled Opportunity',
+      content: opp.description || opp.type || 'No description available',
+      published_at: opp.publishDate || new Date().toISOString(),
+    }));
+  } catch (error) {
+    console.error(`Failed to fetch SAM.gov API:`, error);
+    return [];
+  }
 }
 
 async function runIngestion() {
