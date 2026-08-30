@@ -3,10 +3,10 @@ import path from 'path';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env.local', override: true });
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -153,8 +153,8 @@ interface Source {
 
 // 4. Generate Content with OpenAI
 async function generateContent(weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[], articles: Article[], sources: Source[]) {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY is required for generation.');
+  if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
+    throw new Error('NEXT_PUBLIC_OPENAI_API_KEY is required for generation.');
   }
 
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -295,12 +295,17 @@ async function run() {
   const generated = await generateContent(weather, commute, territories, intel, articles, sources);
   
   // Merge AI output with master territories list to ensure no territories are dropped
-  const mergedTerritories = territories.map((t: { name: string, logo: string }) => {
+  const mergedTerritories = territories.map((t: any) => {
     const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
     return {
       name: t.name,
       logo: t.logo,
-      html: aiMatch ? aiMatch.html : "<ul><li>No significant activity to report this week.</li></ul>"
+      html: aiMatch ? aiMatch.html : "<ul><li>No significant activity to report this week.</li></ul>",
+      mission: t.mission || t.description,
+      tech_priorities: t.tech_priorities || [],
+      prime_contractors: t.prime_contractors || [],
+      leadership: t.leadership || {},
+      locations: t.locations || []
     };
   });
   

@@ -36,8 +36,9 @@ jobs:
 
       - name: Run Data Pipeline
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NEXT_PUBLIC_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SAM_API_KEY: ${{ secrets.SAM_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: npm run pipeline
 
       - name: Build Next.js Static Export

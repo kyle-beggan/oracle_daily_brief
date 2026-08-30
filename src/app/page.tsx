@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon } from "lucide-react";
 import sourcesData from "../../data/sources.json";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TerritoryBrief {
   name: string;
   logo: string;
   html: string;
+  mission?: string;
+  tech_priorities?: string[];
+  prime_contractors?: string[];
+  leadership?: Record<string, string | { name: string; url?: string } | Array<string | { name: string; url?: string }>>;
+  locations?: { name: string; address: string; map_url: string }[];
 }
 
 interface BriefData {
@@ -28,6 +34,7 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTimeLeft, setRefreshTimeLeft] = useState<number | null>(null);
   const [showScript, setShowScript] = useState(false);
+  const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     // Fetch static data on mount with a cache buster so live site gets freshest data
@@ -146,6 +153,78 @@ export default function Home() {
       console.error("Error triggering pipeline:", error);
       toast.error("Error triggering pipeline.");
       setIsRefreshing(false);
+    }
+  };
+
+  const refreshSingleTerritory = async (territoryName: string) => {
+    if (refreshingTerritories.has(territoryName)) return;
+    
+    const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+    if (!apiKey) {
+      toast.error("OpenAI API key missing. Set NEXT_PUBLIC_OPENAI_API_KEY in .env.local");
+      return;
+    }
+
+    setRefreshingTerritories(prev => new Set(prev).add(territoryName));
+    toast("Refreshing data for " + territoryName + "...");
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          messages: [
+            {
+              role: "system",
+              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://linkedin.com/...\"}, \"CDO\": {\"name\": \"...\"}}}. If a profile URL (like LinkedIn or official gov site) is available for a leader, include it."
+            },
+            {
+              role: "user",
+              content: `Generate updated news (HTML bullets), tech priorities, prime contractors, and leadership for ${territoryName}.`
+            }
+          ]
+        })
+      });
+
+      if (!response.ok) throw new Error("OpenAI request failed");
+      
+      const resData = await response.json();
+      const content = JSON.parse(resData.choices[0].message.content);
+
+      setData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          territories: prev.territories.map(t => {
+            if (t.name === territoryName) {
+              return {
+                ...t,
+                html: content.newsHtml || t.html,
+                tech_priorities: content.techPriorities || t.tech_priorities,
+                prime_contractors: content.primeContractors || t.prime_contractors,
+                leadership: content.leadership || t.leadership
+              };
+            }
+            return t;
+          })
+        };
+      });
+
+      toast.success(territoryName + " updated successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to refresh " + territoryName);
+    } finally {
+      setRefreshingTerritories(prev => {
+        const next = new Set(prev);
+        next.delete(territoryName);
+        return next;
+      });
     }
   };
 
@@ -358,14 +437,135 @@ export default function Home() {
           <div className="md:col-span-2 space-y-6">
             {data?.territories ? data.territories.map((territory, idx) => (
               <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
-                <div className="flex items-center gap-3 mb-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
-                  <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
+                    <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
+                  </div>
+                  <button
+                    onClick={() => refreshSingleTerritory(territory.name)}
+                    disabled={refreshingTerritories.has(territory.name)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md w-full justify-center sm:w-auto"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${refreshingTerritories.has(territory.name) ? 'animate-spin text-sky-400' : ''}`} />
+                    {refreshingTerritories.has(territory.name) ? 'Refreshing...' : 'Refresh'}
+                  </button>
                 </div>
-                <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
-                  <div dangerouslySetInnerHTML={{ __html: territory.html }} />
-                </div>
+                
+                <Tabs defaultValue="news" className="w-full">
+                  <TabsList className="flex w-full overflow-x-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
+                    <TabsTrigger value="news" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
+                    <TabsTrigger value="mission" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission</TabsTrigger>
+                    <TabsTrigger value="tech" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Tech Priorities</TabsTrigger>
+                    <TabsTrigger value="primes" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Prime Contractors</TabsTrigger>
+                    <TabsTrigger value="leadership" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
+                    <TabsTrigger value="locations" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="news" className="mt-0">
+                    <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
+                      <div dangerouslySetInnerHTML={{ __html: territory.html }} />
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="mission" className="mt-0">
+                    <p className="text-zinc-300 leading-relaxed text-lg">{territory.mission || "Mission information not available."}</p>
+                  </TabsContent>
+                  
+                  <TabsContent value="tech" className="mt-0">
+                    {territory.tech_priorities && territory.tech_priorities.length > 0 ? (
+                      <ul className="space-y-3">
+                        {territory.tech_priorities.map((priority, i) => (
+                          <li key={i} className="flex items-start gap-3 text-zinc-300">
+                            <span className="text-sky-400 mt-1">•</span>
+                            <span>{priority}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-zinc-500">No tech priorities listed.</p>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="primes" className="mt-0">
+                    {territory.prime_contractors && territory.prime_contractors.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {territory.prime_contractors.map((prime, i) => (
+                          <span key={i} className="px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300">
+                            {prime}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-zinc-500">No prime contractors listed.</p>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="leadership" className="mt-0">
+                    {territory.leadership && Object.keys(territory.leadership).length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {Object.entries(territory.leadership).map(([role, nameOrNames], i) => {
+                          const renderPerson = (person: string | {name: string; url?: string}, idx?: number) => {
+                            if (typeof person === 'string') {
+                              return <li key={idx} className="text-zinc-300 font-medium">{person}</li>;
+                            }
+                            return (
+                              <li key={idx} className="font-medium">
+                                {person.url ? (
+                                  <a href={person.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 transition-colors w-fit">
+                                    {person.name}
+                                    <LinkIcon className="w-3 h-3 opacity-70" />
+                                  </a>
+                                ) : (
+                                  <span className="text-zinc-300">{person.name}</span>
+                                )}
+                              </li>
+                            );
+                          };
+
+                          return (
+                            <div key={i} className="p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 flex flex-col justify-center">
+                              <p className="text-xs font-semibold tracking-wider text-sky-400/80 uppercase mb-1">{role}</p>
+                              <ul className="space-y-1">
+                                {Array.isArray(nameOrNames) 
+                                  ? nameOrNames.map((n, j) => renderPerson(n, j)) 
+                                  : renderPerson(nameOrNames)}
+                              </ul>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-zinc-500">No leadership information available.</p>
+                    )}
+                  </TabsContent>
+                  
+                  <TabsContent value="locations" className="mt-0">
+                    {territory.locations && territory.locations.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {territory.locations.map((loc, i) => (
+                          <a 
+                            key={i} 
+                            href={loc.map_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="block p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 hover:border-sky-500/50 transition-colors group"
+                          >
+                            <h4 className="font-semibold text-zinc-200 group-hover:text-sky-400 transition-colors">{loc.name}</h4>
+                            <p className="text-sm text-zinc-400 mt-1">{loc.address}</p>
+                            <div className="flex items-center gap-1 mt-3 text-xs font-medium text-sky-500">
+                              <span>Get Directions</span>
+                              <LinkIcon className="h-3 w-3" />
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-zinc-500">No locations listed.</p>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </div>
             )) : (
               <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 animate-pulse space-y-4">

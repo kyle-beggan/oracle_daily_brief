@@ -3,10 +3,10 @@ import path from 'path';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env.local', override: true });
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -67,8 +67,8 @@ Include a commercial signal titled "Why Kyle Should Care".
 `;
 
 async function analyzeArticle(article: Article): Promise<Omit<IntelligenceItem, 'id' | 'article_id' | 'analyzed_at'>> {
-  if (!process.env.OPENAI_API_KEY) {
-    console.warn("No OPENAI_API_KEY found, skipping actual analysis and returning dummy data.");
+  if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
+    console.warn("No NEXT_PUBLIC_OPENAI_API_KEY found, skipping actual analysis and returning dummy data.");
     return {
       territory_id: "unassigned",
       relevance_score: 50,
@@ -76,7 +76,7 @@ async function analyzeArticle(article: Article): Promise<Omit<IntelligenceItem, 
       summary: "Mock summary due to missing API key.",
       stakeholders: [],
       commercial_signal: "Why Kyle Should Care: N/A",
-      recommendations: ["Set OPENAI_API_KEY"]
+      recommendations: ["Set NEXT_PUBLIC_OPENAI_API_KEY"]
     };
   }
 
