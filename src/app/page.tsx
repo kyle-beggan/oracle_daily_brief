@@ -277,12 +277,12 @@ export default function Home() {
         </header>
 
         {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col md:grid md:grid-cols-3 gap-6">
           
           {/* Side Panel Area */}
-          <div className="space-y-6">
+          <div className="contents md:flex md:flex-col md:gap-6">
             {/* Audio Player Card */}
-            <div className="w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6 flex flex-col gap-5 hover:border-zinc-700 transition-colors shadow-2xl">
+            <div className="order-1 md:order-none w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6 flex flex-col gap-5 hover:border-zinc-700 transition-colors shadow-2xl">
               <div className="flex items-center gap-4">
                 <button 
                   onClick={togglePlay}
@@ -345,7 +345,7 @@ export default function Home() {
             </div>
 
             {/* Local Conditions Card */}
-            <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+            <div className="order-3 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Local Conditions</h3>
                <ul className="space-y-4">
                  <li className="flex items-start gap-3">
@@ -370,7 +370,7 @@ export default function Home() {
             </div>
 
             {/* Quick Stats Card */}
-            <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+            <div className="order-4 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Market Signals</h3>
                <ul className="space-y-4">
                  <li className="flex items-start gap-3">
@@ -404,7 +404,7 @@ export default function Home() {
             </div>
 
             {/* Data Sources Card */}
-            <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+            <div className="order-5 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Data Sources</h3>
                <ul className="space-y-3">
                  {sourcesData.map((source, idx) => {
@@ -434,7 +434,7 @@ export default function Home() {
             </div>
           </div>
           {/* Main Content Area */}
-          <div className="md:col-span-2 space-y-6">
+          <div className="order-2 md:order-none md:col-span-2 space-y-6">
             {data?.territories ? data.territories.map((territory, idx) => (
               <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
