@@ -345,12 +345,12 @@ export default function Home() {
         {/* User Tabs */}
         {users.length > 0 && (
           <Tabs value={selectedUser || undefined} onValueChange={setSelectedUser} className="w-full mb-12">
-            <TabsList className="flex w-full h-16 bg-zinc-900/60 border border-zinc-700/50 p-1.5 rounded-2xl gap-2 shadow-lg backdrop-blur-sm">
+            <TabsList className="flex w-full h-auto bg-zinc-900/60 border border-zinc-700/50 p-2 rounded-3xl gap-2 shadow-lg backdrop-blur-sm">
               {users.map(u => (
                 <TabsTrigger 
                   key={u.id} 
                   value={u.id} 
-                  className="flex-1 h-full text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-xl data-active:bg-sky-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
+                  className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-2xl data-active:bg-sky-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
                 >
                   {u.name}
                 </TabsTrigger>
