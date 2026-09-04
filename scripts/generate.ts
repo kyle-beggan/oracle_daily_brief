@@ -80,6 +80,12 @@ async function fetchCommuteTime() {
 }
 
 // 3. Load Data from Supabase
+async function loadUsers() {
+  const { data, error } = await supabase.from('oracle_users').select('*');
+  if (error) throw error;
+  return data;
+}
+
 async function loadIntelligence() {
   const { data, error } = await supabase.from('oracle_intelligence').select('*');
   if (error) throw error;
@@ -130,7 +136,7 @@ interface Source {
 }
 
 // 4. Generate Content with OpenAI
-async function generateContent(weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[], articles: Article[], sources: Source[]) {
+async function generateContent(userName: string, weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[], articles: Article[], sources: Source[]) {
   if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
     throw new Error('NEXT_PUBLIC_OPENAI_API_KEY is required for generation.');
   }
@@ -168,10 +174,10 @@ async function generateContent(weatherStr: string, commuteStr: string, territori
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
 
   const systemPrompt = `
-You are the host of a daily podcast and executive briefing for Kyle, an Oracle Federal Cloud Account Executive.
+You are the host of a daily podcast and executive briefing for ${userName}, an Oracle Federal Cloud Account Executive.
 Your task is to review the following intelligence items and produce a JSON response containing two things:
 1. "podcast_script": A spoken-word script that you will read. 
-   - MUST start exactly with: "Good morning, Kyle."
+   - MUST start exactly with: "Good morning, ${userName.split(' ')[0]}."
    - MUST then include the provided weather and commute updates.
    - MUST then smoothly transition into a concise, engaging summary of the most important news.
    - MUST STRICTLY EXCLUDE any political partisan drama. Focus ONLY on executive orders, legislation, and updates that have a direct effect on selling Oracle technology and services.
@@ -240,17 +246,18 @@ ${JSON.stringify(enrichedIntel, null, 2)}
 }
 
 // 5. Generate TTS Audio
-async function generateTTS(script: string) {
+async function generateTTS(script: string, userId: string) {
   const fs = await import('fs/promises');
-  console.log('Generating TTS Audio...');
+  console.log(`Generating TTS Audio for user ${userId}...`);
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
     voice: "alloy",
     input: script,
   });
   const buffer = Buffer.from(await mp3.arrayBuffer());
-  await fs.writeFile(PODCAST_AUDIO_FILE, buffer);
-  console.log(`Saved podcast audio to ${PODCAST_AUDIO_FILE}`);
+  const filePath = path.join(PUBLIC_DATA_DIR, `podcast_${userId}.mp3`);
+  await fs.writeFile(filePath, buffer);
+  console.log(`Saved podcast audio to ${filePath}`);
 }
 
 async function run() {
@@ -264,49 +271,66 @@ async function run() {
   console.log('Commute:', commute);
   
   const intel = await loadIntelligence();
-  console.log(`Loaded ${intel.length} intelligence items.`);
-
-  const territories = await loadTerritories();
-  
-  console.log('Generating content via OpenAI...');
+  const allTerritories = await loadTerritories();
   const articles = await loadArticles();
   const sources = await loadSources();
-  const generated = await generateContent(weather, commute, territories, intel, articles, sources);
-  
-  // Merge AI output with master territories list to ensure no territories are dropped
-  const mergedTerritories = territories.map((t: Record<string, unknown>) => {
-    const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
-    return {
-      name: t.name,
-      logo: t.logo,
-      html: aiMatch ? aiMatch.html : "<ul><li>No significant activity to report this week.</li></ul>",
-      mission: t.mission || t.description,
-      tech_priorities: t.tech_priorities || [],
-      prime_contractors: t.prime_contractors || [],
-      leadership: t.leadership || {},
-      locations: t.locations || []
+  const users = await loadUsers();
+
+  console.log(`Generating content for ${users.length} users...`);
+
+  for (const user of users) {
+    console.log(`\n--- Processing User: ${user.name} ---`);
+    
+    // Filter territories for this user
+    const userTerritories = allTerritories.filter((t: any) => t.user_id === user.id);
+    if (userTerritories.length === 0) {
+      console.log(`Skipping ${user.name}, no territories assigned.`);
+      continue;
+    }
+    const territoryIds = new Set(userTerritories.map((t: any) => t.id));
+    
+    // Filter intel for these territories
+    const userIntel = intel.filter((i: any) => territoryIds.has(i.territory_id));
+    
+    console.log(`Generating AI content for ${user.name}...`);
+    const generated = await generateContent(user.name, weather, commute, userTerritories, userIntel, articles, sources);
+    
+    // Merge AI output with master territories list
+    const mergedTerritories = userTerritories.map((t: Record<string, unknown>) => {
+      const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
+      return {
+        name: t.name,
+        logo: t.logo,
+        html: aiMatch ? aiMatch.html : "<ul><li>No significant activity to report this week.</li></ul>",
+        mission: t.mission || t.description,
+        tech_priorities: t.tech_priorities || [],
+        prime_contractors: t.prime_contractors || [],
+        leadership: t.leadership || {},
+        locations: t.locations || []
+      };
+    });
+    
+    // Save to Supabase oracle_daily_briefs
+    const briefPayload = {
+      user_id: user.id,
+      date: new Date().toISOString(),
+      weather: weather,
+      commute: commute,
+      territories: mergedTerritories,
+      podcast_script: generated.podcast_script
     };
-  });
-  
-  // Save to Supabase oracle_daily_briefs
-  const briefPayload = {
-    date: new Date().toISOString(),
-    weather: weather,
-    commute: commute,
-    territories: mergedTerritories,
-    podcast_script: generated.podcast_script
-  };
-  
-  console.log('Saving daily brief to Supabase...');
-  const { error } = await supabase.from('oracle_daily_briefs').insert(briefPayload);
-  if (error) {
-    console.error('Failed to save daily brief to Supabase:', error);
-  } else {
-    console.log(`Successfully saved brief payload to Supabase.`);
+    
+    console.log(`Saving daily brief to Supabase for ${user.name}...`);
+    const { error } = await supabase.from('oracle_daily_briefs').insert(briefPayload);
+    if (error) {
+      console.error(`Failed to save daily brief for ${user.name}:`, error);
+    } else {
+      console.log(`Successfully saved brief payload.`);
+    }
+    
+    // Generate Audio
+    await generateTTS(generated.podcast_script, user.id);
   }
-  
-  // Generate Audio
-  await generateTTS(generated.podcast_script);
   
   console.log('Generation process complete.');
 }

@@ -10,6 +10,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+interface User {
+  id: string;
+  name: string;
+}
+
 interface TerritoryBrief {
   name: string;
   logo: string;
@@ -30,7 +35,10 @@ interface BriefData {
 }
 
 export default function Home() {
-  const [data, setData] = useState<BriefData | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [briefsMap, setBriefsMap] = useState<Record<string, BriefData>>({});
+  
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -41,20 +49,40 @@ export default function Home() {
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
 
+  const data = selectedUser ? briefsMap[selectedUser] : null;
+
   useEffect(() => {
     async function fetchData() {
-      // Fetch daily brief
-      const { data: brief, error: briefError } = await supabase
+      // Fetch users
+      const { data: userData, error: userError } = await supabase
+        .from('oracle_users')
+        .select('*')
+        .order('name');
+      
+      if (userError) {
+        console.error("Could not load users", userError);
+      } else {
+        setUsers(userData);
+        if (userData.length > 0) setSelectedUser(userData.find(u => u.name === 'Kyle Beggan')?.id || userData[0].id);
+      }
+
+      // Fetch all recent briefs
+      const { data: briefsData, error: briefsError } = await supabase
         .from('oracle_daily_briefs')
         .select('*')
         .order('date', { ascending: false })
-        .limit(1)
-        .single();
-        
-      if (briefError) {
-        console.error("Could not load brief data", briefError);
+        .limit(20);
+
+      if (briefsError) {
+        console.error("Could not load briefs data", briefsError);
       } else {
-        setData(brief);
+        const bMap: Record<string, BriefData> = {};
+        for (const b of briefsData) {
+          if (!bMap[b.user_id]) {
+            bMap[b.user_id] = b;
+          }
+        }
+        setBriefsMap(bMap);
       }
       
       // Fetch sources
@@ -72,9 +100,13 @@ export default function Home() {
     }
     
     fetchData();
-      
-    // Initialize audio
-    const podcastAudio = new Audio("/data/podcast.mp3");
+  }, []);
+
+  useEffect(() => {
+    if (!selectedUser) return;
+    
+    // In dev, sometimes the file might not exist yet, we catch errors gracefully by adding listeners
+    const podcastAudio = new Audio(`/data/podcast_${selectedUser}.mp3`);
     
     const handleLoadedMetadata = () => setDuration(podcastAudio.duration);
     const handleTimeUpdate = () => setCurrentTime(podcastAudio.currentTime);
@@ -87,8 +119,10 @@ export default function Home() {
     podcastAudio.addEventListener("timeupdate", handleTimeUpdate);
     podcastAudio.addEventListener("ended", handleEnded);
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAudio(podcastAudio);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
 
     return () => {
       podcastAudio.pause();
@@ -96,13 +130,12 @@ export default function Home() {
       podcastAudio.removeEventListener("timeupdate", handleTimeUpdate);
       podcastAudio.removeEventListener("ended", handleEnded);
     };
-  }, []);
+  }, [selectedUser]);
 
   useEffect(() => {
     if (refreshTimeLeft === null) return;
     
     if (refreshTimeLeft <= 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRefreshTimeLeft(null);
       setIsRefreshing(false);
       window.location.reload();
@@ -187,7 +220,7 @@ export default function Home() {
   };
 
   const refreshSingleTerritory = async (territoryName: string) => {
-    if (refreshingTerritories.has(territoryName)) return;
+    if (refreshingTerritories.has(territoryName) || !selectedUser) return;
     
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) {
@@ -226,22 +259,27 @@ export default function Home() {
       const resData = await response.json();
       const content = JSON.parse(resData.choices[0].message.content);
 
-      setData(prev => {
-        if (!prev) return prev;
+      setBriefsMap(prev => {
+        const currentBrief = prev[selectedUser];
+        if (!currentBrief) return prev;
+        
         return {
           ...prev,
-          territories: prev.territories.map(t => {
-            if (t.name === territoryName) {
-              return {
-                ...t,
-                html: content.newsHtml || t.html,
-                tech_priorities: content.techPriorities || t.tech_priorities,
-                prime_contractors: content.primeContractors || t.prime_contractors,
-                leadership: content.leadership || t.leadership
-              };
-            }
-            return t;
-          })
+          [selectedUser]: {
+            ...currentBrief,
+            territories: currentBrief.territories.map(t => {
+              if (t.name === territoryName) {
+                return {
+                  ...t,
+                  html: content.newsHtml || t.html,
+                  tech_priorities: content.techPriorities || t.tech_priorities,
+                  prime_contractors: content.primeContractors || t.prime_contractors,
+                  leadership: content.leadership || t.leadership
+                };
+              }
+              return t;
+            })
+          }
         };
       });
 
@@ -260,13 +298,11 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-rose-500/30">
-      {/* Background ambient light */}
       <div className="fixed top-[-50%] left-[-20%] w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800/20 via-zinc-950 to-zinc-950 -z-10 blur-3xl pointer-events-none" />
 
       <main className="max-w-[1224px] mx-auto px-6 py-12 md:py-24">
         
-        {/* Header Section */}
-        <header className="mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <div className="flex items-center gap-3 mb-4">
               <span className="h-px w-8 bg-sky-400"></span>
@@ -306,12 +342,22 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Dashboard Grid */}
+        {/* User Tabs */}
+        {users.length > 0 && (
+          <Tabs value={selectedUser || undefined} onValueChange={setSelectedUser} className="w-full mb-12">
+            <TabsList className="flex w-full overflow-x-auto bg-zinc-900/40 border border-zinc-800/50 p-1 rounded-xl gap-1">
+              {users.map(u => (
+                <TabsTrigger key={u.id} value={u.id} className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black font-semibold">
+                  {u.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
+
         <div className="flex flex-col md:grid md:grid-cols-3 gap-6">
           
-          {/* Side Panel Area */}
           <div className="contents md:flex md:flex-col md:gap-6">
-            {/* Audio Player Card */}
             <div className="order-1 md:order-none w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6 flex flex-col gap-5 hover:border-zinc-700 transition-colors shadow-2xl">
               <div className="flex items-center gap-4">
                 <button 
@@ -331,7 +377,6 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Progress Bar */}
               <div className="w-full space-y-1.5">
                 <div className="flex justify-between text-xs text-zinc-500 font-medium tracking-wide">
                   <span>{formatTime(currentTime)}</span>
@@ -343,7 +388,6 @@ export default function Home() {
                     if (!audio || duration === 0) return;
                     const rect = e.currentTarget.getBoundingClientRect();
                     const percent = (e.clientX - rect.left) / rect.width;
-                    // eslint-disable-next-line react-hooks/immutability
                     audio.currentTime = percent * duration;
                     setCurrentTime(percent * duration);
                   }}
@@ -374,7 +418,6 @@ export default function Home() {
               )}
             </div>
 
-            {/* Local Conditions Card */}
             <div className="order-3 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Local Conditions</h3>
                <ul className="space-y-4">
@@ -399,7 +442,6 @@ export default function Home() {
                </ul>
             </div>
 
-            {/* Quick Stats Card */}
             <div className="order-4 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Market Signals</h3>
                <ul className="space-y-4">
@@ -427,13 +469,12 @@ export default function Home() {
                     </div>
                     <div>
                       <p className="font-medium text-sm">Cloud Migrations</p>
-                      <p className="text-xs text-zinc-400">Steady volume across FEMA</p>
+                      <p className="text-xs text-zinc-400">Steady volume across accounts</p>
                     </div>
                  </li>
                </ul>
             </div>
 
-            {/* Data Sources Card */}
             <div className="order-5 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Data Sources</h3>
                <ul className="space-y-3">
@@ -442,7 +483,7 @@ export default function Home() {
                    try {
                      rootUrl = new URL(source.url).origin;
                    } catch {
-                     // fallback to original if parsing fails
+                     // fallback
                    }
                    
                    const isPaywalled = ['nyt us news', 'washington post national', 'govly'].includes(source.name.trim().toLowerCase());
@@ -473,13 +514,12 @@ export default function Home() {
                </ul>
             </div>
           </div>
-          {/* Main Content Area */}
+          
           <div className="order-2 md:order-none md:col-span-2 space-y-6">
             {data?.territories ? data.territories.map((territory, idx) => (
               <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
                     <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
                   </div>
@@ -615,9 +655,6 @@ export default function Home() {
               </div>
             )}
           </div>
-
-
-          
         </div>
       </main>
     </div>

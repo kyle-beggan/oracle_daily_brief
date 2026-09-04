@@ -1,6 +1,13 @@
 -- Enable UUID extension if not enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- oracle_users
+CREATE TABLE oracle_users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- oracle_sources
 CREATE TABLE oracle_sources (
     id TEXT PRIMARY KEY,
@@ -26,6 +33,7 @@ CREATE TABLE oracle_articles (
 -- oracle_territories
 CREATE TABLE oracle_territories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES oracle_users(id) ON DELETE CASCADE,
     name TEXT NOT NULL UNIQUE,
     logo TEXT NOT NULL,
     mission TEXT,
@@ -54,6 +62,7 @@ CREATE TABLE oracle_intelligence (
 -- oracle_daily_briefs
 CREATE TABLE oracle_daily_briefs (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES oracle_users(id) ON DELETE CASCADE,
     date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     weather TEXT,
     commute TEXT,
@@ -63,6 +72,8 @@ CREATE TABLE oracle_daily_briefs (
 );
 
 -- Set Row Level Security (RLS) policies
+ALTER TABLE oracle_users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable read access for all users" ON oracle_users FOR SELECT USING (true);
 ALTER TABLE oracle_sources ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Enable read access for all users" ON oracle_sources FOR SELECT USING (true);
 
