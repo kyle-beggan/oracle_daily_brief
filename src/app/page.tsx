@@ -63,7 +63,7 @@ export default function Home() {
         console.error("Could not load users", userError);
       } else {
         setUsers(userData);
-        if (userData.length > 0) setSelectedUser(userData.find(u => u.name === 'Kyle Beggan')?.id || userData[0].id);
+        if (userData.length > 0) setSelectedUser(userData.find(u => u.name === 'Dan Ungerleider')?.id || userData[0].id);
       }
 
       // Fetch all recent briefs
@@ -350,7 +350,7 @@ export default function Home() {
                 <TabsTrigger 
                   key={u.id} 
                   value={u.id} 
-                  className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-2xl data-active:bg-sky-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
+                  className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-rose-400 rounded-2xl data-active:bg-rose-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
                 >
                   {u.name}
                 </TabsTrigger>
