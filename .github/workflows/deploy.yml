@@ -39,6 +39,8 @@ jobs:
           NEXT_PUBLIC_GITHUB_PAT: ${{ secrets.NEXT_PUBLIC_GITHUB_PAT }}
           NEXT_PUBLIC_REPO_OWNER: kyle-beggan
           NEXT_PUBLIC_REPO_NAME: oracle_daily_brief
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Setup Pages

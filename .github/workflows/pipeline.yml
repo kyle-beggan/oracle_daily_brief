@@ -39,6 +39,8 @@ jobs:
           NEXT_PUBLIC_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           SAM_API_KEY: ${{ secrets.SAM_API_KEY }}
           GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: npm run pipeline
 
       - name: Build Next.js Static Export
@@ -46,6 +48,8 @@ jobs:
           NEXT_PUBLIC_GITHUB_PAT: ${{ secrets.NEXT_PUBLIC_GITHUB_PAT }}
           NEXT_PUBLIC_REPO_OWNER: kyle-beggan
           NEXT_PUBLIC_REPO_NAME: oracle_daily_brief
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Setup Pages
