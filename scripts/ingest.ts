@@ -1,6 +1,5 @@
-import fs from 'fs/promises';
-import path from 'path';
 import Parser from 'rss-parser';
+import { supabase } from './supabase';
 
 // Types
 interface Source {
@@ -22,11 +21,6 @@ interface Article {
   ingested_at: string;
 }
 
-// Setup paths
-const DATA_DIR = path.join(process.cwd(), 'data');
-const SOURCES_FILE = path.join(DATA_DIR, 'sources.json');
-const ARTICLES_FILE = path.join(DATA_DIR, 'articles.json');
-
 const parser = new Parser({
   timeout: 10000, // 10 seconds timeout
   headers: {
@@ -36,22 +30,28 @@ const parser = new Parser({
 });
 
 async function loadSources(): Promise<Source[]> {
-  const data = await fs.readFile(SOURCES_FILE, 'utf-8');
-  return JSON.parse(data);
+  const { data, error } = await supabase.from('oracle_sources').select('*').eq('is_active', true);
+  if (error) {
+    console.error('Error loading sources from Supabase:', error);
+    return [];
+  }
+  return data as Source[];
 }
 
-async function loadExistingArticles(): Promise<Article[]> {
-  try {
-    const data = await fs.readFile(ARTICLES_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if ((error as { code?: string }).code === 'ENOENT') return [];
-    throw error;
+async function loadExistingArticleUrls(): Promise<Set<string>> {
+  const { data, error } = await supabase.from('oracle_articles').select('url');
+  if (error) {
+    console.error('Error loading articles from Supabase:', error);
+    return new Set();
   }
+  return new Set(data.map((a: { url: string }) => a.url));
 }
 
 async function saveArticles(articles: Article[]): Promise<void> {
-  await fs.writeFile(ARTICLES_FILE, JSON.stringify(articles, null, 2));
+  const { error } = await supabase.from('oracle_articles').insert(articles);
+  if (error) {
+    console.error('Error saving articles to Supabase:', error);
+  }
 }
 
 // Fetch RSS Feeds
@@ -116,12 +116,12 @@ async function fetchSamGovApi(source: Source): Promise<Partial<Article>[]> {
       return [];
     }
 
-    return data.opportunitiesData.map((opp: any) => ({
+    return data.opportunitiesData.map((opp: Record<string, unknown>) => ({
       source_id: source.id,
-      url: opp.uiLink || `https://sam.gov/opp/${opp.noticeId}/view`,
-      title: opp.title || 'Untitled Opportunity',
-      content: opp.description || opp.type || 'No description available',
-      published_at: opp.publishDate || new Date().toISOString(),
+      url: (opp.uiLink as string) || `https://sam.gov/opp/${opp.noticeId}/view`,
+      title: (opp.title as string) || 'Untitled Opportunity',
+      content: (opp.description as string) || (opp.type as string) || 'No description available',
+      published_at: (opp.publishDate as string) || new Date().toISOString(),
     }));
   } catch (error) {
     console.error(`Failed to fetch SAM.gov API:`, error);
@@ -132,16 +132,12 @@ async function fetchSamGovApi(source: Source): Promise<Partial<Article>[]> {
 async function runIngestion() {
   console.log('Starting ingestion pipeline...');
   const sources = await loadSources();
-  const existingArticles = await loadExistingArticles();
+  const existingUrls = await loadExistingArticleUrls();
   
-  // Create a Set of existing URLs for fast deduplication
-  const existingUrls = new Set(existingArticles.map(a => a.url));
   const newArticles: Article[] = [];
   const now = new Date().toISOString();
 
   for (const source of sources) {
-    if (!source.is_active) continue;
-
     let fetchedItems: Partial<Article>[] = [];
     if (source.type === 'rss') {
       fetchedItems = await fetchRss(source);
@@ -168,9 +164,8 @@ async function runIngestion() {
   }
 
   if (newArticles.length > 0) {
-    console.log(`Ingested ${newArticles.length} new articles.`);
-    const updatedArticles = [...existingArticles, ...newArticles];
-    await saveArticles(updatedArticles);
+    console.log(`Ingesting ${newArticles.length} new articles into Supabase.`);
+    await saveArticles(newArticles);
   } else {
     console.log('No new articles found.');
   }

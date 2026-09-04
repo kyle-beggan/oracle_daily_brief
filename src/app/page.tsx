@@ -3,8 +3,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon } from "lucide-react";
-import sourcesData from "../../data/sources.json";
+import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface TerritoryBrief {
   name: string;
@@ -35,13 +39,39 @@ export default function Home() {
   const [refreshTimeLeft, setRefreshTimeLeft] = useState<number | null>(null);
   const [showScript, setShowScript] = useState(false);
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
+  const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
 
   useEffect(() => {
-    // Fetch static data on mount with a cache buster so live site gets freshest data
-    fetch(`/data/daily-brief.json?t=${new Date().getTime()}`)
-      .then(res => res.json())
-      .then(data => setData(data))
-      .catch(err => console.error("Could not load brief data", err));
+    async function fetchData() {
+      // Fetch daily brief
+      const { data: brief, error: briefError } = await supabase
+        .from('oracle_daily_briefs')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (briefError) {
+        console.error("Could not load brief data", briefError);
+      } else {
+        setData(brief);
+      }
+      
+      // Fetch sources
+      const { data: sources, error: sourcesError } = await supabase
+        .from('oracle_sources')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
+        
+      if (sourcesError) {
+        console.error("Could not load sources data", sourcesError);
+      } else {
+        setSourcesData(sources);
+      }
+    }
+    
+    fetchData();
       
     // Initialize audio
     const podcastAudio = new Audio("/data/podcast.mp3");
@@ -411,22 +441,32 @@ export default function Home() {
                    let rootUrl = source.url;
                    try {
                      rootUrl = new URL(source.url).origin;
-                   } catch (e) {
+                   } catch {
                      // fallback to original if parsing fails
                    }
+                   
+                   const isPaywalled = ['NYT US News', 'Washington Post National', 'Govly'].includes(source.name);
+                   
                    return (
-                     <li key={idx} className="flex items-center gap-3 group">
-                        <div className="p-1.5 bg-zinc-800/50 rounded-lg text-zinc-500 group-hover:text-sky-400 transition-colors">
-                          <LinkIcon className="h-3 w-3" />
+                     <li key={idx} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-3 truncate">
+                          <div className={`p-1.5 bg-zinc-800/50 rounded-lg transition-colors ${isPaywalled ? 'text-amber-500/70 group-hover:text-amber-400' : 'text-zinc-500 group-hover:text-sky-400'}`}>
+                            <LinkIcon className="h-3 w-3" />
+                          </div>
+                          <a 
+                            href={rootUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className={`text-sm font-medium transition-colors truncate ${isPaywalled ? 'text-amber-100/80 hover:text-amber-400' : 'text-zinc-300 hover:text-sky-400'}`}
+                          >
+                            {source.name}
+                          </a>
                         </div>
-                        <a 
-                          href={rootUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-zinc-300 hover:text-sky-400 transition-colors truncate"
-                        >
-                          {source.name}
-                        </a>
+                        {isPaywalled && (
+                          <div className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 whitespace-nowrap ml-3">
+                            Subscription
+                          </div>
+                        )}
                      </li>
                    );
                  })}

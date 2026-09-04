@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
 import path from 'path';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import { supabase } from './supabase';
 
 dotenv.config({ path: '.env.local', override: true });
 
@@ -9,17 +9,12 @@ const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
 });
 
-const DATA_DIR = path.join(process.cwd(), 'data');
 const PUBLIC_DATA_DIR = path.join(process.cwd(), 'public', 'data');
-const INTELLIGENCE_FILE = path.join(DATA_DIR, 'intelligence.json');
-const TERRITORIES_FILE = path.join(DATA_DIR, 'territories.json');
-const ARTICLES_FILE = path.join(DATA_DIR, 'articles.json');
-const SOURCES_FILE = path.join(DATA_DIR, 'sources.json');
-const BRIEF_JSON_FILE = path.join(PUBLIC_DATA_DIR, 'daily-brief.json');
 const PODCAST_AUDIO_FILE = path.join(PUBLIC_DATA_DIR, 'podcast.mp3');
 
 // Ensure public/data exists
 async function ensureDirs() {
+  const fs = await import('fs/promises');
   await fs.mkdir(PUBLIC_DATA_DIR, { recursive: true });
 }
 
@@ -84,46 +79,29 @@ async function fetchCommuteTime() {
   }
 }
 
-// 3. Load Intelligence Data
+// 3. Load Data from Supabase
 async function loadIntelligence() {
-  try {
-    const data = await fs.readFile(INTELLIGENCE_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if ((error as { code?: string }).code === 'ENOENT') return [];
-    throw error;
-  }
+  const { data, error } = await supabase.from('oracle_intelligence').select('*');
+  if (error) throw error;
+  return data;
 }
 
 async function loadTerritories() {
-  try {
-    const data = await fs.readFile(TERRITORIES_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if ((error as { code?: string }).code === 'ENOENT') return [];
-    throw error;
-  }
+  const { data, error } = await supabase.from('oracle_territories').select('*');
+  if (error) throw error;
+  return data;
 }
 
-
 async function loadArticles() {
-  try {
-    const data = await fs.readFile(ARTICLES_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if ((error as { code?: string }).code === 'ENOENT') return [];
-    throw error;
-  }
+  const { data, error } = await supabase.from('oracle_articles').select('*');
+  if (error) throw error;
+  return data;
 }
 
 async function loadSources() {
-  try {
-    const data = await fs.readFile(SOURCES_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    if ((error as { code?: string }).code === 'ENOENT') return [];
-    throw error;
-  }
+  const { data, error } = await supabase.from('oracle_sources').select('*');
+  if (error) throw error;
+  return data;
 }
 
 interface IntelligenceItem {
@@ -263,6 +241,7 @@ ${JSON.stringify(enrichedIntel, null, 2)}
 
 // 5. Generate TTS Audio
 async function generateTTS(script: string) {
+  const fs = await import('fs/promises');
   console.log('Generating TTS Audio...');
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
@@ -295,7 +274,7 @@ async function run() {
   const generated = await generateContent(weather, commute, territories, intel, articles, sources);
   
   // Merge AI output with master territories list to ensure no territories are dropped
-  const mergedTerritories = territories.map((t: any) => {
+  const mergedTerritories = territories.map((t: Record<string, unknown>) => {
     const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
     return {
       name: t.name,
@@ -309,7 +288,7 @@ async function run() {
     };
   });
   
-  // Save JSON for dashboard
+  // Save to Supabase oracle_daily_briefs
   const briefPayload = {
     date: new Date().toISOString(),
     weather: weather,
@@ -317,8 +296,14 @@ async function run() {
     territories: mergedTerritories,
     podcast_script: generated.podcast_script
   };
-  await fs.writeFile(BRIEF_JSON_FILE, JSON.stringify(briefPayload, null, 2));
-  console.log(`Saved brief payload to ${BRIEF_JSON_FILE}`);
+  
+  console.log('Saving daily brief to Supabase...');
+  const { error } = await supabase.from('oracle_daily_briefs').insert(briefPayload);
+  if (error) {
+    console.error('Failed to save daily brief to Supabase:', error);
+  } else {
+    console.log(`Successfully saved brief payload to Supabase.`);
+  }
   
   // Generate Audio
   await generateTTS(generated.podcast_script);
