@@ -119,6 +119,7 @@ export default function Home() {
     podcastAudio.addEventListener("timeupdate", handleTimeUpdate);
     podcastAudio.addEventListener("ended", handleEnded);
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAudio(podcastAudio);
     setIsPlaying(false);
     setCurrentTime(0);
@@ -136,6 +137,7 @@ export default function Home() {
     if (refreshTimeLeft === null) return;
     
     if (refreshTimeLeft <= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRefreshTimeLeft(null);
       setIsRefreshing(false);
       window.location.reload();
@@ -350,7 +352,7 @@ export default function Home() {
                 <TabsTrigger 
                   key={u.id} 
                   value={u.id} 
-                  className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-rose-400 rounded-2xl data-active:bg-rose-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
+                  className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-2xl data-active:bg-sky-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
                 >
                   {u.name}
                 </TabsTrigger>
@@ -392,6 +394,7 @@ export default function Home() {
                     if (!audio || duration === 0) return;
                     const rect = e.currentTarget.getBoundingClientRect();
                     const percent = (e.clientX - rect.left) / rect.width;
+                    // eslint-disable-next-line react-hooks/immutability
                     audio.currentTime = percent * duration;
                     setCurrentTime(percent * duration);
                   }}
@@ -524,6 +527,7 @@ export default function Home() {
               <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
                     <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
                   </div>

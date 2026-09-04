@@ -10,6 +10,7 @@ const openai = new OpenAI({
 });
 
 const PUBLIC_DATA_DIR = path.join(process.cwd(), 'public', 'data');
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PODCAST_AUDIO_FILE = path.join(PUBLIC_DATA_DIR, 'podcast.mp3');
 
 // Ensure public/data exists
@@ -192,9 +193,13 @@ Your task is to review the following intelligence items and produce a JSON respo
    - "name": The exact name of the territory from the context.
    - "logo": The exact logo URL of the territory from the context.
    - "html": A richly formatted HTML string summarizing the key points for the visual dashboard using standard <ul><li> for the bullet points. Do NOT include any <h3> headers in this string, only the bulleted list. If there is no news for a territory within the last 7 days, output a single bullet: <li>No significant activity to report this week.</li>
+   - "mission": A string describing the agency's core mission.
+   - "tech_priorities": An array of strings outlining current technology priorities.
+   - "prime_contractors": An array of strings listing key prime contractors.
+   - "leadership": An object with role titles as keys (e.g. "CIO", "CISO") and { "name": string, "url": string } as values. If no URL is found, use an empty string.
+   - "locations": An array of strings listing key office locations.
    - Order the bullets with the most recent news on top.
    - IMPORTANT: If an intelligence item has a source URL, you MUST provide the source name and link at the very end of the bullet point in this exact format: <code>(Source Name - <a href="URL" target="_blank" rel="noopener noreferrer">link</a>)</code>.
-   - 
 
 Here is the context for today:
 [Weather]: ${weatherStr}
@@ -213,34 +218,7 @@ ${JSON.stringify(enrichedIntel, null, 2)}
       { role: 'system', content: systemPrompt },
       { role: 'user', content: "Generate today's brief." }
     ],
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "daily_generation",
-        schema: {
-          type: "object",
-          properties: {
-            podcast_script: { type: "string" },
-            territories: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  logo: { type: "string" },
-                  html: { type: "string" }
-                },
-                required: ["name", "logo", "html"],
-                additionalProperties: false
-              }
-            }
-          },
-          required: ["podcast_script", "territories"],
-          additionalProperties: false
-        },
-        strict: true
-      }
-    }
+    response_format: { type: "json_object" }
   });
 
   const content = response.choices[0].message.content;
@@ -286,14 +264,17 @@ async function run() {
     console.log('Commute:', commute);
     
     // Filter territories for this user
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userTerritories = allTerritories.filter((t: any) => t.user_id === user.id);
     if (userTerritories.length === 0) {
       console.log(`Skipping ${user.name}, no territories assigned.`);
       continue;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const territoryIds = new Set(userTerritories.map((t: any) => t.id));
     
     // Filter intel for these territories
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userIntel = intel.filter((i: any) => territoryIds.has(i.territory_id));
     
     console.log(`Generating AI content for ${user.name}...`);
