@@ -5,6 +5,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE oracle_users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL UNIQUE,
+    home_address TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

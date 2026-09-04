@@ -34,14 +34,18 @@ async function fetchWeather() {
   }
 }
 
-// 2. Fetch Commute Time (Fredericksburg to Reston)
-async function fetchCommuteTime() {
+// 2. Fetch Commute Time
+async function fetchCommuteTime(homeAddress: string) {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
     console.warn('No GOOGLE_MAPS_API_KEY found, returning placeholder commute time.');
     return 'Your estimated commute time is currently unavailable.';
   }
   
+  if (!homeAddress) {
+    return 'Your estimated commute time is currently unavailable because no home address is set.';
+  }
+
   try {
     const url = 'https://routes.googleapis.com/directions/v2:computeRoutes';
     const response = await fetch(url, {
@@ -52,8 +56,8 @@ async function fetchCommuteTime() {
         'X-Goog-FieldMask': 'routes.duration'
       },
       body: JSON.stringify({
-        origin: { address: 'Fredericksburg, VA' },
-        destination: { address: 'Reston, VA' },
+        origin: { address: homeAddress },
+        destination: { address: '1910 Oracle Way Reston Virginia 20190' },
         travelMode: 'DRIVE',
         routingPreference: 'TRAFFIC_AWARE'
       })
@@ -68,7 +72,7 @@ async function fetchCommuteTime() {
       const arrivalDate = new Date(Date.now() + durationSeconds * 1000);
       const arrivalTime = arrivalDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-      return `Your estimated commute time from Fredericksburg to Reston is ${minutes} minutes. If you leave right now, you will arrive at ${arrivalTime}.`;
+      return `Your estimated commute time from your home to the Oracle Reston office is ${minutes} minutes. If you leave right now, you will arrive at ${arrivalTime}.`;
     } else {
       console.warn('Google Maps API returned unexpected data:', data);
       return 'Your estimated commute time could not be calculated.';
@@ -267,9 +271,6 @@ async function run() {
   const weather = await fetchWeather();
   console.log('Weather:', weather);
   
-  const commute = await fetchCommuteTime();
-  console.log('Commute:', commute);
-  
   const intel = await loadIntelligence();
   const allTerritories = await loadTerritories();
   const articles = await loadArticles();
@@ -280,6 +281,9 @@ async function run() {
 
   for (const user of users) {
     console.log(`\n--- Processing User: ${user.name} ---`);
+    
+    const commute = await fetchCommuteTime(user.home_address);
+    console.log('Commute:', commute);
     
     // Filter territories for this user
     const userTerritories = allTerritories.filter((t: any) => t.user_id === user.id);

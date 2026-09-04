@@ -5,9 +5,9 @@ async function main() {
 
   // 1. Create Users
   const usersToCreate = [
-    { name: 'Kyle Beggan' },
-    { name: 'Dan Ungerleider' },
-    { name: 'Michael Scott' }
+    { name: 'Kyle Beggan', home_address: 'Fredericksburg, VA' },
+    { name: 'Dan Ungerleider', home_address: 'Washington, DC' }, // Placeholder
+    { name: 'Michael Scott', home_address: 'Arlington, VA' } // Placeholder
   ];
 
   for (const u of usersToCreate) {

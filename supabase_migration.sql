@@ -1,3 +1,4 @@
+/* 
 -- 1. Create Users Table
 CREATE TABLE IF NOT EXISTS oracle_users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -19,3 +20,8 @@ ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES oracle_users(id) ON DELETE CASC
 -- 3. Enable RLS on users table
 ALTER TABLE oracle_users ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Enable read access for all users" ON oracle_users FOR SELECT USING (true);
+*/
+
+-- 4. Add home_address to users table for commute tracking
+ALTER TABLE oracle_users 
+ADD COLUMN IF NOT EXISTS home_address TEXT;
