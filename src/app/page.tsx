@@ -445,7 +445,7 @@ export default function Home() {
                      // fallback to original if parsing fails
                    }
                    
-                   const isPaywalled = ['NYT US News', 'Washington Post National', 'Govly'].includes(source.name);
+                   const isPaywalled = ['NYT US News', 'Washington Post National'].includes(source.name);
                    
                    return (
                      <li key={idx} className="flex items-center justify-between group">
