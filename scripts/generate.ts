@@ -217,7 +217,7 @@ Your task is to review the following intelligence items and produce a JSON respo
    - "mission": A string describing the agency's core mission.
    - "tech_priorities": An array of strings outlining current technology priorities.
    - "prime_contractors": An array of strings listing key prime contractors.
-   - "leadership": An object with role titles as keys (e.g. "CIO", "CISO") and { "name": string, "url": string } as values. If no URL is found, use an empty string.
+   - "leadership": An object with role titles as keys (e.g. "CIO", "Deputy CIO", "CISO") and { "name": string, "url": string } as values. You MUST ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. If no URL is found, use an empty string.
    - "locations": An array of strings listing key office locations.
    - Order the bullets with the most recent news on top.
    - IMPORTANT: If an intelligence item has a source URL, you MUST provide the source name and link at the very end of the bullet point in this exact format: <code>(Source Name - <a href="URL" target="_blank" rel="noopener noreferrer">link</a>)</code>.
