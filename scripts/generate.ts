@@ -92,8 +92,8 @@ async function fetchCommuteTime(homeAddress: string) {
       
       // Calculate arrival time
       const arrivalDate = new Date(Date.now() + durationSeconds * 1000);
-      const arrivalTime = arrivalDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-      const currentTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const arrivalTime = arrivalDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
+      const currentTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
 
       return `Your estimated commute time from your home to the Oracle Reston office is ${minutes} minutes. If you leave right now (${currentTime}), you will arrive at ${arrivalTime}.`;
     } else {
@@ -205,8 +205,8 @@ You are the host of a daily podcast and executive briefing for ${userName}, an O
 Your task is to review the following intelligence items and produce a JSON response containing two things:
 1. "podcast_script": A spoken-word script that you will read. 
    - MUST start exactly with: "Good morning, ${userName.split(' ')[0]}."
-   - MUST then include the provided weather and commute updates.
-   - MUST then state the user's territories before diving into the news, using phrasing like: "Now, let’s dive into the most important updates related to your [Territory 1], [Territory 2], etc. territories."
+   - MUST then include ALL details from the provided weather update (including the current temperature, the high temperature, the time of the high, and the chance of precipitation) and the commute update.
+   - MUST explicitly name all of the user's territories provided in the [My Territories] list before diving into the news, using phrasing exactly like: "Now, let’s dive into the most important updates related to your [Territory 1], [Territory 2], and [Territory 3] territories."
    - MUST then smoothly transition into a concise, engaging summary of the most important news.
    - MUST STRICTLY EXCLUDE any political partisan drama. Focus ONLY on executive orders, legislation, and updates that have a direct effect on selling Oracle technology and services.
    - MUST NOT read any code, URLs, or hyperlinks aloud. If referencing external resources, simply say: "Check out more using a link on your dashboard."
