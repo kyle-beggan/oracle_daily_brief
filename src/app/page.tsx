@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
@@ -40,10 +40,12 @@ export default function Home() {
   const [briefsMap, setBriefsMap] = useState<Record<string, BriefData>>({});
   
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPodcastEnded, setIsPodcastEnded] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
-  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi' | 'piano' | 'acoustic' | 'classical'>('upbeat');
+  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi' | 'piano' | 'acoustic' | 'classical' | 'guilty'>('upbeat');
   const [playbackRate, setPlaybackRate] = useState(1);
+  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -114,6 +116,7 @@ export default function Home() {
     const handleLoadedMetadata = () => setDuration(podcastAudio.duration);
     const handleTimeUpdate = () => setCurrentTime(podcastAudio.currentTime);
     const handleEnded = () => {
+      setIsPodcastEnded(true);
       setIsPlaying(false);
       setCurrentTime(0);
     };
@@ -150,13 +153,36 @@ export default function Home() {
   }, [musicVibe]);
 
   useEffect(() => {
-    if (musicAudio && isPlaying) {
+    if (!musicAudio) return;
+
+    if (isPlaying) {
+      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+      musicAudio.volume = 0.08;
       musicAudio.playbackRate = playbackRate;
       musicAudio.play().catch(e => console.error("Autoplay prevented:", e));
-    } else if (musicAudio && !isPlaying) {
-      musicAudio.pause();
+    } else {
+      if (isPodcastEnded) {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        let vol = 0.08;
+        const fadeStep = 0.08 / 30; // 3 seconds = 30 * 100ms
+        
+        fadeIntervalRef.current = setInterval(() => {
+          vol -= fadeStep;
+          if (vol <= 0.005) {
+            musicAudio.pause();
+            musicAudio.volume = 0.08;
+            if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+          } else {
+            musicAudio.volume = vol;
+          }
+        }, 100);
+      } else {
+        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
+        musicAudio.pause();
+        musicAudio.volume = 0.08;
+      }
     }
-  }, [musicAudio, isPlaying, playbackRate]);
+  }, [musicAudio, isPlaying, playbackRate, isPodcastEnded]);
 
   useEffect(() => {
     if (refreshTimeLeft === null) return;
@@ -181,6 +207,7 @@ export default function Home() {
     if (isPlaying) {
       audio.pause();
     } else {
+      setIsPodcastEnded(false);
       audio.playbackRate = playbackRate; // ensure speed is respected
       audio.play();
     }
@@ -484,6 +511,12 @@ export default function Home() {
                   className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'classical' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Classical
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('guilty')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Guilty
                 </button>
               </div>
 
