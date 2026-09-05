@@ -52,6 +52,7 @@ export default function Home() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTimeLeft, setRefreshTimeLeft] = useState<number | null>(null);
   const [estimatedCompletionTime, setEstimatedCompletionTime] = useState<string | null>(null);
+  const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [showScript, setShowScript] = useState(false);
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
@@ -113,7 +114,8 @@ export default function Home() {
     if (!selectedUser) return;
     
     // In dev, sometimes the file might not exist yet, we catch errors gracefully by adding listeners
-    const podcastAudio = new Audio(`/data/podcast_${selectedUser}.mp3`);
+    const cacheBuster = data?.date ? `?v=${new Date(data.date).getTime()}` : '';
+    const podcastAudio = new Audio(`/data/podcast_${selectedUser}.mp3${cacheBuster}`);
     
     const handleLoadedMetadata = () => setDuration(podcastAudio.duration);
     const handleTimeUpdate = () => setCurrentTime(podcastAudio.currentTime);
@@ -139,7 +141,7 @@ export default function Home() {
       podcastAudio.removeEventListener("timeupdate", handleTimeUpdate);
       podcastAudio.removeEventListener("ended", handleEnded);
     };
-  }, [selectedUser]);
+  }, [selectedUser, data?.date]);
 
   useEffect(() => {
     const bgMusic = new Audio(`/data/${musicVibe}.mp3`);
@@ -244,6 +246,7 @@ export default function Home() {
   }) : 'Unknown';
 
   const triggerRefresh = async () => {
+    setShowRefreshModal(false);
     if (isRefreshing) return;
     setIsRefreshing(true);
     
@@ -404,7 +407,7 @@ export default function Home() {
               </div>
             ) : (
               <button 
-                onClick={triggerRefresh}
+                onClick={() => setShowRefreshModal(true)}
                 disabled={isRefreshing}
                 className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md w-full justify-center md:w-auto md:justify-start"
               >
@@ -414,6 +417,34 @@ export default function Home() {
             )}
           </div>
         </header>
+
+        {/* Refresh Confirmation Modal */}
+        {showRefreshModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 max-w-md w-full animate-in fade-in zoom-in-95 duration-200">
+              <h2 className="text-xl font-bold text-zinc-100 mb-2">Confirm Pipeline Refresh</h2>
+              <p className="text-zinc-400 text-sm leading-relaxed mb-6">
+                Your daily brief is automatically refreshed at 6:00 AM ET every day. 
+                Manually rerunning the data pipeline will incur a cost of approximately <strong className="text-sky-400 font-semibold">$0.05</strong>. 
+                Are you sure you want to proceed?
+              </p>
+              <div className="flex justify-end gap-3">
+                <button 
+                  onClick={() => setShowRefreshModal(false)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={triggerRefresh}
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-sky-500 hover:bg-sky-400 text-zinc-950 transition-colors"
+                >
+                  Confirm Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* User Tabs */}
         {users.length > 0 && (
