@@ -25,12 +25,31 @@ async function fetchWeather() {
     // Latitude/Longitude for Northern Virginia area (e.g., Reston)
     const lat = 38.9687;
     const lon = -77.3411;
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&daily=precipitation_probability_max,snowfall_sum&timezone=America/New_York`);
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=fahrenheit&hourly=temperature_2m&daily=precipitation_probability_max,snowfall_sum&timezone=America/New_York&forecast_days=1`);
     const data = await response.json();
     const temp = data.current_weather.temperature;
     const precipProb = data.daily.precipitation_probability_max[0];
     const snowSum = data.daily.snowfall_sum[0];
-    return `The current temperature in Northern Virginia is ${temp} degrees Fahrenheit. There is a ${precipProb}% chance of precipitation (rain or sleet) today, and ${snowSum} cm of snow expected.`;
+    
+    const temps = data.hourly.temperature_2m;
+    const times = data.hourly.time;
+    let maxTemp = -Infinity;
+    let maxTempTime = "";
+    for (let i = 0; i < temps.length; i++) {
+      if (temps[i] > maxTemp) {
+        maxTemp = temps[i];
+        maxTempTime = times[i];
+      }
+    }
+    
+    const timeStr = maxTempTime.split('T')[1];
+    const [h, m] = timeStr.split(':');
+    let hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    const formattedTime = `${hour}:${m} ${ampm}`;
+    
+    return `The current temperature in Northern Virginia is ${temp} degrees Fahrenheit. The high today will be ${maxTemp} degrees Fahrenheit at ${formattedTime}. There is a ${precipProb}% chance of precipitation (rain or sleet) today, and ${snowSum} cm of snow expected.`;
   } catch (error) {
     console.error('Error fetching weather:', error);
     return 'The weather forecast is currently unavailable.';
