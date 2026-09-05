@@ -2,8 +2,8 @@ name: Data Pipeline Refresh
 
 on:
   schedule:
-    # Run every morning at 5:00 AM EST (10:00 UTC)
-    - cron: '0 10 * * *'
+    # Run every morning at 5:00 AM EDT (09:00 UTC)
+    - cron: '0 9 * * *'
   workflow_dispatch: # Allows manual triggering from UI or Actions tab
 
 permissions:

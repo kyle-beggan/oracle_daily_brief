@@ -93,8 +93,9 @@ async function fetchCommuteTime(homeAddress: string) {
       // Calculate arrival time
       const arrivalDate = new Date(Date.now() + durationSeconds * 1000);
       const arrivalTime = arrivalDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const currentTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-      return `Your estimated commute time from your home to the Oracle Reston office is ${minutes} minutes. If you leave right now, you will arrive at ${arrivalTime}.`;
+      return `Your estimated commute time from your home to the Oracle Reston office is ${minutes} minutes. If you leave right now (${currentTime}), you will arrive at ${arrivalTime}.`;
     } else {
       console.warn('Google Maps API returned unexpected data:', data);
       return 'Your estimated commute time could not be calculated.';
