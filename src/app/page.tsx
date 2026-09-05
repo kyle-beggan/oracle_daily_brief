@@ -43,7 +43,7 @@ export default function Home() {
   const [isPodcastEnded, setIsPodcastEnded] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
-  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi' | 'piano' | 'acoustic' | 'classical' | 'guilty'>('upbeat');
+  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi' | 'piano' | 'acoustic' | 'classical' | 'guilty' | 'cliburn' | 'pigs' | 'x-files'>('upbeat');
   const [playbackRate, setPlaybackRate] = useState(1);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -517,6 +517,24 @@ export default function Home() {
                   className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Guilty
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('cliburn')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'cliburn' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Cliburn
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('pigs')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'pigs' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Pigs
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('x-files')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'x-files' ? 'bg-lime-500/20 text-lime-400 border border-lime-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  X-Files
                 </button>
               </div>
 
