@@ -206,6 +206,7 @@ Your task is to review the following intelligence items and produce a JSON respo
 1. "podcast_script": A spoken-word script that you will read. 
    - MUST start exactly with: "Good morning, ${userName.split(' ')[0]}."
    - MUST then include the provided weather and commute updates.
+   - MUST then state the user's territories before diving into the news, using phrasing like: "Now, let’s dive into the most important updates related to your [Territory 1], [Territory 2], etc. territories."
    - MUST then smoothly transition into a concise, engaging summary of the most important news.
    - MUST STRICTLY EXCLUDE any political partisan drama. Focus ONLY on executive orders, legislation, and updates that have a direct effect on selling Oracle technology and services.
    - MUST NOT read any code, URLs, or hyperlinks aloud. If referencing external resources, simply say: "Check out more using a link on your dashboard."
