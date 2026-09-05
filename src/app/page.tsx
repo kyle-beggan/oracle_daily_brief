@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, Bot, Database } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -55,6 +55,7 @@ export default function Home() {
   const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [showScript, setShowScript] = useState(false);
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
+  const [aiGeneratedTerritories, setAiGeneratedTerritories] = useState<Set<string>>(new Set());
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
 
   const data = selectedUser ? briefsMap[selectedUser] : null;
@@ -353,6 +354,8 @@ export default function Home() {
           }
         };
       });
+
+      setAiGeneratedTerritories(prev => new Set(prev).add(territoryName));
 
       toast.success(territoryName + " updated successfully!");
     } catch (error) {
@@ -725,6 +728,20 @@ export default function Home() {
                   <TabsContent value="news" className="mt-0">
                     <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
                       <div dangerouslySetInnerHTML={{ __html: territory.html }} />
+                    </div>
+                    
+                    <div className="mt-6 flex items-center">
+                      {aiGeneratedTerritories.has(territory.name) ? (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-semibold tracking-wide">
+                          <Bot className="h-4 w-4" />
+                          <span>AI Generated (May contain hallucinations)</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold tracking-wide">
+                          <Database className="h-4 w-4" />
+                          <span>Data Pipeline (Verified Sources)</span>
+                        </div>
+                      )}
                     </div>
                   </TabsContent>
                   
