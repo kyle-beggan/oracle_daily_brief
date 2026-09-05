@@ -42,7 +42,7 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
-  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi'>('upbeat');
+  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi' | 'piano' | 'acoustic' | 'classical'>('upbeat');
   const [playbackRate, setPlaybackRate] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -448,7 +448,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex gap-2 w-full mt-1 justify-center">
+              <div className="flex flex-wrap gap-2 w-full mt-1 justify-center">
                 <button 
                   onClick={() => setMusicVibe('upbeat')}
                   className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'upbeat' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
@@ -466,6 +466,24 @@ export default function Home() {
                   className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'lofi' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Lo-Fi
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('piano')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'piano' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Piano
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('acoustic')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'acoustic' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Acoustic
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('classical')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'classical' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Classical
                 </button>
               </div>
 
