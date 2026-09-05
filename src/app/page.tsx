@@ -51,6 +51,7 @@ export default function Home() {
   const [duration, setDuration] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshTimeLeft, setRefreshTimeLeft] = useState<number | null>(null);
+  const [estimatedCompletionTime, setEstimatedCompletionTime] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
@@ -270,8 +271,9 @@ export default function Home() {
       });
 
       if (response.ok) {
-        toast.success("Data pipeline triggered! The site will update in ~7.5 minutes.");
-        setRefreshTimeLeft(450);
+        toast.success("Data pipeline triggered! The site will update in ~2.25 minutes.");
+        setRefreshTimeLeft(135);
+        setEstimatedCompletionTime(new Date(Date.now() + 135 * 1000).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
       } else {
         const err = await response.text();
         console.error("Failed to trigger pipeline:", err);
@@ -388,12 +390,17 @@ export default function Home() {
                     {Math.floor(refreshTimeLeft / 60)}:{(refreshTimeLeft % 60).toString().padStart(2, '0')}
                   </span>
                 </div>
-                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden mb-2">
                   <div 
                     className="h-full bg-sky-500 rounded-full transition-all duration-1000 ease-linear"
-                    style={{ width: `${((450 - refreshTimeLeft) / 450) * 100}%` }}
+                    style={{ width: `${((135 - refreshTimeLeft) / 135) * 100}%` }}
                   />
                 </div>
+                {estimatedCompletionTime && (
+                  <div className="text-[10px] text-zinc-500 text-right font-medium">
+                    Est. completion: {estimatedCompletionTime}
+                  </div>
+                )}
               </div>
             ) : (
               <button 
