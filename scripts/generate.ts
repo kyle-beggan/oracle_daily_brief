@@ -233,7 +233,7 @@ async function generateTTS(script: string, userId: string) {
   console.log(`Generating TTS Audio for user ${userId}...`);
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
-    voice: "onyx",
+    voice: "alloy",
     input: script,
   });
   const buffer = Buffer.from(await mp3.arrayBuffer());
