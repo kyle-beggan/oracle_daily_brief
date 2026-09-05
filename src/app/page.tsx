@@ -316,7 +316,7 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://linkedin.com/...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in newsHtml, include anchor links where available (e.g., <li><a href='...'>Article Title</a> - Summary...</li>). Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. If a profile URL (like LinkedIn or official gov site) is available for a leader, include it."
+              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://linkedin.com/...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in newsHtml, include anchor links ONLY if you are absolutely certain of the exact, working URL. DO NOT hallucinate or guess URLs; if you do not know the real URL, do not include a link. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. If a profile URL (like LinkedIn or official gov site) is available for a leader, include it."
             },
             {
               role: "user",
@@ -726,7 +726,17 @@ export default function Home() {
                   </TabsList>
                   
                   <TabsContent value="news" className="mt-0">
-                    <div className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300">
+                    <div 
+                      className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300"
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+                        const anchor = target.closest('a');
+                        if (anchor && anchor.href) {
+                          e.preventDefault();
+                          window.open(anchor.href, '_blank', 'noopener,noreferrer');
+                        }
+                      }}
+                    >
                       <div dangerouslySetInnerHTML={{ __html: territory.html }} />
                     </div>
                     
