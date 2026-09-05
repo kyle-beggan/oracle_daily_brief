@@ -316,7 +316,7 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://linkedin.com/...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. If a profile URL (like LinkedIn or official gov site) is available for a leader, include it."
+              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://linkedin.com/...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in newsHtml, include anchor links where available (e.g., <li><a href='...'>Article Title</a> - Summary...</li>). Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. If a profile URL (like LinkedIn or official gov site) is available for a leader, include it."
             },
             {
               role: "user",
