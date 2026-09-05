@@ -164,7 +164,7 @@ export default function Home() {
       if (isPodcastEnded) {
         if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
         let vol = 0.08;
-        const fadeStep = 0.08 / 30; // 3 seconds = 30 * 100ms
+        const fadeStep = 0.08 / 100; // 10 seconds = 100 * 100ms
         
         fadeIntervalRef.current = setInterval(() => {
           vol -= fadeStep;
