@@ -41,6 +41,9 @@ export default function Home() {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
+  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi'>('upbeat');
+  const [playbackRate, setPlaybackRate] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -134,6 +137,28 @@ export default function Home() {
   }, [selectedUser]);
 
   useEffect(() => {
+    const bgMusic = new Audio(`/data/${musicVibe}.mp3`);
+    bgMusic.loop = true;
+    bgMusic.volume = 0.08;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMusicAudio(bgMusic);
+
+    return () => {
+      bgMusic.pause();
+      bgMusic.src = '';
+    };
+  }, [musicVibe]);
+
+  useEffect(() => {
+    if (musicAudio && isPlaying) {
+      musicAudio.playbackRate = playbackRate;
+      musicAudio.play().catch(e => console.error("Autoplay prevented:", e));
+    } else if (musicAudio && !isPlaying) {
+      musicAudio.pause();
+    }
+  }, [musicAudio, isPlaying, playbackRate]);
+
+  useEffect(() => {
     if (refreshTimeLeft === null) return;
     
     if (refreshTimeLeft <= 0) {
@@ -156,9 +181,20 @@ export default function Home() {
     if (isPlaying) {
       audio.pause();
     } else {
+      audio.playbackRate = playbackRate; // ensure speed is respected
       audio.play();
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const cycleSpeed = () => {
+    const speeds = [1, 1.25, 1.5, 2];
+    const nextIdx = (speeds.indexOf(playbackRate) + 1) % speeds.length;
+    const nextSpeed = speeds[nextIdx];
+    setPlaybackRate(nextSpeed);
+    if (audio) {
+      audio.playbackRate = nextSpeed;
+    }
   };
 
   const formatTime = (time: number) => {
@@ -381,6 +417,12 @@ export default function Home() {
                   <div className={`w-1 bg-rose-500/70 rounded-full ${isPlaying ? 'animate-[bounce_1.2s_infinite]' : 'h-4'}`}></div>
                   <div className={`w-1 bg-rose-500/50 rounded-full ${isPlaying ? 'animate-[bounce_0.8s_infinite]' : 'h-1'}`}></div>
                 </div>
+                <button
+                  onClick={cycleSpeed}
+                  className="ml-2 px-3 py-1.5 bg-zinc-800/50 hover:bg-zinc-700/50 text-xs font-semibold text-zinc-300 rounded-md transition-colors"
+                >
+                  {playbackRate}x
+                </button>
               </div>
               
               <div className="w-full space-y-1.5">
@@ -404,6 +446,27 @@ export default function Home() {
                     style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                   />
                 </div>
+              </div>
+
+              <div className="flex gap-2 w-full mt-1 justify-center">
+                <button 
+                  onClick={() => setMusicVibe('upbeat')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'upbeat' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Upbeat
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('ambient')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'ambient' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Ambient
+                </button>
+                <button 
+                  onClick={() => setMusicVibe('lofi')}
+                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'lofi' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  Lo-Fi
+                </button>
               </div>
 
               {data?.podcast_script && (

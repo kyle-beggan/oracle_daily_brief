@@ -2,10 +2,6 @@ import path from 'path';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { supabase } from './supabase';
-import ffmpeg from 'fluent-ffmpeg';
-import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
-
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 dotenv.config({ path: '.env.local', override: true });
 
@@ -241,31 +237,9 @@ async function generateTTS(script: string, userId: string) {
     input: script,
   });
   const buffer = Buffer.from(await mp3.arrayBuffer());
-  const rawPath = path.join(PUBLIC_DATA_DIR, `temp_podcast_${userId}.mp3`);
-  const finalPath = path.join(PUBLIC_DATA_DIR, `podcast_${userId}.mp3`);
-  const musicBedPath = path.join(PUBLIC_DATA_DIR, 'music_bed.mp3');
-  
-  await fs.writeFile(rawPath, buffer);
-  console.log(`Saved raw podcast audio to ${rawPath}, now mixing with music bed...`);
-
-  await new Promise((resolve, reject) => {
-    ffmpeg()
-      .input(rawPath)
-      .input(musicBedPath)
-      .inputOptions(['-stream_loop -1'])
-      .complexFilter([
-        '[0:a]volume=1.2[a0]',
-        '[1:a]volume=0.08[a1]',
-        '[a0][a1]amix=inputs=2:duration=first:dropout_transition=2[out]'
-      ])
-      .outputOptions(['-map [out]'])
-      .save(finalPath)
-      .on('end', resolve)
-      .on('error', reject);
-  });
-  
-  await fs.unlink(rawPath);
-  console.log(`Saved final mixed podcast audio to ${finalPath}`);
+  const filePath = path.join(PUBLIC_DATA_DIR, `podcast_${userId}.mp3`);
+  await fs.writeFile(filePath, buffer);
+  console.log(`Saved podcast audio to ${filePath}`);
 }
 
 async function run() {
