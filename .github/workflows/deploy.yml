@@ -1,10 +1,10 @@
-name: Daily Brief Pipeline & Deploy
+name: Deploy Dashboard UI
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # Allows manual triggering from the GitHub Actions tab
+  workflow_dispatch: # Allows manual triggering from UI or Actions tab
 
 permissions:
   contents: read
