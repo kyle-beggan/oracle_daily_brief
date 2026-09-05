@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/immutability */
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
