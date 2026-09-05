@@ -44,7 +44,7 @@ export default function Home() {
   const [isPodcastEnded, setIsPodcastEnded] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
-  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'ambient' | 'lofi' | 'piano' | 'acoustic' | 'classical' | 'guilty' | 'cliburn' | 'pigs' | 'x-files'>('upbeat');
+  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'guilty' | 'cliburn' | 'pigs' | 'x-files'>('upbeat');
   const [playbackRate, setPlaybackRate] = useState(1);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -517,66 +517,36 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 w-full mt-1 justify-center">
+              <div className="flex flex-nowrap gap-1.5 w-full mt-2 justify-center overflow-x-auto pb-1 scrollbar-hide">
                 <button 
                   onClick={() => setMusicVibe('upbeat')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'upbeat' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'upbeat' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Upbeat
-                </button>
-                <button 
-                  onClick={() => setMusicVibe('ambient')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'ambient' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
-                >
-                  Ambient
-                </button>
-                <button 
-                  onClick={() => setMusicVibe('lofi')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'lofi' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
-                >
-                  Lo-Fi
-                </button>
-                <button 
-                  onClick={() => setMusicVibe('piano')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'piano' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
-                >
-                  Piano
-                </button>
-                <button 
-                  onClick={() => setMusicVibe('acoustic')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'acoustic' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
-                >
-                  Acoustic
-                </button>
-                <button 
-                  onClick={() => setMusicVibe('classical')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'classical' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
-                >
-                  Classical
+                  Music 1
                 </button>
                 <button 
                   onClick={() => setMusicVibe('guilty')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Guilty
+                  Music 2
                 </button>
                 <button 
                   onClick={() => setMusicVibe('cliburn')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'cliburn' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'cliburn' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Cliburn
+                  Music 3
                 </button>
                 <button 
                   onClick={() => setMusicVibe('pigs')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'pigs' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'pigs' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Pigs
+                  Music 4
                 </button>
                 <button 
                   onClick={() => setMusicVibe('x-files')}
-                  className={`text-[10px] font-semibold px-3 py-1 rounded-full transition-all ${musicVibe === 'x-files' ? 'bg-lime-500/20 text-lime-400 border border-lime-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'x-files' ? 'bg-lime-500/20 text-lime-400 border border-lime-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  X-Files
+                  Music 5
                 </button>
               </div>
 
