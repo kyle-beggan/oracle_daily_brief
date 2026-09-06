@@ -16,15 +16,23 @@ interface User {
   name: string;
 }
 
+export type SourceTag = "Data Pipeline" | "AI Generated";
+
+export interface DataItem<T> {
+  value: T;
+  source: SourceTag;
+}
+
 interface TerritoryBrief {
   name: string;
   logo: string;
-  html: string;
-  mission?: string;
-  tech_priorities?: string[];
-  prime_contractors?: string[];
-  leadership?: Record<string, string | { name: string; url?: string } | Array<string | { name: string; url?: string }>>;
-  locations?: { name: string; address: string; map_url: string }[];
+  html?: string;
+  news?: DataItem<string>[];
+  mission?: DataItem<string>;
+  tech_priorities?: DataItem<string>[];
+  prime_contractors?: DataItem<string>[];
+  leadership?: Record<string, DataItem<string | { name: string; url?: string }> | DataItem<string | { name: string; url?: string }>[]>;
+  locations?: DataItem<{ name: string; address: string; map_url: string }>[];
 }
 
 interface BriefData {
@@ -55,7 +63,6 @@ export default function Home() {
   const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [showScript, setShowScript] = useState(false);
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
-  const [aiGeneratedTerritories, setAiGeneratedTerritories] = useState<Set<string>>(new Set());
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
 
@@ -89,6 +96,50 @@ export default function Home() {
         const bMap: Record<string, BriefData> = {};
         for (const b of briefsData) {
           if (!bMap[b.user_id]) {
+            // Normalize data to support item-level source badges
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            b.territories = b.territories.map((t: any) => {
+              const news: DataItem<string>[] = t.news || [];
+              if (!t.news && t.html) {
+                const liRegex = /<li>(.*?)<\/li>/g;
+                let match;
+                while ((match = liRegex.exec(t.html)) !== null) {
+                   const item = match[1].trim();
+                   if (item && item !== "No significant activity to report this week.") {
+                     news.push({ value: item, source: "Data Pipeline" });
+                   }
+                }
+              }
+              
+              const wrap = <T,>(val: T | DataItem<T>): DataItem<T> => 
+                (val && typeof val === 'object' && 'source' in val && 'value' in val) ? val as DataItem<T> : { value: val as T, source: "Data Pipeline" };
+
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const wrapArray = <T,>(arr: any[] | undefined): DataItem<T>[] => 
+                arr ? arr.map(wrap) : [];
+              
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const leadership: any = {};
+              if (t.leadership) {
+                for (const [key, val] of Object.entries(t.leadership)) {
+                   if (Array.isArray(val)) {
+                     leadership[key] = val.map(wrap);
+                   } else {
+                     leadership[key] = wrap(val);
+                   }
+                }
+              }
+
+              return {
+                ...t,
+                news,
+                mission: t.mission ? wrap(t.mission) : undefined,
+                tech_priorities: wrapArray(t.tech_priorities),
+                prime_contractors: wrapArray(t.prime_contractors),
+                leadership,
+                locations: wrapArray(t.locations)
+              };
+            });
             bMap[b.user_id] = b;
           }
         }
@@ -317,7 +368,7 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://www.linkedin.com/search/results/people/?keywords=...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in newsHtml, include anchor links ONLY if you are absolutely certain of the exact, working URL. DO NOT hallucinate or guess URLs; if you do not know the real URL, do not include a link. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. For LinkedIn URLs, ALWAYS generate a search URL for the person (e.g., https://www.linkedin.com/search/results/people/?keywords=First+Last+Agency) instead of attempting to guess their direct profile link. Official gov site links can be direct."
+              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"news\": [\"...\"], \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://www.linkedin.com/search/results/people/?keywords=...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in the news array, include anchor links ONLY if you are absolutely certain of the exact, working URL. DO NOT hallucinate or guess URLs; if you do not know the real URL, do not include a link. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. For LinkedIn URLs, ALWAYS generate a search URL for the person (e.g., https://www.linkedin.com/search/results/people/?keywords=First+Last+Agency) instead of attempting to guess their direct profile link. Official gov site links can be direct."
             },
             {
               role: "user",
@@ -344,10 +395,14 @@ export default function Home() {
               if (t.name === territoryName) {
                 return {
                   ...t,
-                  html: content.newsHtml || t.html,
-                  tech_priorities: content.techPriorities || t.tech_priorities,
-                  prime_contractors: content.primeContractors || t.prime_contractors,
-                  leadership: content.leadership || t.leadership
+                  news: [...(t.news || []), ...(content.news ? content.news.map((item: string) => ({ value: item, source: "AI Generated" })) : [])],
+                  tech_priorities: [...(t.tech_priorities || []), ...(content.techPriorities ? content.techPriorities.map((item: string) => ({ value: item, source: "AI Generated" })) : [])],
+                  prime_contractors: [...(t.prime_contractors || []), ...(content.primeContractors ? content.primeContractors.map((item: string) => ({ value: item, source: "AI Generated" })) : [])],
+                  leadership: {
+                    ...(t.leadership || {}),
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    ...(content.leadership ? Object.fromEntries(Object.entries(content.leadership).map(([k, v]) => [k, Array.isArray(v) ? v.map((item: any) => ({ value: item as (string | { name: string; url?: string }), source: "AI Generated" as const })) : { value: v as (string | { name: string; url?: string }), source: "AI Generated" as const }])) : {})
+                  }
                 };
               }
               return t;
@@ -355,8 +410,6 @@ export default function Home() {
           }
         };
       });
-
-      setAiGeneratedTerritories(prev => new Set(prev).add(territoryName));
 
       toast.success(territoryName + " updated successfully!");
     } catch (error) {
@@ -709,7 +762,7 @@ export default function Home() {
                   </TabsList>
                   
                   <TabsContent value="news" className="mt-0">
-                    <div 
+                    <ul 
                       className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300"
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
@@ -720,26 +773,32 @@ export default function Home() {
                         }
                       }}
                     >
-                      <div dangerouslySetInnerHTML={{ __html: territory.html }} />
-                    </div>
-                    
-                    <div className="mt-6 flex items-center">
-                      {aiGeneratedTerritories.has(territory.name) ? (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-amber-500/10 text-amber-500 border border-amber-500/20 text-xs font-semibold tracking-wide">
-                          <Bot className="h-4 w-4" />
-                          <span>AI Generated (May contain hallucinations)</span>
-                        </div>
+                      {territory.news && territory.news.length > 0 ? (
+                        territory.news.map((item, i) => (
+                          <li key={i} className="mb-4 relative group">
+                            <span dangerouslySetInnerHTML={{ __html: item.value }} />
+                            <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${item.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                              {item.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                              {item.source}
+                            </span>
+                          </li>
+                        ))
                       ) : (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-xs font-semibold tracking-wide">
-                          <Database className="h-4 w-4" />
-                          <span>Data Pipeline (Verified Sources)</span>
-                        </div>
+                        <li>No significant activity to report this week.</li>
                       )}
-                    </div>
+                    </ul>
                   </TabsContent>
                   
                   <TabsContent value="mission" className="mt-0">
-                    <p className="text-zinc-300 leading-relaxed text-lg">{territory.mission || "Mission information not available."}</p>
+                    <p className="text-zinc-300 leading-relaxed text-lg">
+                      {territory.mission ? territory.mission.value : "Mission information not available."}
+                      {territory.mission && (
+                        <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${territory.mission.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                          {territory.mission.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                          {territory.mission.source}
+                        </span>
+                      )}
+                    </p>
                   </TabsContent>
                   
                   <TabsContent value="tech" className="mt-0">
@@ -748,7 +807,13 @@ export default function Home() {
                         {territory.tech_priorities.map((priority, i) => (
                           <li key={i} className="flex items-start gap-3 text-zinc-300">
                             <span className="text-sky-400 mt-1">•</span>
-                            <span>{priority}</span>
+                            <span className="flex-1">
+                              {priority.value}
+                              <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${priority.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                {priority.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                                {priority.source}
+                              </span>
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -761,8 +826,11 @@ export default function Home() {
                     {territory.prime_contractors && territory.prime_contractors.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {territory.prime_contractors.map((prime, i) => (
-                          <span key={i} className="px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300">
-                            {prime}
+                          <span key={i} className="px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 flex items-center gap-2">
+                            {prime.value}
+                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${prime.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                              {prime.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                            </span>
                           </span>
                         ))}
                       </div>
@@ -775,20 +843,26 @@ export default function Home() {
                     {territory.leadership && Object.keys(territory.leadership).length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {Object.entries(territory.leadership).map(([role, nameOrNames], i) => {
-                          const renderPerson = (person: string | {name: string; url?: string}, idx?: number) => {
-                            if (typeof person === 'string') {
-                              return <li key={idx} className="text-zinc-300 font-medium">{person}</li>;
-                            }
+                          const renderPerson = (person: DataItem<string | {name: string; url?: string}>, idx?: number) => {
+                            const val = person.value;
+                            const isString = typeof val === 'string';
                             return (
-                              <li key={idx} className="font-medium">
-                                {person.url ? (
-                                  <a href={person.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 transition-colors w-fit">
-                                    {person.name}
-                                    <LinkIcon className="w-3 h-3 opacity-70" />
-                                  </a>
+                              <li key={idx} className="font-medium flex items-center gap-2">
+                                {isString ? (
+                                  <span className="text-zinc-300">{val}</span>
                                 ) : (
-                                  <span className="text-zinc-300">{person.name}</span>
+                                  val.url ? (
+                                    <a href={val.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 transition-colors w-fit">
+                                      {val.name}
+                                      <LinkIcon className="w-3 h-3 opacity-70" />
+                                    </a>
+                                  ) : (
+                                    <span className="text-zinc-300">{val.name}</span>
+                                  )
                                 )}
+                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${person.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                  {person.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                                </span>
                               </li>
                             );
                           };
@@ -814,20 +888,19 @@ export default function Home() {
                     {territory.locations && territory.locations.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {territory.locations.map((loc, i) => (
-                          <a 
-                            key={i} 
-                            href={loc.map_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="block p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 hover:border-sky-500/50 transition-colors group"
-                          >
-                            <h4 className="font-semibold text-zinc-200 group-hover:text-sky-400 transition-colors">{loc.name}</h4>
-                            <p className="text-sm text-zinc-400 mt-1">{loc.address}</p>
-                            <div className="flex items-center gap-1 mt-3 text-xs font-medium text-sky-500">
+                          <div key={i} className="relative block p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 hover:border-sky-500/50 transition-colors group">
+                            <div className="flex justify-between items-start">
+                              <h4 className="font-semibold text-zinc-200 group-hover:text-sky-400 transition-colors">{loc.value.name}</h4>
+                              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${loc.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                {loc.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                              </span>
+                            </div>
+                            <p className="text-sm text-zinc-400 mt-1">{loc.value.address}</p>
+                            <a href={loc.value.map_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-3 text-xs font-medium text-sky-500 w-fit">
                               <span>Get Directions</span>
                               <LinkIcon className="h-3 w-3" />
-                            </div>
-                          </a>
+                            </a>
+                          </div>
                         ))}
                       </div>
                     ) : (

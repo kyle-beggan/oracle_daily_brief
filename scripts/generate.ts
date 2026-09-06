@@ -215,7 +215,7 @@ Your task is to review the following intelligence items and produce a JSON respo
 2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.
    - "name": The exact name of the territory from the context.
    - "logo": The exact logo URL of the territory from the context.
-   - "html": A richly formatted HTML string summarizing the key points for the visual dashboard using standard <ul><li> for the bullet points. Do NOT include any <h3> headers in this string, only the bulleted list. If there is no news for a territory within the last 7 days, output a single bullet: <li>No significant activity to report this week.</li>
+   - "news": An array of strings where each string is a richly formatted HTML summary of a key point for the visual dashboard. Do NOT include any <ul>, <li>, or <h3> tags, just the inner HTML for the bullet point. If there is no news for a territory within the last 7 days, output an empty array.
    - "mission": A string describing the agency's core mission.
    - "tech_priorities": An array of strings outlining current technology priorities.
    - "prime_contractors": An array of strings listing key prime contractors.
@@ -318,11 +318,11 @@ async function run() {
     
     // Merge AI output with master territories list
     const mergedTerritories = userTerritories.map((t: Record<string, unknown>) => {
-      const aiMatch = generated.territories.find((g: { name: string, logo: string, html: string }) => g.name === t.name);
+      const aiMatch = generated.territories.find((g: { name: string, logo: string, news?: string[] }) => g.name === t.name);
       return {
         name: t.name,
         logo: t.logo,
-        html: aiMatch ? aiMatch.html : "<ul><li>No significant activity to report this week.</li></ul>",
+        news: aiMatch ? (aiMatch.news || []) : [],
         mission: t.mission || t.description,
         tech_priorities: t.tech_priorities || [],
         prime_contractors: t.prime_contractors || [],
