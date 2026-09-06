@@ -22,7 +22,7 @@ interface Article {
 interface IntelligenceItem {
   id: string;
   article_id: string;
-  territory_id: string;
+  territory_id: string | null;
   relevance_score: number;
   category: string[];
   summary: string;
@@ -139,7 +139,8 @@ async function runAnalysis() {
           id: crypto.randomUUID(),
           article_id: article.id,
           analyzed_at: new Date().toISOString(),
-          ...analysis
+          ...analysis,
+          territory_id: analysis.territory_id === 'unassigned' ? null : analysis.territory_id
         };
         newItems.push(item);
         
