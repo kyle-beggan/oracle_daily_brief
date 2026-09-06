@@ -1,6 +1,7 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { supabase } from './supabase';
+import crypto from 'crypto';
 
 dotenv.config({ path: '.env.local', override: true });
 
@@ -135,7 +136,7 @@ async function runAnalysis() {
       try {
         const analysis = await analyzeArticle(article, territoriesList);
         const item: IntelligenceItem = {
-          id: `intel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+          id: crypto.randomUUID(),
           article_id: article.id,
           analyzed_at: new Date().toISOString(),
           ...analysis
