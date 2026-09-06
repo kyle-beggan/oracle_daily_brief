@@ -117,7 +117,7 @@ export default function Home() {
     
     // In dev, sometimes the file might not exist yet, we catch errors gracefully by adding listeners
     const cacheBuster = data?.date ? `?v=${new Date(data.date).getTime()}` : '';
-    const podcastAudio = new Audio(`/data/podcast_${selectedUser}.mp3${cacheBuster}`);
+    const podcastAudio = new Audio(`${supabaseUrl}/storage/v1/object/public/recordings/podcast_${selectedUser}.mp3${cacheBuster}`);
     
     const handleLoadedMetadata = () => setDuration(podcastAudio.duration);
     const handleTimeUpdate = () => setCurrentTime(podcastAudio.currentTime);
@@ -317,7 +317,7 @@ export default function Home() {
           messages: [
             {
               role: "system",
-              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://linkedin.com/...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in newsHtml, include anchor links ONLY if you are absolutely certain of the exact, working URL. DO NOT hallucinate or guess URLs; if you do not know the real URL, do not include a link. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. If a profile URL (like LinkedIn or official gov site) is available for a leader, include it."
+              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"newsHtml\": \"<ul><li>...</li></ul>\", \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://www.linkedin.com/search/results/people/?keywords=...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in newsHtml, include anchor links ONLY if you are absolutely certain of the exact, working URL. DO NOT hallucinate or guess URLs; if you do not know the real URL, do not include a link. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. For LinkedIn URLs, ALWAYS generate a search URL for the person (e.g., https://www.linkedin.com/search/results/people/?keywords=First+Last+Agency) instead of attempting to guess their direct profile link. Official gov site links can be direct."
             },
             {
               role: "user",

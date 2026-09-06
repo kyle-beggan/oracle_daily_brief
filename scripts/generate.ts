@@ -260,9 +260,22 @@ async function generateTTS(script: string, userId: string) {
     input: script,
   });
   const buffer = Buffer.from(await mp3.arrayBuffer());
+  
+  console.log(`Uploading podcast audio to Supabase for user ${userId}...`);
+  const { error } = await supabase.storage.from('recordings').upload(`podcast_${userId}.mp3`, buffer, {
+    contentType: 'audio/mpeg',
+    upsert: true
+  });
+  
+  if (error) {
+    console.error(`Failed to upload audio to Supabase for user ${userId}:`, error);
+  } else {
+    console.log(`Successfully uploaded podcast audio to Supabase storage.`);
+  }
+
   const filePath = path.join(PUBLIC_DATA_DIR, `podcast_${userId}.mp3`);
   await fs.writeFile(filePath, buffer);
-  console.log(`Saved podcast audio to ${filePath}`);
+  console.log(`Saved podcast audio locally to ${filePath}`);
 }
 
 async function run() {
