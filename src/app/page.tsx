@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, Bot, Database } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, Bot, Database, ChevronDown, ChevronRight } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -57,6 +57,7 @@ export default function Home() {
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
   const [aiGeneratedTerritories, setAiGeneratedTerritories] = useState<Set<string>>(new Set());
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
+  const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
 
   const data = selectedUser ? briefsMap[selectedUser] : null;
 
@@ -627,42 +628,54 @@ export default function Home() {
             </div>
 
             <div className="order-5 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
-               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Data Sources</h3>
-               <ul className="space-y-3">
-                 {sourcesData.map((source, idx) => {
-                   let rootUrl = source.url;
-                   try {
-                     rootUrl = new URL(source.url).origin;
-                   } catch {
-                     // fallback
-                   }
-                   
-                   const isPaywalled = ['nyt us news', 'washington post national', 'govly'].includes(source.name.trim().toLowerCase());
-                   
-                   return (
-                     <li key={idx} className="flex items-center justify-between group">
-                        <div className="flex items-center gap-3 truncate">
-                          <div className={`p-1.5 bg-zinc-800/50 rounded-lg transition-colors ${isPaywalled ? 'text-amber-500/70 group-hover:text-amber-400' : 'text-zinc-500 group-hover:text-sky-400'}`}>
-                            <LinkIcon className="h-3 w-3" />
+               <button 
+                 onClick={() => setIsDataSourcesExpanded(!isDataSourcesExpanded)}
+                 className="w-full flex items-center justify-between text-left group"
+               >
+                 <h3 className={`text-base font-semibold uppercase tracking-wider transition-colors ${isDataSourcesExpanded ? 'text-zinc-300' : 'text-zinc-400 group-hover:text-sky-400'}`}>Data Sources</h3>
+                 {isDataSourcesExpanded ? (
+                   <ChevronDown className="h-4 w-4 text-zinc-400 group-hover:text-sky-400 transition-colors" />
+                 ) : (
+                   <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-sky-400 transition-colors" />
+                 )}
+               </button>
+               {isDataSourcesExpanded && (
+                 <ul className="space-y-3 mt-4">
+                   {sourcesData.map((source, idx) => {
+                     let rootUrl = source.url;
+                     try {
+                       rootUrl = new URL(source.url).origin;
+                     } catch {
+                       // fallback
+                     }
+                     
+                     const isPaywalled = ['nyt us news', 'washington post national', 'govly'].includes(source.name.trim().toLowerCase());
+                     
+                     return (
+                       <li key={idx} className="flex items-center justify-between group">
+                          <div className="flex items-center gap-3 truncate">
+                            <div className={`p-1.5 bg-zinc-800/50 rounded-lg transition-colors ${isPaywalled ? 'text-amber-500/70 group-hover:text-amber-400' : 'text-zinc-500 group-hover:text-sky-400'}`}>
+                              <LinkIcon className="h-3 w-3" />
+                            </div>
+                            <a 
+                              href={rootUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className={`text-sm font-medium transition-colors truncate ${isPaywalled ? 'text-amber-100/80 hover:text-amber-400' : 'text-zinc-300 hover:text-sky-400'}`}
+                            >
+                              {source.name}
+                            </a>
                           </div>
-                          <a 
-                            href={rootUrl} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className={`text-sm font-medium transition-colors truncate ${isPaywalled ? 'text-amber-100/80 hover:text-amber-400' : 'text-zinc-300 hover:text-sky-400'}`}
-                          >
-                            {source.name}
-                          </a>
-                        </div>
-                        {isPaywalled && (
-                          <div className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 whitespace-nowrap ml-3">
-                            Subscription
-                          </div>
-                        )}
-                     </li>
-                   );
-                 })}
-               </ul>
+                          {isPaywalled && (
+                            <div className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 whitespace-nowrap ml-3">
+                              Subscription
+                            </div>
+                          )}
+                       </li>
+                     );
+                   })}
+                 </ul>
+               )}
             </div>
           </div>
           
