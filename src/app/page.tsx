@@ -3,7 +3,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, Bot, Database, ChevronDown, ChevronRight } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, Bot, Database, ChevronDown, ChevronRight, HelpCircle } from "lucide-react";
+import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -47,7 +48,7 @@ export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [briefsMap, setBriefsMap] = useState<Record<string, BriefData>>({});
-  
+
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPodcastEnded, setIsPodcastEnded] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
@@ -63,8 +64,33 @@ export default function Home() {
   const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [showScript, setShowScript] = useState(false);
   const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
-  const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string; [key: string]: unknown }>>([]);
+  const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string;[key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+
+  const tourSteps: Step[] = [
+    {
+      target: '.tour-user-tabs',
+      content: 'Welcome to your Daily Brief! Select your name here to view your personalized dashboard.',
+      skipBeacon: true,
+    },
+    {
+      target: '.tour-podcast',
+      content: 'Listen to an AI-generated morning podcast summarizing your territories and the latest news.',
+    },
+    {
+      target: '.tour-territory-card',
+      content: 'Each of your territories has its own card with tabs for the latest news, mission, tech priorities, and more.',
+    },
+    {
+      target: '.tour-local-conditions',
+      content: 'Check the local weather and commute conditions for your area.',
+    },
+    {
+      target: '.tour-data-sources',
+      content: 'View the underlying news sources and articles that powered today\'s insights.',
+    }
+  ];
 
   const data = selectedUser ? briefsMap[selectedUser] : null;
 
@@ -75,7 +101,7 @@ export default function Home() {
         .from('oracle_users')
         .select('*')
         .order('name');
-      
+
       if (userError) {
         console.error("Could not load users", userError);
       } else {
@@ -104,29 +130,29 @@ export default function Home() {
                 const liRegex = /<li>(.*?)<\/li>/g;
                 let match;
                 while ((match = liRegex.exec(t.html)) !== null) {
-                   const item = match[1].trim();
-                   if (item && item !== "No significant activity to report this week.") {
-                     news.push({ value: item, source: "Data Pipeline" });
-                   }
+                  const item = match[1].trim();
+                  if (item && item !== "No significant activity to report this week.") {
+                    news.push({ value: item, source: "Data Pipeline" });
+                  }
                 }
               }
-              
-              const wrap = <T,>(val: T | DataItem<T>): DataItem<T> => 
+
+              const wrap = <T,>(val: T | DataItem<T>): DataItem<T> =>
                 (val && typeof val === 'object' && 'source' in val && 'value' in val) ? val as DataItem<T> : { value: val as T, source: "Data Pipeline" };
 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const wrapArray = <T,>(arr: any[] | undefined): DataItem<T>[] => 
+              const wrapArray = <T,>(arr: any[] | undefined): DataItem<T>[] =>
                 arr ? arr.map(wrap) : [];
-              
+
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const leadership: any = {};
               if (t.leadership) {
                 for (const [key, val] of Object.entries(t.leadership)) {
-                   if (Array.isArray(val)) {
-                     leadership[key] = val.map(wrap);
-                   } else {
-                     leadership[key] = wrap(val);
-                   }
+                  if (Array.isArray(val)) {
+                    leadership[key] = val.map(wrap);
+                  } else {
+                    leadership[key] = wrap(val);
+                  }
                 }
               }
 
@@ -145,31 +171,31 @@ export default function Home() {
         }
         setBriefsMap(bMap);
       }
-      
+
       // Fetch sources
       const { data: sources, error: sourcesError } = await supabase
         .from('oracle_sources')
         .select('*')
         .eq('is_active', true)
         .order('name', { ascending: true });
-        
+
       if (sourcesError) {
         console.error("Could not load sources data", sourcesError);
       } else {
         setSourcesData(sources);
       }
     }
-    
+
     fetchData();
   }, []);
 
   useEffect(() => {
     if (!selectedUser) return;
-    
+
     // In dev, sometimes the file might not exist yet, we catch errors gracefully by adding listeners
     const cacheBuster = data?.date ? `?v=${new Date(data.date).getTime()}` : '';
     const podcastAudio = new Audio(`${supabaseUrl}/storage/v1/object/public/recordings/podcast_${selectedUser}.mp3${cacheBuster}`);
-    
+
     const handleLoadedMetadata = () => setDuration(podcastAudio.duration);
     const handleTimeUpdate = () => setCurrentTime(podcastAudio.currentTime);
     const handleEnded = () => {
@@ -222,7 +248,7 @@ export default function Home() {
         if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
         let vol = 0.08;
         const fadeStep = 0.08 / 100; // 10 seconds = 100 * 100ms
-        
+
         fadeIntervalRef.current = setInterval(() => {
           vol -= fadeStep;
           if (vol <= 0.005) {
@@ -243,7 +269,7 @@ export default function Home() {
 
   useEffect(() => {
     if (refreshTimeLeft === null) return;
-    
+
     if (refreshTimeLeft <= 0) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setRefreshTimeLeft(null);
@@ -251,11 +277,11 @@ export default function Home() {
       window.location.reload();
       return;
     }
-    
+
     const timer = setInterval(() => {
       setRefreshTimeLeft(prev => prev !== null ? prev - 1 : null);
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, [refreshTimeLeft]);
 
@@ -302,11 +328,11 @@ export default function Home() {
     setShowRefreshModal(false);
     if (isRefreshing) return;
     setIsRefreshing(true);
-    
+
     const owner = process.env.NEXT_PUBLIC_REPO_OWNER;
     const repo = process.env.NEXT_PUBLIC_REPO_NAME;
     const pat = process.env.NEXT_PUBLIC_GITHUB_PAT;
-    
+
     if (!owner || !repo || !pat) {
       toast.error("GitHub configuration missing in .env.local. Please set NEXT_PUBLIC_REPO_OWNER, NEXT_PUBLIC_REPO_NAME, and NEXT_PUBLIC_GITHUB_PAT.");
       setIsRefreshing(false);
@@ -345,7 +371,7 @@ export default function Home() {
 
   const refreshSingleTerritory = async (territoryName: string) => {
     if (refreshingTerritories.has(territoryName) || !selectedUser) return;
-    
+
     const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
     if (!apiKey) {
       toast.error("OpenAI API key missing. Set NEXT_PUBLIC_OPENAI_API_KEY in .env.local");
@@ -379,14 +405,14 @@ export default function Home() {
       });
 
       if (!response.ok) throw new Error("OpenAI request failed");
-      
+
       const resData = await response.json();
       const content = JSON.parse(resData.choices[0].message.content);
 
       setBriefsMap(prev => {
         const currentBrief = prev[selectedUser];
         if (!currentBrief) return prev;
-        
+
         return {
           ...prev,
           [selectedUser]: {
@@ -428,8 +454,40 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-rose-500/30">
       <div className="fixed top-[-50%] left-[-20%] w-[150%] h-[150%] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-800/20 via-zinc-950 to-zinc-950 -z-10 blur-3xl pointer-events-none" />
 
+      <Joyride
+        steps={tourSteps}
+        run={runTour}
+        continuous={true}
+        locale={{ last: 'Close' }}
+        options={{ primaryColor: '#0ea5e9' }}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onEvent={(data: any) => {
+          const { status, action } = data;
+          if (status === 'finished' || status === 'skipped' || action === 'close') {
+            setRunTour(false);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }}
+        styles={{
+          beaconInner: { backgroundColor: '#0ea5e9' },
+          beaconOuter: { borderColor: '#0ea5e9' },
+          tooltip: {
+            backgroundColor: '#18181b',
+            color: '#d4d4d8',
+            textAlign: 'left',
+          },
+          buttonPrimary: {
+            backgroundColor: '#0ea5e9',
+            color: '#09090b',
+            fontWeight: 'bold',
+          },
+          buttonBack: {
+            color: '#a1a1aa',
+          },
+        }}
+      />
       <main className="max-w-[1224px] mx-auto px-6 py-12 md:py-24">
-        
+
         <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div>
             <div className="flex items-center gap-3 mb-4">
@@ -439,9 +497,9 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">Daily Brief</h1>
             <p className="text-xl text-zinc-400">{formattedDate}</p>
           </div>
-          
+
           <div className="flex flex-col items-start md:items-end gap-2 min-w-[240px]">
-            <span className="text-xs text-zinc-500 font-medium tracking-wide">Last updated: {lastUpdated}</span>
+            <span className="text-xs text-zinc-500 font-medium tracking-wide">{lastUpdated}</span>
             {refreshTimeLeft !== null ? (
               <div className="w-full bg-zinc-900/80 border border-zinc-800 rounded-lg p-3 shadow-xl backdrop-blur-md">
                 <div className="flex justify-between items-center mb-2">
@@ -451,7 +509,7 @@ export default function Home() {
                   </span>
                 </div>
                 <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden mb-2">
-                  <div 
+                  <div
                     className="h-full bg-sky-500 rounded-full transition-all duration-1000 ease-linear"
                     style={{ width: `${((135 - refreshTimeLeft) / 135) * 100}%` }}
                   />
@@ -463,14 +521,23 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <button 
-                onClick={() => setShowRefreshModal(true)}
-                disabled={isRefreshing}
-                className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md w-full justify-center md:w-auto md:justify-start"
-              >
-                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
-                {isRefreshing ? 'Triggering...' : 'Refresh Feed'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setRunTour(true)}
+                  className="flex items-center justify-center p-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-300 transition-colors shadow-xl backdrop-blur-md"
+                  title="App Walkthrough"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setShowRefreshModal(true)}
+                  disabled={isRefreshing}
+                  className="tour-refresh-feed flex items-center justify-center p-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
+                  title="Refresh Feed"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
+                </button>
+              </div>
             )}
           </div>
         </header>
@@ -481,18 +548,18 @@ export default function Home() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 max-w-md w-full animate-in fade-in zoom-in-95 duration-200">
               <h2 className="text-xl font-bold text-zinc-100 mb-2">Confirm Pipeline Refresh</h2>
               <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-                Your daily brief is automatically refreshed at 6:00 AM ET every day. 
-                Manually rerunning the data pipeline will incur a cost of approximately <strong className="text-sky-400 font-semibold">$0.05</strong>. 
+                Your daily brief is automatically refreshed at 6:00 AM ET every day.
+                Manually rerunning the data pipeline will incur a cost of approximately <strong className="text-sky-400 font-semibold">$0.05</strong>.
                 Are you sure you want to proceed?
               </p>
               <div className="flex justify-end gap-3">
-                <button 
+                <button
                   onClick={() => setShowRefreshModal(false)}
                   className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   onClick={triggerRefresh}
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-sky-500 hover:bg-sky-400 text-zinc-950 transition-colors"
                 >
@@ -505,12 +572,12 @@ export default function Home() {
 
         {/* User Tabs */}
         {users.length > 0 && (
-          <Tabs value={selectedUser || undefined} onValueChange={setSelectedUser} className="w-full mb-12">
+          <Tabs value={selectedUser || undefined} onValueChange={setSelectedUser} className="tour-user-tabs w-full mb-12">
             <TabsList className="flex w-full h-auto bg-zinc-900/60 border border-zinc-700/50 p-2 rounded-3xl gap-2 shadow-lg backdrop-blur-sm">
               {users.map(u => (
-                <TabsTrigger 
-                  key={u.id} 
-                  value={u.id} 
+                <TabsTrigger
+                  key={u.id}
+                  value={u.id}
                   className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-2xl data-active:bg-sky-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
                 >
                   {u.name}
@@ -521,11 +588,11 @@ export default function Home() {
         )}
 
         <div className="flex flex-col md:grid md:grid-cols-3 gap-6">
-          
+
           <div className="contents md:flex md:flex-col md:gap-6">
-            <div className="order-1 md:order-none w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6 flex flex-col gap-5 hover:border-zinc-700 transition-colors shadow-2xl">
+            <div className="tour-podcast order-1 md:order-none w-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6 flex flex-col gap-5 hover:border-zinc-700 transition-colors shadow-2xl">
               <div className="flex items-center gap-4">
-                <button 
+                <button
                   onClick={togglePlay}
                   className="h-14 w-14 rounded-full shrink-0 bg-rose-500 hover:bg-rose-600 flex items-center justify-center text-white transition-transform hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(244,63,94,0.3)]"
                 >
@@ -547,13 +614,13 @@ export default function Home() {
                   {playbackRate}x
                 </button>
               </div>
-              
+
               <div className="w-full space-y-1.5">
                 <div className="flex justify-between text-xs text-zinc-500 font-medium tracking-wide">
                   <span>{formatTime(currentTime)}</span>
                   <span>{formatTime(duration)}</span>
                 </div>
-                <div 
+                <div
                   className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden cursor-pointer"
                   onClick={(e) => {
                     if (!audio || duration === 0) return;
@@ -564,39 +631,39 @@ export default function Home() {
                     setCurrentTime(percent * duration);
                   }}
                 >
-                  <div 
-                    className="h-full bg-rose-500 rounded-full transition-all duration-100 ease-linear" 
+                  <div
+                    className="h-full bg-rose-500 rounded-full transition-all duration-100 ease-linear"
                     style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                   />
                 </div>
               </div>
 
               <div className="flex flex-nowrap gap-1.5 w-full mt-2 justify-center overflow-x-auto pb-1 scrollbar-hide">
-                <button 
+                <button
                   onClick={() => setMusicVibe('upbeat')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'upbeat' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Music 1
                 </button>
-                <button 
+                <button
                   onClick={() => setMusicVibe('guilty')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Music 2
                 </button>
-                <button 
+                <button
                   onClick={() => setMusicVibe('cliburn')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'cliburn' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Music 3
                 </button>
-                <button 
+                <button
                   onClick={() => setMusicVibe('pigs')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'pigs' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
                   Music 4
                 </button>
-                <button 
+                <button
                   onClick={() => setMusicVibe('x-files')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'x-files' ? 'bg-lime-500/20 text-lime-400 border border-lime-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
@@ -606,7 +673,7 @@ export default function Home() {
 
               {data?.podcast_script && (
                 <div className="w-full mt-2">
-                  <button 
+                  <button
                     onClick={() => setShowScript(!showScript)}
                     className="text-xs font-medium text-zinc-400 hover:text-zinc-200 transition-colors w-full text-center py-2 border border-zinc-800/50 rounded-lg hover:bg-zinc-800/30"
                   >
@@ -623,134 +690,126 @@ export default function Home() {
               )}
             </div>
 
-            <div className="order-3 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
-               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Local Conditions</h3>
-               <ul className="space-y-4">
-                 <li className="flex items-start gap-3">
-                    <div className="p-2 bg-sky-500/10 rounded-lg text-sky-400 mt-0.5">
-                      <Cloud className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-base">Weather</p>
-                      <p className="text-sm text-zinc-400">{data?.weather || "Loading..."}</p>
-                    </div>
-                 </li>
-                 <li className="flex items-start gap-3">
-                    <div className="p-2 bg-rose-500/10 rounded-lg text-rose-500 mt-0.5">
-                      <Car className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-base">Commute</p>
-                      <p className="text-sm text-zinc-400">{data?.commute || "Loading..."}</p>
-                    </div>
-                 </li>
-               </ul>
+            <div className="tour-local-conditions order-3 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+              <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Local Conditions</h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="p-2 bg-sky-500/10 rounded-lg text-sky-400 mt-0.5">
+                    <Cloud className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-base">Weather</p>
+                    <p className="text-sm text-zinc-400">{data?.weather || "Loading..."}</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="p-2 bg-rose-500/10 rounded-lg text-rose-500 mt-0.5">
+                    <Car className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-base">Commute</p>
+                    <p className="text-sm text-zinc-400">{data?.commute || "Loading..."}</p>
+                  </div>
+                </li>
+              </ul>
             </div>
 
             <div className="order-4 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
-               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Market Signals</h3>
-               <ul className="space-y-4">
-                 <li className="flex items-start gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 mt-0.5">
-                      <Cpu className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">AI Adoption</p>
-                      <p className="text-xs text-zinc-400">High relevance in recent DHS RFIs</p>
-                    </div>
-                 </li>
-                 <li className="flex items-start gap-3">
-                    <div className="p-2 bg-amber-500/10 rounded-lg text-amber-500 mt-0.5">
-                      <ShieldAlert className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Cyber Directives</p>
-                      <p className="text-xs text-zinc-400">Zero-Trust mandates accelerating</p>
-                    </div>
-                 </li>
-                 <li className="flex items-start gap-3">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 mt-0.5">
-                      <Activity className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Cloud Migrations</p>
-                      <p className="text-xs text-zinc-400">Steady volume across accounts</p>
-                    </div>
-                 </li>
-               </ul>
+              <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Market Signals</h3>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 mt-0.5">
+                    <Cpu className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">AI Adoption</p>
+                    <p className="text-xs text-zinc-400">High relevance in recent DHS RFIs</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="p-2 bg-amber-500/10 rounded-lg text-amber-500 mt-0.5">
+                    <ShieldAlert className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Cyber Directives</p>
+                    <p className="text-xs text-zinc-400">Zero-Trust mandates accelerating</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500 mt-0.5">
+                    <Activity className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">Cloud Migrations</p>
+                    <p className="text-xs text-zinc-400">Steady volume across accounts</p>
+                  </div>
+                </li>
+              </ul>
             </div>
 
-            <div className="order-5 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
-               <button 
-                 onClick={() => setIsDataSourcesExpanded(!isDataSourcesExpanded)}
-                 className="w-full flex items-center justify-between text-left group"
-               >
-                 <h3 className={`text-base font-semibold uppercase tracking-wider transition-colors ${isDataSourcesExpanded ? 'text-zinc-300' : 'text-zinc-400 group-hover:text-sky-400'}`}>Data Sources</h3>
-                 {isDataSourcesExpanded ? (
-                   <ChevronDown className="h-4 w-4 text-zinc-400 group-hover:text-sky-400 transition-colors" />
-                 ) : (
-                   <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-sky-400 transition-colors" />
-                 )}
-               </button>
-               {isDataSourcesExpanded && (
-                 <ul className="space-y-3 mt-4">
-                   {sourcesData.map((source, idx) => {
-                     let rootUrl = source.url;
-                     try {
-                       rootUrl = new URL(source.url).origin;
-                     } catch {
-                       // fallback
-                     }
-                     
-                     const isPaywalled = ['nyt us news', 'washington post national', 'govly'].includes(source.name.trim().toLowerCase());
-                     
-                     return (
-                       <li key={idx} className="flex items-center justify-between group">
-                          <div className="flex items-center gap-3 truncate">
-                            <div className={`p-1.5 bg-zinc-800/50 rounded-lg transition-colors ${isPaywalled ? 'text-amber-500/70 group-hover:text-amber-400' : 'text-zinc-500 group-hover:text-sky-400'}`}>
-                              <LinkIcon className="h-3 w-3" />
-                            </div>
-                            <a 
-                              href={rootUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className={`text-sm font-medium transition-colors truncate ${isPaywalled ? 'text-amber-100/80 hover:text-amber-400' : 'text-zinc-300 hover:text-sky-400'}`}
-                            >
-                              {source.name}
-                            </a>
+            <div className="tour-data-sources order-5 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+              <button
+                onClick={() => setIsDataSourcesExpanded(!isDataSourcesExpanded)}
+                className="w-full flex items-center justify-between text-left group"
+              >
+                <h3 className={`text-base font-semibold uppercase tracking-wider transition-colors ${isDataSourcesExpanded ? 'text-zinc-300' : 'text-zinc-400 group-hover:text-sky-400'}`}>Data Sources</h3>
+                {isDataSourcesExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-zinc-400 group-hover:text-sky-400 transition-colors" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-zinc-400 group-hover:text-sky-400 transition-colors" />
+                )}
+              </button>
+              {isDataSourcesExpanded && (
+                <ul className="space-y-3 mt-4">
+                  {sourcesData.map((source, idx) => {
+                    let rootUrl = source.url;
+                    try {
+                      rootUrl = new URL(source.url).origin;
+                    } catch {
+                      // fallback
+                    }
+
+                    const isPaywalled = ['nyt us news', 'washington post national', 'govly'].includes(source.name.trim().toLowerCase());
+
+                    return (
+                      <li key={idx} className="flex items-center justify-between group">
+                        <div className="flex items-center gap-3 truncate">
+                          <div className={`p-1.5 bg-zinc-800/50 rounded-lg transition-colors ${isPaywalled ? 'text-amber-500/70 group-hover:text-amber-400' : 'text-zinc-500 group-hover:text-sky-400'}`}>
+                            <LinkIcon className="h-3 w-3" />
                           </div>
-                          {isPaywalled && (
-                            <div className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 whitespace-nowrap ml-3">
-                              Subscription
-                            </div>
-                          )}
-                       </li>
-                     );
-                   })}
-                 </ul>
-               )}
+                          <a
+                            href={rootUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`text-sm font-medium transition-colors truncate ${isPaywalled ? 'text-amber-100/80 hover:text-amber-400' : 'text-zinc-300 hover:text-sky-400'}`}
+                          >
+                            {source.name}
+                          </a>
+                        </div>
+                        {isPaywalled && (
+                          <div className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20 whitespace-nowrap ml-3">
+                            Subscription
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </div>
           </div>
-          
+
           <div className="order-2 md:order-none md:col-span-2 space-y-6">
             {data?.territories ? data.territories.map((territory, idx) => (
-              <div key={idx} className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8">
+              <div key={idx} className={`${idx === 0 ? 'tour-territory-card' : ''} bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
                     <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
                   </div>
-                  <button
-                    onClick={() => refreshSingleTerritory(territory.name)}
-                    disabled={refreshingTerritories.has(territory.name)}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-sm font-medium text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md w-full justify-center sm:w-auto"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${refreshingTerritories.has(territory.name) ? 'animate-spin text-sky-400' : ''}`} />
-                    {refreshingTerritories.has(territory.name) ? 'Refreshing...' : 'Refresh'}
-                  </button>
                 </div>
-                
+
                 <Tabs defaultValue="news" className="w-full">
                   <TabsList className="flex w-full overflow-x-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
                     <TabsTrigger value="news" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
@@ -760,9 +819,9 @@ export default function Home() {
                     <TabsTrigger value="leadership" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
                     <TabsTrigger value="locations" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="news" className="mt-0">
-                    <ul 
+                    <ul
                       className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300"
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
@@ -788,7 +847,7 @@ export default function Home() {
                       )}
                     </ul>
                   </TabsContent>
-                  
+
                   <TabsContent value="mission" className="mt-0">
                     <p className="text-zinc-300 leading-relaxed text-lg">
                       {territory.mission ? territory.mission.value : "Mission information not available."}
@@ -800,7 +859,7 @@ export default function Home() {
                       )}
                     </p>
                   </TabsContent>
-                  
+
                   <TabsContent value="tech" className="mt-0">
                     {territory.tech_priorities && territory.tech_priorities.length > 0 ? (
                       <ul className="space-y-3">
@@ -821,7 +880,7 @@ export default function Home() {
                       <p className="text-zinc-500">No tech priorities listed.</p>
                     )}
                   </TabsContent>
-                  
+
                   <TabsContent value="primes" className="mt-0">
                     {territory.prime_contractors && territory.prime_contractors.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
@@ -838,12 +897,12 @@ export default function Home() {
                       <p className="text-zinc-500">No prime contractors listed.</p>
                     )}
                   </TabsContent>
-                  
+
                   <TabsContent value="leadership" className="mt-0">
                     {territory.leadership && Object.keys(territory.leadership).length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {Object.entries(territory.leadership).map(([role, nameOrNames], i) => {
-                          const renderPerson = (person: DataItem<string | {name: string; url?: string}>, idx?: number) => {
+                          const renderPerson = (person: DataItem<string | { name: string; url?: string }>, idx?: number) => {
                             const val = person.value;
                             const isString = typeof val === 'string';
                             return (
@@ -871,8 +930,8 @@ export default function Home() {
                             <div key={i} className="p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 flex flex-col justify-center">
                               <p className="text-xs font-semibold tracking-wider text-sky-400/80 uppercase mb-1">{role}</p>
                               <ul className="space-y-1">
-                                {Array.isArray(nameOrNames) 
-                                  ? nameOrNames.map((n, j) => renderPerson(n, j)) 
+                                {Array.isArray(nameOrNames)
+                                  ? nameOrNames.map((n, j) => renderPerson(n, j))
                                   : renderPerson(nameOrNames)}
                               </ul>
                             </div>
@@ -883,7 +942,7 @@ export default function Home() {
                       <p className="text-zinc-500">No leadership information available.</p>
                     )}
                   </TabsContent>
-                  
+
                   <TabsContent value="locations" className="mt-0">
                     {territory.locations && territory.locations.length > 0 ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
