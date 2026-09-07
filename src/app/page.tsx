@@ -53,7 +53,7 @@ export default function Home() {
   const [isPodcastEnded, setIsPodcastEnded] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
-  const [musicVibe, setMusicVibe] = useState<'upbeat' | 'guilty' | 'cliburn' | 'pigs' | 'x-files'>('upbeat');
+  const [musicVibe, setMusicVibe] = useState<'guilty' | 'cliburn' | 'pigs' | 'x-files'>('guilty');
   const [playbackRate, setPlaybackRate] = useState(1);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -639,12 +639,7 @@ export default function Home() {
               </div>
 
               <div className="flex flex-nowrap gap-1.5 w-full mt-2 justify-center overflow-x-auto pb-1 scrollbar-hide">
-                <button
-                  onClick={() => setMusicVibe('upbeat')}
-                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'upbeat' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
-                >
-                  Music 1
-                </button>
+
                 <button
                   onClick={() => setMusicVibe('guilty')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
