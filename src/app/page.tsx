@@ -125,8 +125,15 @@ export default function Home() {
             // Normalize data to support item-level source badges
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             b.territories = b.territories.map((t: any) => {
-              const news: DataItem<string>[] = t.news || [];
-              if (!t.news && t.html) {
+              const wrap = <T,>(val: T | DataItem<T>): DataItem<T> =>
+                (val && typeof val === 'object' && 'source' in val && 'value' in val) ? val as DataItem<T> : { value: val as T, source: "Data Pipeline" };
+
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const wrapArray = <T,>(arr: any[] | undefined): DataItem<T>[] =>
+                arr ? arr.map(wrap) : [];
+
+              const news: DataItem<string>[] = t.news ? wrapArray(t.news) : [];
+              if (news.length === 0 && t.html) {
                 const liRegex = /<li>(.*?)<\/li>/g;
                 let match;
                 while ((match = liRegex.exec(t.html)) !== null) {
@@ -136,13 +143,6 @@ export default function Home() {
                   }
                 }
               }
-
-              const wrap = <T,>(val: T | DataItem<T>): DataItem<T> =>
-                (val && typeof val === 'object' && 'source' in val && 'value' in val) ? val as DataItem<T> : { value: val as T, source: "Data Pipeline" };
-
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const wrapArray = <T,>(arr: any[] | undefined): DataItem<T>[] =>
-                arr ? arr.map(wrap) : [];
 
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const leadership: any = {};
