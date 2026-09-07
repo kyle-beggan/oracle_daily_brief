@@ -201,13 +201,14 @@ async function generateContent(userName: string, weatherStr: string, commuteStr:
     .sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
 
   const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  const currentTime = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
 
   const systemPrompt = `
 You are the host of a daily podcast and executive briefing for ${userName}, an Oracle Federal Cloud Account Executive.
 Your task is to review the following intelligence items and produce a JSON response containing two things:
 1. "podcast_script": A spoken-word script that you will read. 
    - MUST start exactly with: "Good morning, ${userName.split(' ')[0]}."
-   - MUST then state today's day of the week and date (${currentDate}), and explicitly clarify that the data in this podcast is current as of the timestamp on the data pipeline.
+   - MUST then state today's day of the week and date (${currentDate}), and explicitly clarify that the data in this podcast is current as of ${currentTime}.
    - MUST then include ALL details from the provided weather update (including the current temperature, the high temperature, the time of the high, and the chance of precipitation) and the commute update.
    - MUST then smoothly transition into the news by saying something exactly like: "Now, let’s dive into the most important updates related to your territories." DO NOT list out all of the territory names individually.
    - MUST then smoothly transition into a concise, engaging summary of the most important news.

@@ -53,7 +53,7 @@ export default function Home() {
   const [isPodcastEnded, setIsPodcastEnded] = useState(false);
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [musicAudio, setMusicAudio] = useState<HTMLAudioElement | null>(null);
-  const [musicVibe, setMusicVibe] = useState<'guilty' | 'cliburn' | 'pigs' | 'x-files'>('guilty');
+  const [musicVibe, setMusicVibe] = useState<'none' | 'guilty' | 'cliburn' | 'pigs' | 'x-files'>('none');
   const [playbackRate, setPlaybackRate] = useState(1);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -63,7 +63,7 @@ export default function Home() {
   const [estimatedCompletionTime, setEstimatedCompletionTime] = useState<string | null>(null);
   const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [showScript, setShowScript] = useState(false);
-  const [refreshingTerritories, setRefreshingTerritories] = useState<Set<string>>(new Set());
+
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string;[key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const [runTour, setRunTour] = useState(false);
@@ -223,10 +223,14 @@ export default function Home() {
   }, [selectedUser, data?.date]);
 
   useEffect(() => {
+    if (musicVibe === 'none') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMusicAudio(null);
+      return;
+    }
     const bgMusic = new Audio(`/data/${musicVibe}.mp3`);
     bgMusic.loop = true;
     bgMusic.volume = 0.08;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMusicAudio(bgMusic);
 
     return () => {
@@ -369,86 +373,6 @@ export default function Home() {
     }
   };
 
-  const refreshSingleTerritory = async (territoryName: string) => {
-    if (refreshingTerritories.has(territoryName) || !selectedUser) return;
-
-    const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-    if (!apiKey) {
-      toast.error("OpenAI API key missing. Set NEXT_PUBLIC_OPENAI_API_KEY in .env.local");
-      return;
-    }
-
-    setRefreshingTerritories(prev => new Set(prev).add(territoryName));
-    toast("Refreshing data for " + territoryName + "...");
-
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          response_format: { type: "json_object" },
-          messages: [
-            {
-              role: "system",
-              content: "You are an elite federal market analyst. Return a JSON object containing updated real-time information for the requested territory. Format: {\"news\": [\"...\"], \"techPriorities\": [\"...\"], \"primeContractors\": [\"...\"], \"leadership\": {\"CIO\": {\"name\": \"...\", \"url\": \"https://www.linkedin.com/search/results/people/?keywords=...\"}, \"Deputy CIO\": {\"name\": \"...\"}, \"CDO\": {\"name\": \"...\"}}}. For the news items in the news array, include anchor links ONLY if you are absolutely certain of the exact, working URL. DO NOT hallucinate or guess URLs; if you do not know the real URL, do not include a link. Ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. For LinkedIn URLs, ALWAYS generate a search URL for the person (e.g., https://www.linkedin.com/search/results/people/?keywords=First+Last+Agency) instead of attempting to guess their direct profile link. Official gov site links can be direct."
-            },
-            {
-              role: "user",
-              content: `Generate updated news (HTML bullets), tech priorities, prime contractors, and leadership for ${territoryName}.`
-            }
-          ]
-        })
-      });
-
-      if (!response.ok) throw new Error("OpenAI request failed");
-
-      const resData = await response.json();
-      const content = JSON.parse(resData.choices[0].message.content);
-
-      setBriefsMap(prev => {
-        const currentBrief = prev[selectedUser];
-        if (!currentBrief) return prev;
-
-        return {
-          ...prev,
-          [selectedUser]: {
-            ...currentBrief,
-            territories: currentBrief.territories.map(t => {
-              if (t.name === territoryName) {
-                return {
-                  ...t,
-                  news: [...(t.news || []), ...(content.news ? content.news.map((item: string) => ({ value: item, source: "AI Generated" })) : [])],
-                  tech_priorities: [...(t.tech_priorities || []), ...(content.techPriorities ? content.techPriorities.map((item: string) => ({ value: item, source: "AI Generated" })) : [])],
-                  prime_contractors: [...(t.prime_contractors || []), ...(content.primeContractors ? content.primeContractors.map((item: string) => ({ value: item, source: "AI Generated" })) : [])],
-                  leadership: {
-                    ...(t.leadership || {}),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    ...(content.leadership ? Object.fromEntries(Object.entries(content.leadership).map(([k, v]) => [k, Array.isArray(v) ? v.map((item: any) => ({ value: item as (string | { name: string; url?: string }), source: "AI Generated" as const })) : { value: v as (string | { name: string; url?: string }), source: "AI Generated" as const }])) : {})
-                  }
-                };
-              }
-              return t;
-            })
-          }
-        };
-      });
-
-      toast.success(territoryName + " updated successfully!");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to refresh " + territoryName);
-    } finally {
-      setRefreshingTerritories(prev => {
-        const next = new Set(prev);
-        next.delete(territoryName);
-        return next;
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-50 font-sans selection:bg-rose-500/30">
@@ -626,7 +550,6 @@ export default function Home() {
                     if (!audio || duration === 0) return;
                     const rect = e.currentTarget.getBoundingClientRect();
                     const percent = (e.clientX - rect.left) / rect.width;
-                    // eslint-disable-next-line react-hooks/immutability
                     audio.currentTime = percent * duration;
                     setCurrentTime(percent * duration);
                   }}
@@ -639,30 +562,35 @@ export default function Home() {
               </div>
 
               <div className="flex flex-nowrap gap-1.5 w-full mt-2 justify-center overflow-x-auto pb-1 scrollbar-hide">
-
+                <button
+                  onClick={() => setMusicVibe('none')}
+                  className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'none' ? 'bg-zinc-500/20 text-zinc-300 border border-zinc-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
+                >
+                  None
+                </button>
                 <button
                   onClick={() => setMusicVibe('guilty')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'guilty' ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Music 2
+                  Music 1
                 </button>
                 <button
                   onClick={() => setMusicVibe('cliburn')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'cliburn' ? 'bg-teal-500/20 text-teal-400 border border-teal-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Music 3
+                  Music 2
                 </button>
                 <button
                   onClick={() => setMusicVibe('pigs')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'pigs' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Music 4
+                  Music 3
                 </button>
                 <button
                   onClick={() => setMusicVibe('x-files')}
                   className={`text-[9px] font-semibold px-2 py-1.5 rounded-full transition-all flex-1 whitespace-nowrap ${musicVibe === 'x-files' ? 'bg-lime-500/20 text-lime-400 border border-lime-500/50' : 'bg-zinc-800/50 text-zinc-400 hover:text-zinc-200 border border-transparent'}`}
                 >
-                  Music 5
+                  Music 4
                 </button>
               </div>
 
