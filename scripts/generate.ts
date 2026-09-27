@@ -168,7 +168,7 @@ async function generateContent(userName: string, weatherStr: string, commuteStr:
     throw new Error('NEXT_PUBLIC_OPENAI_API_KEY is required for generation.');
   }
 
-  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
   const now = Date.now();
 
   const articleMap = new Map(articles.map(a => [a.id, a]));
@@ -183,7 +183,7 @@ async function generateContent(userName: string, weatherStr: string, commuteStr:
     .filter(item => {
       if (!item.article || !item.article.published_at) return false;
       const pubDate = new Date(item.article.published_at).getTime();
-      return (now - pubDate) <= SEVEN_DAYS_MS;
+      return (now - pubDate) <= THIRTY_DAYS_MS;
     })
     .map(item => {
       const source = item.article ? sourceMap.get(item.article.source_id) : undefined;
@@ -219,7 +219,7 @@ Your task is to review the following intelligence items and produce a JSON respo
 2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.
    - "name": The exact name of the territory from the context.
    - "logo": The exact logo URL of the territory from the context.
-   - "news": An array of strings where each string is a richly formatted HTML summary of a key point for the visual dashboard. Do NOT include any <ul>, <li>, or <h3> tags, just the inner HTML for the bullet point. If there is no news for a territory within the last 7 days, output an empty array.
+   - "news": An array of strings where each string is a richly formatted HTML summary of a key point for the visual dashboard. Do NOT include any <ul>, <li>, or <h3> tags, just the inner HTML for the bullet point. If there is no news for a territory within the last 30 days, output an empty array.
    - "mission": A string describing the agency's core mission.
    - "tech_priorities": An array of strings outlining current technology priorities.
    - "prime_contractors": An array of strings listing key prime contractors.
