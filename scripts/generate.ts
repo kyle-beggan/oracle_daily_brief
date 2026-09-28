@@ -219,7 +219,7 @@ Your task is to review the following intelligence items and produce a JSON respo
 2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.
    - "name": The exact name of the territory from the context.
    - "logo": The exact logo URL of the territory from the context.
-   - "news": An array of strings where each string is a richly formatted HTML summary of a key point for the visual dashboard. Do NOT include any <ul>, <li>, or <h3> tags, just the inner HTML for the bullet point. If there is no news for a territory within the last 30 days, output an empty array.
+   - "news": An array of strings where each string is a richly formatted HTML summary of a key point for the visual dashboard. The string MUST begin with the article's publication date wrapped in a <strong> tag (e.g., "<strong>Oct 12, 2023</strong> - "). Do NOT include any <ul>, <li>, or <h3> tags, just the inner HTML for the bullet point. If there is no news for a territory within the last 30 days, output an empty array.
    - "mission": A string describing the agency's core mission.
    - "tech_priorities": An array of strings outlining current technology priorities.
    - "prime_contractors": An array of strings listing key prime contractors.
