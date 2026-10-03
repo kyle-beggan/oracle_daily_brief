@@ -63,6 +63,8 @@ export default function Home() {
   const [estimatedCompletionTime, setEstimatedCompletionTime] = useState<string | null>(null);
   const [showRefreshModal, setShowRefreshModal] = useState(false);
   const [showScript, setShowScript] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [networkingEvents, setNetworkingEvents] = useState<any[]>([]);
 
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string;[key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
@@ -183,6 +185,18 @@ export default function Home() {
         console.error("Could not load sources data", sourcesError);
       } else {
         setSourcesData(sources);
+      }
+
+      // Fetch networking events
+      const { data: events, error: eventsError } = await supabase
+        .from('oracle_networking_events')
+        .select('*')
+        .order('event_date', { ascending: true });
+        
+      if (eventsError) {
+        console.error("Could not load networking events", eventsError);
+      } else {
+        setNetworkingEvents(events);
       }
     }
 
@@ -736,9 +750,9 @@ export default function Home() {
                 <Tabs defaultValue="news" className="w-full">
                   <TabsList className="flex w-full overflow-x-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
                     <TabsTrigger value="news" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
-                    <TabsTrigger value="mission" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission</TabsTrigger>
-                    <TabsTrigger value="tech" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Tech Priorities</TabsTrigger>
+                    <TabsTrigger value="mission-tech" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission & Tech</TabsTrigger>
                     <TabsTrigger value="primes" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Prime Contractors</TabsTrigger>
+                    <TabsTrigger value="networking" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Networking</TabsTrigger>
                     <TabsTrigger value="leadership" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
                     <TabsTrigger value="locations" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
                   </TabsList>
@@ -771,37 +785,41 @@ export default function Home() {
                     </ul>
                   </TabsContent>
 
-                  <TabsContent value="mission" className="mt-0">
-                    <p className="text-zinc-300 leading-relaxed text-lg">
-                      {territory.mission ? territory.mission.value : "Mission information not available."}
-                      {territory.mission && (
-                        <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${territory.mission.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                          {territory.mission.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                          {territory.mission.source}
-                        </span>
-                      )}
-                    </p>
-                  </TabsContent>
+                  <TabsContent value="mission-tech" className="mt-0 space-y-8">
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Mission</h4>
+                      <p className="text-zinc-300 leading-relaxed text-lg">
+                        {territory.mission ? territory.mission.value : "Mission information not available."}
+                        {territory.mission && (
+                          <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${territory.mission.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                            {territory.mission.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                            {territory.mission.source}
+                          </span>
+                        )}
+                      </p>
+                    </div>
 
-                  <TabsContent value="tech" className="mt-0">
-                    {territory.tech_priorities && territory.tech_priorities.length > 0 ? (
-                      <ul className="space-y-3">
-                        {territory.tech_priorities.map((priority, i) => (
-                          <li key={i} className="flex items-start gap-3 text-zinc-300">
-                            <span className="text-sky-400 mt-1">•</span>
-                            <span className="flex-1">
-                              {priority.value}
-                              <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${priority.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                                {priority.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                                {priority.source}
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Tech Priorities</h4>
+                      {territory.tech_priorities && territory.tech_priorities.length > 0 ? (
+                        <ul className="space-y-3">
+                          {territory.tech_priorities.map((priority, i) => (
+                            <li key={i} className="flex items-start gap-3 text-zinc-300">
+                              <span className="text-sky-400 mt-1">•</span>
+                              <span className="flex-1">
+                                {priority.value}
+                                <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${priority.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                  {priority.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                                  {priority.source}
+                                </span>
                               </span>
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-zinc-500">No tech priorities listed.</p>
-                    )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-zinc-500">No tech priorities listed.</p>
+                      )}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="primes" className="mt-0">
@@ -819,6 +837,77 @@ export default function Home() {
                     ) : (
                       <p className="text-zinc-500">No prime contractors listed.</p>
                     )}
+                  </TabsContent>
+
+                  <TabsContent value="networking" className="mt-0 space-y-6">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
+                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">Tier 1</p>
+                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => e.opportunity_tier === 'Tier 1').length}</p>
+                      </div>
+                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
+                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">DHS Speakers</p>
+                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => e.dhs_participants && e.dhs_participants.length > 0).length}</p>
+                      </div>
+                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
+                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">This Month</p>
+                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => new Date(e.event_date).getMonth() === new Date().getMonth()).length}</p>
+                      </div>
+                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
+                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">New</p>
+                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => {
+                           const daysOld = (new Date().getTime() - new Date(e.date_discovered).getTime()) / (1000 * 3600 * 24);
+                           return daysOld < 7;
+                        }).length}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                       {networkingEvents.length > 0 ? networkingEvents.map((ev, i) => (
+                         <div key={i} className="bg-zinc-900 border border-zinc-700/50 rounded-xl p-5 hover:border-sky-500/50 transition-colors">
+                           <div className="flex justify-between items-start gap-4">
+                             <div>
+                               <h4 className="text-lg font-bold text-zinc-100">{ev.name}</h4>
+                               <p className="text-sm text-zinc-400 mt-1">
+                                 {ev.event_date ? new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBD'} | {ev.venue || 'Virtual/TBD'} | {ev.format || ev.event_type}
+                               </p>
+                             </div>
+                             <div className="text-right">
+                               <div className="text-sky-400 font-bold text-xl">{ev.networking_score}<span className="text-xs text-zinc-500 font-normal">/100</span></div>
+                               <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{ev.opportunity_tier}</div>
+                             </div>
+                           </div>
+                           
+                           {ev.why_it_matters && (
+                             <div className="mt-4 p-3 bg-zinc-800/30 rounded-lg">
+                               <p className="text-sm text-zinc-300 italic">&quot;{ev.why_it_matters}&quot;</p>
+                             </div>
+                           )}
+
+                           <div className="mt-4 flex flex-wrap gap-2">
+                             {ev.topics && ev.topics.map((t: string, ti: number) => (
+                               <span key={ti} className="px-2 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded text-[10px] uppercase font-semibold tracking-wider">
+                                 {t}
+                               </span>
+                             ))}
+                           </div>
+
+                           <div className="mt-4 flex gap-3">
+                             {ev.event_url && (
+                               <a href={ev.event_url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-sm font-medium rounded-lg transition-colors">
+                                 Event Details
+                               </a>
+                             )}
+                           </div>
+                         </div>
+                       )) : (
+                         <div className="text-center py-12 bg-zinc-900/50 rounded-xl border border-zinc-800 border-dashed">
+                           <Bot className="h-8 w-8 text-zinc-600 mx-auto mb-3" />
+                           <p className="text-zinc-400 font-medium">No networking events discovered yet.</p>
+                           <p className="text-zinc-500 text-sm mt-1">Run the ingestion pipeline to discover opportunities.</p>
+                         </div>
+                       )}
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="leadership" className="mt-0">
