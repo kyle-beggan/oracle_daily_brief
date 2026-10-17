@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Bot, ArrowLeft } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
@@ -59,22 +60,41 @@ export default function NetworkingPage() {
 
   const runIngestion = async () => {
     setIsIngesting(true);
+    const owner = process.env.NEXT_PUBLIC_REPO_OWNER;
+    const repo = process.env.NEXT_PUBLIC_REPO_NAME;
+    const pat = process.env.NEXT_PUBLIC_GITHUB_PAT;
+
+    if (!owner || !repo || !pat) {
+      toast.error("GitHub configuration missing in .env.local.");
+      setIsIngesting(false);
+      return;
+    }
+
     try {
-      const res = await fetch('/api/ingest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          targetAgency: targetAgencies.join(', '), 
-          location: locations.join(', '), 
-          topics: topics.join(', ') 
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/pipeline.yml/dispatches`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${pat}`,
+          "Accept": "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ref: "main",
+          inputs: { run_pipeline: true }
         })
       });
-      if(res.ok) {
-        await fetchEvents();
+
+      if (response.ok) {
+        toast.success("Discovery pipeline triggered! New events will appear in ~2 minutes.");
         setShowSettings(false);
+      } else {
+        const err = await response.text();
+        console.error("Failed to trigger pipeline:", err);
+        toast.error("Failed to trigger pipeline.");
       }
-    } catch(e) {
-      console.error(e);
+    } catch (e) {
+      console.error("Error triggering pipeline:", e);
+      toast.error("Error triggering pipeline.");
     }
     setIsIngesting(false);
   };
