@@ -2,8 +2,8 @@ name: Data Pipeline Refresh
 
 on:
   schedule:
-    # Run every morning at 6:00 AM EDT (10:00 UTC)
-    - cron: '0 10 * * *'
+    # Run weekday mornings (Monday-Friday) at 6:00 AM EDT (10:00 UTC)
+    - cron: '0 10 * * 1-5'
   workflow_dispatch:
     inputs:
       run_pipeline:

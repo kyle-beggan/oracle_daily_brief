@@ -113,10 +113,27 @@ async function loadUsers() {
   return data;
 }
 
-async function loadIntelligence() {
-  const { data, error } = await supabase.from('oracle_intelligence').select('*');
-  if (error) throw error;
-  return data;
+async function loadIntelligence(): Promise<IntelligenceItem[]> {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  let from = 0;
+  const step = 1000;
+  const items: IntelligenceItem[] = [];
+  while (true) {
+    const { data, error } = await supabase
+      .from('oracle_intelligence')
+      .select('*')
+      .gte('analyzed_at', thirtyDaysAgo)
+      .gt('relevance_score', 60)
+      .not('territory_id', 'is', null)
+      .order('analyzed_at', { ascending: false })
+      .range(from, from + step - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    items.push(...(data as IntelligenceItem[]));
+    if (data.length < step) break;
+    from += step;
+  }
+  return items;
 }
 
 async function loadTerritories() {
@@ -125,10 +142,22 @@ async function loadTerritories() {
   return data;
 }
 
-async function loadArticles() {
-  const { data, error } = await supabase.from('oracle_articles').select('*');
-  if (error) throw error;
-  return data;
+async function loadArticlesForIntel(intelItems: IntelligenceItem[]): Promise<Article[]> {
+  const articleIds = Array.from(new Set(intelItems.map(i => i.article_id).filter(Boolean)));
+  if (articleIds.length === 0) return [];
+
+  const articles: Article[] = [];
+  const chunkSize = 200;
+  for (let i = 0; i < articleIds.length; i += chunkSize) {
+    const chunk = articleIds.slice(i, i + chunkSize);
+    const { data, error } = await supabase
+      .from('oracle_articles')
+      .select('id, source_id, url, title, published_at')
+      .in('id', chunk);
+    if (error) throw error;
+    if (data) articles.push(...(data as Article[]));
+  }
+  return articles;
 }
 
 async function loadSources() {
@@ -163,7 +192,8 @@ interface Source {
 }
 
 // 4. Generate Content with OpenAI
-async function generateContent(userName: string, weatherStr: string, commuteStr: string, territories: { name: string, logo: string }[], intelligenceData: IntelligenceItem[], articles: Article[], sources: Source[]) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function generateContent(userName: string, weatherStr: string, commuteStr: string, territories: any[], intelligenceData: IntelligenceItem[], articles: Article[], sources: Source[]) {
   if (!process.env.NEXT_PUBLIC_OPENAI_API_KEY) {
     throw new Error('NEXT_PUBLIC_OPENAI_API_KEY is required for generation.');
   }
@@ -174,6 +204,10 @@ async function generateContent(userName: string, weatherStr: string, commuteStr:
   const articleMap = new Map(articles.map(a => [a.id, a]));
   const sourceMap = new Map(sources.map(s => [s.id, s]));
 
+  // Deduplicate by URL and filter within 30 days
+  const seenUrls = new Set<string>();
+  const intelByTerritory: Record<string, number> = {};
+
   const enrichedIntel = intelligenceData
     .filter(item => item.relevance_score > 60)
     .map(item => {
@@ -183,7 +217,16 @@ async function generateContent(userName: string, weatherStr: string, commuteStr:
     .filter(item => {
       if (!item.article || !item.article.published_at) return false;
       const pubDate = new Date(item.article.published_at).getTime();
-      return (now - pubDate) <= THIRTY_DAYS_MS;
+      if ((now - pubDate) > THIRTY_DAYS_MS) return false;
+      if (item.article.url && seenUrls.has(item.article.url)) return false;
+      if (item.article.url) seenUrls.add(item.article.url);
+      
+      // Limit to top 8 items per territory
+      const currentCount = intelByTerritory[item.territory_id] || 0;
+      if (currentCount >= 8) return false;
+      intelByTerritory[item.territory_id] = currentCount + 1;
+      
+      return true;
     })
     .map(item => {
       const source = item.article ? sourceMap.get(item.article.source_id) : undefined;
@@ -217,6 +260,7 @@ Your task is to review the following intelligence items and produce a JSON respo
    - The script must be concise enough to be spoken in under 20 minutes (maximum 2500 words).
    - Keep the tone highly enthusiastic, dramatic, and deeply expressive! Use exclamation points, capitalized words for emphasis, ellipses for dramatic pauses, and a dynamic, charismatic, energetic voice to bring intense emotion to the reading!
 2. "territories": An array of objects for each of my territories in the EXACT same order they are listed in the [My Territories] context.
+   - "id": The territory ID from context.
    - "name": The exact name of the territory from the context.
    - "logo": The exact logo URL of the territory from the context.
    - "news": An array of strings where each string is a richly formatted HTML summary of a key point for the visual dashboard. The string MUST begin with the article's publication date wrapped in a <strong> tag (e.g., "<strong>Oct 12, 2023</strong> - "). Do NOT include any <ul>, <li>, or <h3> tags, just the inner HTML for the bullet point. If there is no news for a territory within the last 30 days, output an empty array.
@@ -233,7 +277,7 @@ Here is the context for today:
 [Commute]: ${commuteStr}
 
 [My Territories]:
-${territories.map((t: { name: string, logo: string }) => `- ${t.name} (Logo URL: ${t.logo})`).join('\n')}
+${territories.map((t: { id: string; name: string; logo: string }) => `- ID: ${t.id} | Name: ${t.name} (Logo URL: ${t.logo})`).join('\n')}
 
 [Intelligence Items]:
 ${JSON.stringify(enrichedIntel, null, 2)}
@@ -291,7 +335,8 @@ async function run() {
   
   const intel = await loadIntelligence();
   const allTerritories = await loadTerritories();
-  const articles = await loadArticles();
+  const articles = await loadArticlesForIntel(intel);
+  console.log(`Loaded ${intel.length} recent intelligence items and ${articles.length} referenced articles.`);
   const sources = await loadSources();
   const users = await loadUsers();
 
@@ -316,13 +361,22 @@ async function run() {
     // Filter intel for these territories
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userIntel = intel.filter((i: any) => territoryIds.has(i.territory_id));
+    console.log(`Found ${userIntel.length} intelligence items for ${user.name}'s territories.`);
     
     console.log(`Generating AI content for ${user.name}...`);
     const generated = await generateContent(user.name, weather, commute, userTerritories, userIntel, articles, sources);
     
     // Merge AI output with master territories list
     const mergedTerritories = userTerritories.map((t: Record<string, unknown>) => {
-      const aiMatch = generated.territories.find((g: { name: string, logo: string, news?: string[] }) => g.name === t.name);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const aiMatch = generated.territories?.find((g: any) => {
+        if (g.id && g.id === t.id) return true;
+        if (g.name === t.name) return true;
+        const gNorm = g.name?.trim().toLowerCase();
+        const tNorm = (t.name as string)?.trim().toLowerCase();
+        if (gNorm && tNorm && (gNorm === tNorm || gNorm.includes(tNorm) || tNorm.includes(gNorm))) return true;
+        return false;
+      });
       return {
         name: t.name,
         logo: t.logo,

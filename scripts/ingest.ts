@@ -39,18 +39,36 @@ async function loadSources(): Promise<Source[]> {
 }
 
 async function loadExistingArticleUrls(): Promise<Set<string>> {
-  const { data, error } = await supabase.from('oracle_articles').select('url');
-  if (error) {
-    console.error('Error loading articles from Supabase:', error);
-    return new Set();
+  const urls = new Set<string>();
+  let from = 0;
+  const step = 1000;
+  while (true) {
+    const { data, error } = await supabase
+      .from('oracle_articles')
+      .select('url')
+      .range(from, from + step - 1);
+    if (error) {
+      console.error('Error loading articles from Supabase:', error);
+      break;
+    }
+    if (!data || data.length === 0) break;
+    for (const a of data) {
+      if (a.url) urls.add(a.url);
+    }
+    if (data.length < step) break;
+    from += step;
   }
-  return new Set(data.map((a: { url: string }) => a.url));
+  return urls;
 }
 
 async function saveArticles(articles: Article[]): Promise<void> {
-  const { error } = await supabase.from('oracle_articles').insert(articles);
-  if (error) {
-    console.error('Error saving articles to Supabase:', error);
+  const batchSize = 100;
+  for (let i = 0; i < articles.length; i += batchSize) {
+    const batch = articles.slice(i, i + batchSize);
+    const { error } = await supabase.from('oracle_articles').insert(batch);
+    if (error) {
+      console.error(`Error saving article batch ${i}-${i + batch.length} to Supabase:`, error);
+    }
   }
 }
 

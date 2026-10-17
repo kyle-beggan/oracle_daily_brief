@@ -8,9 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "ingest": "tsx scripts/ingest.ts",
+    "ingest:events": "tsx scripts/ingest_events.ts",
     "generate": "tsx scripts/generate.ts",
     "analyze": "tsx scripts/analyze.ts",
-    "pipeline": "npm run ingest && npm run analyze && npm run generate"
+    "pipeline": "npm run ingest && npm run ingest:events && npm run analyze && npm run generate"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

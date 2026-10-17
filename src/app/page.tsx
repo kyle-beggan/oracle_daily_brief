@@ -146,6 +146,14 @@ export default function Home() {
                 }
               }
 
+              news.sort((a, b) => {
+                const extractDate = (val: string) => {
+                  const match = val.match(/<strong>(.*?)<\/strong>/);
+                  return match ? new Date(match[1]).getTime() : 0;
+                };
+                return extractDate(b.value) - extractDate(a.value);
+              });
+
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const leadership: any = {};
               if (t.leadership) {
@@ -627,6 +635,27 @@ export default function Home() {
               )}
             </div>
 
+
+            <div className="order-2 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider">Networking</h3>
+                <a href="/networking" className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">View All &rarr;</a>
+              </div>
+              
+              <ul className="space-y-4">
+                {networkingEvents.length > 0 ? networkingEvents.slice(0, 3).map((ev, i) => (
+                  <li key={i} className="flex flex-col gap-1">
+                    <p className="font-medium text-sm text-zinc-200 line-clamp-1" title={ev.name}>{ev.name}</p>
+                    <p className="text-xs text-zinc-500">
+                      {ev.event_date ? new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'TBD'} &bull; {ev.venue || 'Virtual'}
+                    </p>
+                  </li>
+                )) : (
+                  <li className="text-sm text-zinc-500">No upcoming events.</li>
+                )}
+              </ul>
+            </div>
+
             <div className="tour-local-conditions order-3 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
               <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider mb-4">Local Conditions</h3>
               <ul className="space-y-4">
@@ -752,7 +781,6 @@ export default function Home() {
                     <TabsTrigger value="news" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
                     <TabsTrigger value="mission-tech" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission & Tech</TabsTrigger>
                     <TabsTrigger value="primes" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Prime Contractors</TabsTrigger>
-                    <TabsTrigger value="networking" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Networking</TabsTrigger>
                     <TabsTrigger value="leadership" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
                     <TabsTrigger value="locations" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
                   </TabsList>
@@ -839,76 +867,6 @@ export default function Home() {
                     )}
                   </TabsContent>
 
-                  <TabsContent value="networking" className="mt-0 space-y-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
-                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">Tier 1</p>
-                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => e.opportunity_tier === 'Tier 1').length}</p>
-                      </div>
-                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
-                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">DHS Speakers</p>
-                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => e.dhs_participants && e.dhs_participants.length > 0).length}</p>
-                      </div>
-                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
-                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">This Month</p>
-                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => new Date(e.event_date).getMonth() === new Date().getMonth()).length}</p>
-                      </div>
-                      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-4">
-                        <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider mb-1">New</p>
-                        <p className="text-2xl font-bold text-sky-400">{networkingEvents.filter(e => {
-                           const daysOld = (new Date().getTime() - new Date(e.date_discovered).getTime()) / (1000 * 3600 * 24);
-                           return daysOld < 7;
-                        }).length}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-4">
-                       {networkingEvents.length > 0 ? networkingEvents.map((ev, i) => (
-                         <div key={i} className="bg-zinc-900 border border-zinc-700/50 rounded-xl p-5 hover:border-sky-500/50 transition-colors">
-                           <div className="flex justify-between items-start gap-4">
-                             <div>
-                               <h4 className="text-lg font-bold text-zinc-100">{ev.name}</h4>
-                               <p className="text-sm text-zinc-400 mt-1">
-                                 {ev.event_date ? new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBD'} | {ev.venue || 'Virtual/TBD'} | {ev.format || ev.event_type}
-                               </p>
-                             </div>
-                             <div className="text-right">
-                               <div className="text-sky-400 font-bold text-xl">{ev.networking_score}<span className="text-xs text-zinc-500 font-normal">/100</span></div>
-                               <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">{ev.opportunity_tier}</div>
-                             </div>
-                           </div>
-                           
-                           {ev.why_it_matters && (
-                             <div className="mt-4 p-3 bg-zinc-800/30 rounded-lg">
-                               <p className="text-sm text-zinc-300 italic">&quot;{ev.why_it_matters}&quot;</p>
-                             </div>
-                           )}
-
-                           <div className="mt-4 flex flex-wrap gap-2">
-                             {ev.topics && ev.topics.map((t: string, ti: number) => (
-                               <span key={ti} className="px-2 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded text-[10px] uppercase font-semibold tracking-wider">
-                                 {t}
-                               </span>
-                             ))}
-                           </div>
-
-                           <div className="mt-4 flex gap-3">
-                             {ev.event_url && (
-                               <a href={ev.event_url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-sm font-medium rounded-lg transition-colors">
-                                 Event Details
-                               </a>
-                             )}
-                           </div>
-                         </div>
-                       )) : (
-                         <div className="text-center py-12 bg-zinc-900/50 rounded-xl border border-zinc-800 border-dashed">
-                           <Bot className="h-8 w-8 text-zinc-600 mx-auto mb-3" />
-                           <p className="text-zinc-400 font-medium">No networking events discovered yet.</p>
-                           <p className="text-zinc-500 text-sm mt-1">Run the ingestion pipeline to discover opportunities.</p>
-                         </div>
-                       )}
-                    </div>
-                  </TabsContent>
 
                   <TabsContent value="leadership" className="mt-0">
                     {territory.leadership && Object.keys(territory.leadership).length > 0 ? (
