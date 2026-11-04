@@ -2,6 +2,7 @@ import path from 'path';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { supabase } from './supabase';
+import { getForecastForTerritory, RawApfsRecord } from '../src/lib/apfs';
 
 dotenv.config({ path: '.env.local', override: true });
 
@@ -164,6 +165,35 @@ async function loadSources() {
   const { data, error } = await supabase.from('oracle_sources').select('*');
   if (error) throw error;
   return data;
+}
+
+async function loadApfsForecast(): Promise<RawApfsRecord[]> {
+  const fs = await import('fs/promises');
+  const cachePath = path.join(PUBLIC_DATA_DIR, 'apfs_forecast.json');
+  try {
+    const res = await fetch('https://apfs-cloud.dhs.gov/api/forecast/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+    });
+    if (res.ok) {
+      const data = (await res.json()) as RawApfsRecord[];
+      if (Array.isArray(data)) {
+        await fs.writeFile(cachePath, JSON.stringify(data));
+        return data;
+      }
+    }
+  } catch (err) {
+    console.warn('Could not fetch live APFS forecast, falling back to cached file:', err);
+  }
+
+  try {
+    const raw = await fs.readFile(cachePath, 'utf-8');
+    return JSON.parse(raw) as RawApfsRecord[];
+  } catch {
+    return [];
+  }
 }
 
 interface IntelligenceItem {
@@ -338,6 +368,8 @@ async function run() {
   const articles = await loadArticlesForIntel(intel);
   console.log(`Loaded ${intel.length} recent intelligence items and ${articles.length} referenced articles.`);
   const sources = await loadSources();
+  const apfsRecords = await loadApfsForecast();
+  console.log(`Loaded ${apfsRecords.length} APFS forecast records.`);
   const users = await loadUsers();
 
   console.log(`Generating content for ${users.length} users...`);
@@ -381,6 +413,7 @@ async function run() {
         name: t.name,
         logo: t.logo,
         news: aiMatch ? (aiMatch.news || []) : [],
+        acquisition_forecast: getForecastForTerritory(apfsRecords, t.name as string),
         mission: t.mission || t.description,
         tech_priorities: t.tech_priorities || [],
         prime_contractors: t.prime_contractors || [],

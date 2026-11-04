@@ -7,6 +7,7 @@ import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AcquisitionForecastItem, getForecastForTerritory, RawApfsRecord } from "@/lib/apfs";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
@@ -29,6 +30,7 @@ interface TerritoryBrief {
   logo: string;
   html?: string;
   news?: DataItem<string>[];
+  acquisition_forecast?: DataItem<AcquisitionForecastItem>[];
   mission?: DataItem<string>;
   tech_priorities?: DataItem<string>[];
   prime_contractors?: DataItem<string>[];
@@ -111,6 +113,17 @@ export default function Home() {
         if (userData.length > 0) setSelectedUser(userData.find(u => u.name === 'Dan Ungerleider')?.id || userData[0].id);
       }
 
+      // Fetch APFS forecast data (fallback to static cached JSON in public/data)
+      let apfsRecords: RawApfsRecord[] = [];
+      try {
+        const apfsRes = await fetch('/data/apfs_forecast.json');
+        if (apfsRes.ok) {
+          apfsRecords = await apfsRes.json();
+        }
+      } catch (err) {
+        console.warn("Could not load cached APFS forecast JSON", err);
+      }
+
       // Fetch all recent briefs
       const { data: briefsData, error: briefsError } = await supabase
         .from('oracle_daily_briefs')
@@ -166,9 +179,15 @@ export default function Home() {
                 }
               }
 
+              const forecastItems =
+                t.acquisition_forecast && t.acquisition_forecast.length > 0
+                  ? wrapArray<AcquisitionForecastItem>(t.acquisition_forecast)
+                  : wrapArray<AcquisitionForecastItem>(getForecastForTerritory(apfsRecords, t.name));
+
               return {
                 ...t,
                 news,
+                acquisition_forecast: forecastItems,
                 mission: t.mission ? wrap(t.mission) : undefined,
                 tech_priorities: wrapArray(t.tech_priorities),
                 prime_contractors: wrapArray(t.prime_contractors),
@@ -777,12 +796,13 @@ export default function Home() {
                 </div>
 
                 <Tabs defaultValue="news" className="w-full">
-                  <TabsList className="flex w-full overflow-x-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
-                    <TabsTrigger value="news" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
-                    <TabsTrigger value="mission-tech" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission & Tech</TabsTrigger>
-                    <TabsTrigger value="primes" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Prime Contractors</TabsTrigger>
-                    <TabsTrigger value="leadership" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
-                    <TabsTrigger value="locations" className="flex-1 basis-0 text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
+                  <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:flex w-full h-auto group-data-horizontal/tabs:h-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
+                    <TabsTrigger value="news" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
+                    <TabsTrigger value="acquisition-forecast" className="flex-1 px-2 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Acquisition Forecast</TabsTrigger>
+                    <TabsTrigger value="mission-tech" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission & Tech</TabsTrigger>
+                    <TabsTrigger value="primes" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Primes</TabsTrigger>
+                    <TabsTrigger value="leadership" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
+                    <TabsTrigger value="locations" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="news" className="mt-0">
@@ -811,6 +831,58 @@ export default function Home() {
                         <li>No significant activity to report this week.</li>
                       )}
                     </ul>
+                  </TabsContent>
+
+                  <TabsContent value="acquisition-forecast" className="mt-0">
+                    {territory.acquisition_forecast && territory.acquisition_forecast.length > 0 ? (
+                      <ul className="list-disc pl-5 space-y-5 marker:text-sky-400/70 max-h-[540px] overflow-y-auto pr-2">
+                        {territory.acquisition_forecast.map((item, i) => {
+                          const acq = item.value;
+                          return (
+                            <li key={acq.id || i} className="text-zinc-300 pb-4 border-b border-zinc-800/60 last:border-b-0 last:pb-0">
+                              <div className="flex flex-col gap-2">
+                                <div className="flex flex-wrap items-start justify-between gap-2">
+                                  <div className="font-semibold text-base text-zinc-100">
+                                    {acq.requirements_title}
+                                    <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${item.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                                      {item.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
+                                      {item.source}
+                                    </span>
+                                  </div>
+                                  <a
+                                    href={acq.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors shrink-0"
+                                  >
+                                    <span>APFS Record ({acq.apfs_number})</span>
+                                    <LinkIcon className="h-3 w-3" />
+                                  </a>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <span className="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
+                                    Est. Solicitation Release: {acq.estimated_solicitation_release_date}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 font-medium">
+                                    Dollar Range: {acq.dollar_range}
+                                  </span>
+                                  <span className="px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 font-medium">
+                                    Contract Type: {acq.contract_type}
+                                  </span>
+                                </div>
+
+                                <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-line">
+                                  {acq.description}
+                                </p>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-zinc-500">No upcoming acquisitions forecasted within the next 3 years.</p>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="mission-tech" className="mt-0 space-y-8">

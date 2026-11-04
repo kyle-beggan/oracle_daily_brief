@@ -1,5 +1,8 @@
+import fs from 'fs/promises';
+import path from 'path';
 import Parser from 'rss-parser';
 import { supabase } from './supabase';
+import { cleanApfsText, isTechRelatedApfsRecord, parseApfsDate, RawApfsRecord } from '../src/lib/apfs';
 
 // Types
 interface Source {
@@ -147,6 +150,62 @@ async function fetchSamGovApi(source: Source): Promise<Partial<Article>[]> {
   }
 }
 
+// Fetch DHS APFS Forecast API
+async function fetchApfsApi(source: Source): Promise<Partial<Article>[]> {
+  console.log(`Fetching APFS Forecast API for ${source.name} from ${source.url}`);
+  try {
+    const response = await fetch(source.url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      console.error(`APFS API returned ${response.status}: ${await response.text()}`);
+      return [];
+    }
+    const data = (await response.json()) as RawApfsRecord[];
+    if (!Array.isArray(data)) {
+      console.warn('Unexpected APFS response format.');
+      return [];
+    }
+
+    // Cache full forecast payload for static export and brief generation
+    const publicDataDir = path.join(process.cwd(), 'public', 'data');
+    await fs.mkdir(publicDataDir, { recursive: true });
+    await fs.writeFile(path.join(publicDataDir, 'apfs_forecast.json'), JSON.stringify(data));
+    console.log(`Saved ${data.length} APFS forecast records to public/data/apfs_forecast.json`);
+
+    // Return records published/updated in the last 14 days for article intelligence analysis
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 14);
+
+    return data
+      .filter((item: RawApfsRecord & { publish_date?: string; last_updated_date?: string }) => {
+        if (!isTechRelatedApfsRecord(item)) return false;
+        const pubDate = parseApfsDate(item.last_updated_date || item.publish_date);
+        return pubDate ? pubDate >= cutoff : false;
+      })
+      .map((item: RawApfsRecord & { publish_date?: string; last_updated_date?: string }) => {
+        const pubDate = parseApfsDate(item.last_updated_date || item.publish_date) || new Date();
+        const dollarRange =
+          typeof item.dollar_range === 'string'
+            ? item.dollar_range
+            : item.dollar_range?.display_name || 'Not Specified';
+        return {
+          source_id: source.id,
+          url: `https://apfs-cloud.dhs.gov/record/${item.id}/public-print/`,
+          title: `[${item.organization || 'DHS'} APFS] ${cleanApfsText(item.requirements_title) || 'Untitled Forecast'}`,
+          content: `Organization: ${item.organization || 'DHS'}\nDollar Range: ${dollarRange}\nContract Type: ${item.contract_type || 'N/A'}\nEst. Solicitation Release: ${item.estimated_solicitation_release_date || 'TBD'}\nRequirement: ${cleanApfsText(item.requirement)}`,
+          published_at: pubDate.toISOString(),
+        };
+      });
+  } catch (error) {
+    console.error(`Failed to fetch APFS API for ${source.name}:`, error);
+    return [];
+  }
+}
+
 async function runIngestion() {
   console.log('Starting ingestion pipeline...');
   const sources = await loadSources();
@@ -160,7 +219,11 @@ async function runIngestion() {
     if (source.type === 'rss') {
       fetchedItems = await fetchRss(source);
     } else if (source.type === 'api') {
-      fetchedItems = await fetchSamGovApi(source);
+      if (source.url.includes('apfs-cloud.dhs.gov')) {
+        fetchedItems = await fetchApfsApi(source);
+      } else {
+        fetchedItems = await fetchSamGovApi(source);
+      }
     }
 
     for (const item of fetchedItems) {
