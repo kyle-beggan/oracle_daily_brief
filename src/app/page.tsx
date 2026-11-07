@@ -4,15 +4,18 @@
 import { useEffect, useState, useRef } from "react";
 import { flushSync } from "react-dom";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2 } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff } from "lucide-react";
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AcquisitionForecastItem, getForecastForTerritory, RawApfsRecord } from "@/lib/apfs";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  'placeholder';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface User {
   id: string;
@@ -40,6 +43,7 @@ interface TerritoryBrief {
 }
 
 interface BriefData {
+  id?: string;
   date: string;
   weather?: string;
   commute?: string;
@@ -84,8 +88,59 @@ export default function Home() {
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const [expandedForecastIds, setExpandedForecastIds] = useState<Record<string, boolean>>({});
   const [expandedTerritories, setExpandedTerritories] = useState<Record<string, boolean>>({});
+  const [pendingDismissItem, setPendingDismissItem] = useState<AcquisitionForecastItem | null>(null);
+  const [isDismissing, setIsDismissing] = useState(false);
   const [runTour, setRunTour] = useState(false);
   const [isLightMode, setIsLightMode] = useState(true);
+
+  const confirmDismissForecastItem = async () => {
+    if (!pendingDismissItem || isDismissing) return;
+    const itemToDismiss = pendingDismissItem;
+    setIsDismissing(true);
+
+    // 1. Optimistically remove the record from all territory forecast lists in UI
+    setBriefsMap((prev) => {
+      const updated: Record<string, BriefData> = {};
+      for (const [uid, brief] of Object.entries(prev)) {
+        updated[uid] = {
+          ...brief,
+          territories: brief.territories.map((t) => ({
+            ...t,
+            acquisition_forecast: t.acquisition_forecast
+              ? t.acquisition_forecast.filter((f) => f.value.id !== itemToDismiss.id)
+              : [],
+          })),
+        };
+      }
+      return updated;
+    });
+    setPendingDismissItem(null);
+
+    try {
+      // 2. Persist to database in oracle_articles so future loads and pipeline runs exclude it
+      const { error } = await supabase.from('oracle_articles').upsert({
+        id: `dismissed_apfs_${itemToDismiss.id}`,
+        source_id: 'source-afps',
+        url: itemToDismiss.url,
+        title: `[DISMISSED] ${itemToDismiss.requirements_title}`,
+        content: 'DISMISSED_BY_USER',
+        published_at: '1970-01-01T00:00:00.000Z',
+        ingested_at: new Date().toISOString(),
+      });
+
+      if (error) {
+        console.error('Failed to mark APFS record in database:', error);
+        toast.error('Removed from view, but failed to persist to database.');
+      } else {
+        toast.success('Record marked as Not Interested and hidden from future loads.');
+      }
+    } catch (err) {
+      console.error('Error persisting dismissed APFS record:', err);
+      toast.error('Error saving preference to database.');
+    } finally {
+      setIsDismissing(false);
+    }
+  };
 
   const toggleTerritoryCard = (territoryName: string) => {
     const update = () => {
@@ -165,12 +220,28 @@ export default function Home() {
         if (userData.length > 0) setSelectedUser(userData.find(u => u.name === 'Dan Ungerleider')?.id || userData[0].id);
       }
 
+      // Fetch dismissed APFS record IDs from database
+      const dismissedApfsIds = new Set<number>();
+      try {
+        const { data: dismissedRows } = await supabase
+          .from('oracle_articles')
+          .select('id')
+          .like('id', 'dismissed_apfs_%');
+        for (const row of dismissedRows || []) {
+          const num = Number(String(row.id).replace('dismissed_apfs_', ''));
+          if (!isNaN(num)) dismissedApfsIds.add(num);
+        }
+      } catch (err) {
+        console.warn("Could not load dismissed APFS records", err);
+      }
+
       // Fetch APFS forecast data (fallback to static cached JSON in public/data)
       let apfsRecords: RawApfsRecord[] = [];
       try {
         const apfsRes = await fetch('/data/apfs_forecast.json');
         if (apfsRes.ok) {
-          apfsRecords = await apfsRes.json();
+          const rawApfs: RawApfsRecord[] = await apfsRes.json();
+          apfsRecords = rawApfs.filter((r) => !dismissedApfsIds.has(r.id));
         }
       } catch (err) {
         console.warn("Could not load cached APFS forecast JSON", err);
@@ -231,10 +302,14 @@ export default function Home() {
                 }
               }
 
-              const forecastItems =
+              const rawForecastItems =
                 t.acquisition_forecast && t.acquisition_forecast.length > 0
                   ? wrapArray<AcquisitionForecastItem>(t.acquisition_forecast)
                   : wrapArray<AcquisitionForecastItem>(getForecastForTerritory(apfsRecords, t.name));
+
+              const forecastItems = rawForecastItems.filter(
+                (item) => !dismissedApfsIds.has(item.value.id)
+              );
 
               return {
                 ...t,
@@ -589,6 +664,42 @@ export default function Home() {
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-sky-500 hover:bg-sky-400 text-zinc-950 transition-colors"
                 >
                   Confirm Refresh
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Not Interested Confirmation Modal */}
+        {pendingDismissItem && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-6 max-w-md w-full animate-in fade-in zoom-in-95 duration-200">
+              <h2 className="text-xl font-bold text-zinc-100 mb-2">Mark as Not Interested?</h2>
+              <p className="text-zinc-400 text-sm leading-relaxed mb-3">
+                Are you sure you want to hide this acquisition forecast record? It will be removed from your view and marked in the database so it will not appear again in future loads:
+              </p>
+              <div className="p-3 rounded-xl bg-zinc-800/60 border border-zinc-700/60 mb-6">
+                <p className="text-sm font-semibold text-zinc-100">{pendingDismissItem.requirements_title}</p>
+                <p className="text-xs text-sky-400 mt-1">
+                  APFS Record: {pendingDismissItem.apfs_number} &bull; Est. Release: {pendingDismissItem.estimated_solicitation_release_date}
+                </p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPendingDismissItem(null)}
+                  disabled={isDismissing}
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-300 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmDismissForecastItem}
+                  disabled={isDismissing}
+                  className="px-4 py-2 rounded-lg text-sm font-semibold bg-rose-500 hover:bg-rose-600 text-white transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {isDismissing ? 'Removing...' : 'Confirm Not Interested'}
                 </button>
               </div>
             </div>
@@ -1000,16 +1111,30 @@ export default function Home() {
                                       )}
                                       <span>{acq.requirements_title}</span>
                                     </div>
-                                    <a
-                                      href={acq.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="inline-flex items-center gap-1 text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors shrink-0"
-                                    >
-                                      <span>APFS Record ({acq.apfs_number})</span>
-                                      <LinkIcon className="h-3 w-3" />
-                                    </a>
+                                    <div className="flex items-center gap-3 shrink-0">
+                                      <a
+                                        href={acq.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="inline-flex items-center gap-1 text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors"
+                                      >
+                                        <span>APFS Record ({acq.apfs_number})</span>
+                                        <LinkIcon className="h-3 w-3" />
+                                      </a>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setPendingDismissItem(acq);
+                                        }}
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 transition-colors cursor-pointer"
+                                        title="Mark as Not Interested"
+                                      >
+                                        <EyeOff className="h-3 w-3" />
+                                        <span>Not Interested</span>
+                                      </button>
+                                    </div>
                                   </div>
 
                                   <div className="flex flex-wrap items-center gap-2 text-xs pl-6">

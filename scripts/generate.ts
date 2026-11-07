@@ -170,6 +170,22 @@ async function loadSources() {
 async function loadApfsForecast(): Promise<RawApfsRecord[]> {
   const fs = await import('fs/promises');
   const cachePath = path.join(PUBLIC_DATA_DIR, 'apfs_forecast.json');
+
+  // Load any user-dismissed APFS record IDs from Supabase
+  const dismissedIds = new Set<number>();
+  try {
+    const { data: dismissedRows } = await supabase
+      .from('oracle_articles')
+      .select('id')
+      .like('id', 'dismissed_apfs_%');
+    for (const row of dismissedRows || []) {
+      const num = Number(String(row.id).replace('dismissed_apfs_', ''));
+      if (!isNaN(num)) dismissedIds.add(num);
+    }
+  } catch (err) {
+    console.warn('Could not load dismissed APFS records:', err);
+  }
+
   try {
     const res = await fetch('https://apfs-cloud.dhs.gov/api/forecast/', {
       headers: {
@@ -181,7 +197,7 @@ async function loadApfsForecast(): Promise<RawApfsRecord[]> {
       const data = (await res.json()) as RawApfsRecord[];
       if (Array.isArray(data)) {
         await fs.writeFile(cachePath, JSON.stringify(data));
-        return data;
+        return data.filter((r) => !dismissedIds.has(r.id));
       }
     }
   } catch (err) {
@@ -190,7 +206,8 @@ async function loadApfsForecast(): Promise<RawApfsRecord[]> {
 
   try {
     const raw = await fs.readFile(cachePath, 'utf-8');
-    return JSON.parse(raw) as RawApfsRecord[];
+    const parsed = JSON.parse(raw) as RawApfsRecord[];
+    return parsed.filter((r) => !dismissedIds.has(r.id));
   } catch {
     return [];
   }
