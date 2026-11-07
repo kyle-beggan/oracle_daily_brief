@@ -1005,11 +1005,11 @@ export default function Home() {
                   <button
                     type="button"
                     onClick={() => toggleTerritoryCard(territory.name)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-sky-400 border border-zinc-700/60 transition-colors self-start sm:self-auto cursor-pointer shrink-0"
+                    className="inline-flex items-center justify-center p-2 rounded-lg text-xs font-semibold bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-sky-400 border border-zinc-700/60 transition-colors self-start sm:self-auto cursor-pointer shrink-0"
                     title="Shrink back to grid"
+                    aria-label="Shrink back to grid"
                   >
-                    <Minimize2 className="h-3.5 w-3.5" />
-                    <span>Shrink</span>
+                    <Minimize2 className="h-4 w-4" />
                   </button>
                 </div>
 
