@@ -2,8 +2,9 @@
 /* eslint-disable react-hooks/immutability */
 
 import { useEffect, useState, useRef } from "react";
+import { flushSync } from "react-dom";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2 } from "lucide-react";
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -46,6 +47,17 @@ interface BriefData {
   podcast_script?: string;
 }
 
+function getTerritoryShortName(name: string): string {
+  const matches = [...name.matchAll(/\(([^)]+)\)/g)].map((m) => m[1].trim());
+  if (matches.length > 0) {
+    return matches.join(" & ");
+  }
+  if (/headquarters/i.test(name)) {
+    return "DHS HQ";
+  }
+  return name;
+}
+
 export default function Home() {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
@@ -71,8 +83,25 @@ export default function Home() {
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string;[key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const [expandedForecastIds, setExpandedForecastIds] = useState<Record<string, boolean>>({});
+  const [expandedTerritories, setExpandedTerritories] = useState<Record<string, boolean>>({});
   const [runTour, setRunTour] = useState(false);
   const [isLightMode, setIsLightMode] = useState(true);
+
+  const toggleTerritoryCard = (territoryName: string) => {
+    const update = () => {
+      setExpandedTerritories((prev) => ({
+        ...prev,
+        [territoryName]: !prev[territoryName],
+      }));
+    };
+    if (typeof document !== "undefined" && "startViewTransition" in document) {
+      (document as Document & { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
+        flushSync(update);
+      });
+    } else {
+      update();
+    }
+  };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('oracle_theme');
@@ -568,7 +597,14 @@ export default function Home() {
 
         {/* User Tabs */}
         {users.length > 0 && (
-          <Tabs value={selectedUser || undefined} onValueChange={setSelectedUser} className="tour-user-tabs w-full mb-12">
+          <Tabs
+            value={selectedUser || undefined}
+            onValueChange={(val) => {
+              setSelectedUser(val);
+              setExpandedTerritories({});
+            }}
+            className="tour-user-tabs w-full mb-12"
+          >
             <TabsList className="flex w-full h-auto group-data-horizontal/tabs:h-auto bg-zinc-900/60 border border-zinc-700/50 p-2 rounded-3xl gap-2 shadow-lg backdrop-blur-sm">
               {users.map(u => (
                 <TabsTrigger
@@ -815,15 +851,55 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="order-2 md:order-none md:col-span-2 space-y-6">
-            {data?.territories ? data.territories.map((territory, idx) => (
-              <div key={idx} className={`${idx === 0 ? 'tour-territory-card' : ''} bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8`}>
+          <div className="order-2 md:order-none md:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start content-start">
+            {data?.territories ? data.territories.map((territory, idx) => {
+              const isTerritoryExpanded = !!expandedTerritories[territory.name];
+              const shortName = getTerritoryShortName(territory.name);
+
+              if (!isTerritoryExpanded) {
+                return (
+                  <button
+                    key={territory.name || idx}
+                    type="button"
+                    onClick={() => toggleTerritoryCard(territory.name)}
+                    style={{ viewTransitionName: `territory-card-${idx}` }}
+                    className={`${idx === 0 ? 'tour-territory-card' : ''} group relative flex flex-col items-center justify-center gap-4 bg-zinc-900/40 hover:bg-zinc-900/70 backdrop-blur-md border border-zinc-800/50 hover:border-sky-400/60 rounded-2xl p-8 aspect-square w-full text-center transition-all duration-300 hover:scale-[1.03] hover:shadow-xl cursor-pointer animate-in fade-in zoom-in-95`}
+                  >
+                    <Maximize2 className="h-4 w-4 text-zinc-400 opacity-0 group-hover:opacity-100 group-hover:text-sky-400 transition-all absolute top-4 right-4" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={territory.logo}
+                      alt={territory.name}
+                      className="w-20 h-20 object-contain opacity-95 group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <h3 className="text-xl font-bold tracking-tight text-sky-400 group-hover:text-sky-300 transition-colors">
+                      {shortName}
+                    </h3>
+                  </button>
+                );
+              }
+
+              return (
+              <div
+                key={territory.name || idx}
+                style={{ viewTransitionName: `territory-card-${idx}` }}
+                className={`${idx === 0 ? 'tour-territory-card' : ''} col-span-1 sm:col-span-2 lg:col-span-3 bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 transition-all duration-300 animate-in fade-in zoom-in-95`}
+              >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={territory.logo} alt={territory.name} className="w-8 h-8 opacity-90" />
                     <h3 className="text-2xl font-semibold text-sky-400">{territory.name}</h3>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleTerritoryCard(territory.name)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 hover:text-sky-400 border border-zinc-700/60 transition-colors self-start sm:self-auto cursor-pointer shrink-0"
+                    title="Shrink back to grid"
+                  >
+                    <Minimize2 className="h-3.5 w-3.5" />
+                    <span>Shrink</span>
+                  </button>
                 </div>
 
                 <Tabs defaultValue="news" className="w-full">
@@ -1070,8 +1146,9 @@ export default function Home() {
                   </TabsContent>
                 </Tabs>
               </div>
-            )) : (
-              <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 animate-pulse space-y-4">
+              );
+            }) : (
+              <div className="col-span-full bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-8 animate-pulse space-y-4">
                 <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
                 <div className="h-4 bg-zinc-800 rounded w-full"></div>
                 <div className="h-4 bg-zinc-800 rounded w-5/6"></div>
