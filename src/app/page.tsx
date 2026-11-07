@@ -205,6 +205,33 @@ export default function Home() {
 
   const data = selectedUser ? briefsMap[selectedUser] : null;
 
+  const allTerritoriesExpanded = Boolean(
+    data?.territories?.length &&
+    data.territories.every((t) => expandedTerritories[t.name])
+  );
+
+  const toggleAllTerritoryCards = () => {
+    if (!data?.territories?.length) return;
+    const update = () => {
+      if (allTerritoriesExpanded) {
+        setExpandedTerritories({});
+      } else {
+        const next: Record<string, boolean> = {};
+        for (const t of data.territories) {
+          next[t.name] = true;
+        }
+        setExpandedTerritories(next);
+      }
+    };
+    if (typeof document !== "undefined" && "startViewTransition" in document) {
+      (document as Document & { startViewTransition: (cb: () => void) => void }).startViewTransition(() => {
+        flushSync(update);
+      });
+    } else {
+      update();
+    }
+  };
+
   useEffect(() => {
     async function fetchData() {
       // Fetch users
@@ -963,6 +990,27 @@ export default function Home() {
           </div>
 
           <div className="order-2 md:order-none md:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start content-start">
+            {data?.territories && data.territories.length > 0 && (
+              <div className="col-span-full flex items-center justify-end -mb-2">
+                <button
+                  type="button"
+                  onClick={toggleAllTerritoryCards}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 hover:text-sky-400 border border-zinc-800/80 hover:border-sky-400/50 transition-all shadow-sm backdrop-blur-md cursor-pointer"
+                >
+                  {allTerritoriesExpanded ? (
+                    <>
+                      <Minimize2 className="h-3.5 w-3.5 text-sky-400" />
+                      <span>Shrink All</span>
+                    </>
+                  ) : (
+                    <>
+                      <Maximize2 className="h-3.5 w-3.5 text-sky-400" />
+                      <span>Expand All</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
             {data?.territories ? data.territories.map((territory, idx) => {
               const isTerritoryExpanded = !!expandedTerritories[territory.name];
               const shortName = getTerritoryShortName(territory.name);
