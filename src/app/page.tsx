@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, Bot, Database, ChevronDown, ChevronRight, HelpCircle } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon } from "lucide-react";
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -70,7 +70,30 @@ export default function Home() {
 
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string;[key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
+  const [expandedForecastIds, setExpandedForecastIds] = useState<Record<string, boolean>>({});
   const [runTour, setRunTour] = useState(false);
+  const [isLightMode, setIsLightMode] = useState(true);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('oracle_theme');
+    if (savedTheme === 'dark') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsLightMode(false);
+      document.documentElement.classList.remove('light');
+    } else {
+      setIsLightMode(true);
+      document.documentElement.classList.add('light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    setIsLightMode((prev) => {
+      const next = !prev;
+      document.documentElement.classList.toggle('light', next);
+      localStorage.setItem('oracle_theme', next ? 'light' : 'dark');
+      return next;
+    });
+  };
 
   const tourSteps: Step[] = [
     {
@@ -437,17 +460,17 @@ export default function Home() {
           beaconInner: { backgroundColor: '#0ea5e9' },
           beaconOuter: { borderColor: '#0ea5e9' },
           tooltip: {
-            backgroundColor: '#18181b',
-            color: '#d4d4d8',
+            backgroundColor: isLightMode ? '#ffffff' : '#18181b',
+            color: isLightMode ? '#1e293b' : '#d4d4d8',
             textAlign: 'left',
           },
           buttonPrimary: {
             backgroundColor: '#0ea5e9',
-            color: '#09090b',
+            color: '#ffffff',
             fontWeight: 'bold',
           },
           buttonBack: {
-            color: '#a1a1aa',
+            color: isLightMode ? '#64748b' : '#a1a1aa',
           },
         }}
       />
@@ -495,9 +518,17 @@ export default function Home() {
                   <HelpCircle className="h-4 w-4" />
                 </button>
                 <button
+                  onClick={toggleTheme}
+                  className="flex items-center justify-center p-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-300 transition-colors shadow-xl backdrop-blur-md"
+                  title={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                  aria-label={isLightMode ? "Switch to Dark Mode" : "Switch to Light Mode"}
+                >
+                  {isLightMode ? <Moon className="h-4 w-4 text-sky-400" /> : <Sun className="h-4 w-4 text-amber-400" />}
+                </button>
+                <button
                   onClick={() => setShowRefreshModal(true)}
                   disabled={isRefreshing}
-                  className="tour-refresh-feed flex items-center justify-center p-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
+                  className="hidden tour-refresh-feed items-center justify-center p-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-md"
                   title="Refresh Feed"
                 >
                   <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-sky-400' : ''}`} />
@@ -538,12 +569,12 @@ export default function Home() {
         {/* User Tabs */}
         {users.length > 0 && (
           <Tabs value={selectedUser || undefined} onValueChange={setSelectedUser} className="tour-user-tabs w-full mb-12">
-            <TabsList className="flex w-full h-auto bg-zinc-900/60 border border-zinc-700/50 p-2 rounded-3xl gap-2 shadow-lg backdrop-blur-sm">
+            <TabsList className="flex w-full h-auto group-data-horizontal/tabs:h-auto bg-zinc-900/60 border border-zinc-700/50 p-2 rounded-3xl gap-2 shadow-lg backdrop-blur-sm">
               {users.map(u => (
                 <TabsTrigger
                   key={u.id}
                   value={u.id}
-                  className="flex-1 py-5 text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-2xl data-active:bg-sky-500 data-active:text-zinc-950 font-bold transition-all shadow-sm"
+                  className={`flex-1 py-[7.5px] border-0 bg-transparent shadow-none text-zinc-400 text-lg [&:not([data-active])]:hover:bg-zinc-800/80 [&:not([data-active])]:hover:text-sky-400 rounded-2xl data-active:bg-sky-500 data-active:shadow-sm ${isLightMode ? 'data-active:text-white' : 'data-active:text-zinc-950'} font-bold transition-all`}
                 >
                   {u.name}
                 </TabsTrigger>
@@ -797,17 +828,17 @@ export default function Home() {
 
                 <Tabs defaultValue="news" className="w-full">
                   <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:flex w-full h-auto group-data-horizontal/tabs:h-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
-                    <TabsTrigger value="news" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Latest News</TabsTrigger>
-                    <TabsTrigger value="acquisition-forecast" className="flex-1 px-2 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Acquisition Forecast</TabsTrigger>
-                    <TabsTrigger value="mission-tech" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Mission & Tech</TabsTrigger>
-                    <TabsTrigger value="primes" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Primes</TabsTrigger>
-                    <TabsTrigger value="leadership" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Leadership</TabsTrigger>
-                    <TabsTrigger value="locations" className="flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 data-active:text-black">Locations</TabsTrigger>
+                    <TabsTrigger value="news" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Latest News</TabsTrigger>
+                    <TabsTrigger value="acquisition-forecast" className={`flex-1 px-2 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Acquisition Forecast</TabsTrigger>
+                    <TabsTrigger value="mission-tech" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Mission & Tech</TabsTrigger>
+                    <TabsTrigger value="primes" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Primes</TabsTrigger>
+                    <TabsTrigger value="leadership" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Leadership</TabsTrigger>
+                    <TabsTrigger value="locations" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Locations</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="news" className="mt-0">
-                    <ul
-                      className="prose prose-lg prose-invert max-w-none prose-p:text-zinc-400 prose-li:text-zinc-300 prose-ul:m-0 prose-ul:p-0 prose-li:marker:text-sky-400/70 prose-a:text-sky-400 hover:prose-a:text-sky-300"
+                    <div
+                      className={`prose prose-base ${isLightMode ? '' : 'prose-invert'} max-w-none prose-p:text-zinc-400 prose-a:text-sky-400 hover:prose-a:text-sky-300 space-y-3`}
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
                         const anchor = target.closest('a');
@@ -818,68 +849,116 @@ export default function Home() {
                       }}
                     >
                       {territory.news && territory.news.length > 0 ? (
-                        territory.news.map((item, i) => (
-                          <li key={i} className="mb-4 relative group">
-                            <span dangerouslySetInnerHTML={{ __html: item.value }} />
-                            <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${item.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                              {item.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                              {item.source}
-                            </span>
-                          </li>
-                        ))
+                        territory.news.map((item, i) => {
+                          const isEven = i % 2 === 0;
+                          return (
+                            <div
+                              key={i}
+                              className={`rounded-xl p-4 border transition-colors text-zinc-200 leading-relaxed ${
+                                isLightMode
+                                  ? isEven
+                                    ? 'bg-[#ffffff] border-[#cbd5e1] hover:border-sky-500/70 shadow-xs'
+                                    : 'bg-[#e2e8f0] border-[#94a3b8] hover:border-sky-500/70'
+                                  : isEven
+                                    ? 'bg-[#09090b] border-[#27272a] hover:border-sky-500/50'
+                                    : 'bg-[#27272a] border-[#52525b] hover:border-sky-500/50'
+                              }`}
+                            >
+                              <span dangerouslySetInnerHTML={{ __html: item.value }} />
+                            </div>
+                          );
+                        })
                       ) : (
-                        <li>No significant activity to report this week.</li>
+                        <p className="text-zinc-500">No significant activity to report this week.</p>
                       )}
-                    </ul>
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="acquisition-forecast" className="mt-0">
                     {territory.acquisition_forecast && territory.acquisition_forecast.length > 0 ? (
-                      <ul className="list-disc pl-5 space-y-5 marker:text-sky-400/70 max-h-[540px] overflow-y-auto pr-2">
+                      <div className="space-y-3 max-h-[540px] overflow-y-auto pr-2">
                         {territory.acquisition_forecast.map((item, i) => {
                           const acq = item.value;
+                          const itemKey = `${territory.name}-${acq.id || acq.apfs_number || i}`;
+                          const isExpanded = !!expandedForecastIds[itemKey];
+                          const isEven = i % 2 === 0;
+                          const toggleExpand = () =>
+                            setExpandedForecastIds((prev) => ({
+                              ...prev,
+                              [itemKey]: !prev[itemKey],
+                            }));
+
                           return (
-                            <li key={acq.id || i} className="text-zinc-300 pb-4 border-b border-zinc-800/60 last:border-b-0 last:pb-0">
-                              <div className="flex flex-col gap-2">
-                                <div className="flex flex-wrap items-start justify-between gap-2">
-                                  <div className="font-semibold text-base text-zinc-100">
-                                    {acq.requirements_title}
-                                    <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${item.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                                      {item.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                                      {item.source}
+                            <div
+                              key={itemKey}
+                              className={`rounded-xl p-4 border transition-colors ${
+                                isLightMode
+                                  ? isEven
+                                    ? 'bg-[#ffffff] border-[#cbd5e1] hover:border-sky-500/70 shadow-xs'
+                                    : 'bg-[#e2e8f0] border-[#94a3b8] hover:border-sky-500/70'
+                                  : isEven
+                                    ? 'bg-[#09090b] border-[#27272a] hover:border-sky-500/50'
+                                    : 'bg-[#27272a] border-[#52525b] hover:border-sky-500/50'
+                              }`}
+                            >
+                              <div className="flex flex-col gap-2.5">
+                                <div
+                                  role="button"
+                                  tabIndex={0}
+                                  aria-expanded={isExpanded}
+                                  onClick={toggleExpand}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      toggleExpand();
+                                    }
+                                  }}
+                                  className="flex flex-col gap-2.5 cursor-pointer group select-none"
+                                >
+                                  <div className="flex flex-wrap items-start justify-between gap-2">
+                                    <div className="font-semibold text-base text-zinc-100 group-hover:text-sky-400 transition-colors flex items-start gap-2 flex-1">
+                                      {isExpanded ? (
+                                        <ChevronDown className="h-4 w-4 mt-1 shrink-0 text-sky-400 transition-transform" />
+                                      ) : (
+                                        <ChevronRight className="h-4 w-4 mt-1 shrink-0 text-zinc-400 group-hover:text-sky-400 transition-transform" />
+                                      )}
+                                      <span>{acq.requirements_title}</span>
+                                    </div>
+                                    <a
+                                      href={acq.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex items-center gap-1 text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors shrink-0"
+                                    >
+                                      <span>APFS Record ({acq.apfs_number})</span>
+                                      <LinkIcon className="h-3 w-3" />
+                                    </a>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-2 text-xs pl-6">
+                                    <span className="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
+                                      Est. Solicitation Release: {acq.estimated_solicitation_release_date}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded bg-zinc-900/90 text-zinc-300 border border-zinc-700/60 font-medium">
+                                      Dollar Range: {acq.dollar_range}
+                                    </span>
+                                    <span className="px-2 py-0.5 rounded bg-zinc-900/90 text-zinc-300 border border-zinc-700/60 font-medium">
+                                      Contract Type: {acq.contract_type}
                                     </span>
                                   </div>
-                                  <a
-                                    href={acq.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-xs font-medium text-sky-400 hover:text-sky-300 transition-colors shrink-0"
-                                  >
-                                    <span>APFS Record ({acq.apfs_number})</span>
-                                    <LinkIcon className="h-3 w-3" />
-                                  </a>
                                 </div>
 
-                                <div className="flex flex-wrap items-center gap-2 text-xs">
-                                  <span className="px-2 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
-                                    Est. Solicitation Release: {acq.estimated_solicitation_release_date}
-                                  </span>
-                                  <span className="px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 font-medium">
-                                    Dollar Range: {acq.dollar_range}
-                                  </span>
-                                  <span className="px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/60 font-medium">
-                                    Contract Type: {acq.contract_type}
-                                  </span>
-                                </div>
-
-                                <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-line">
-                                  {acq.description}
-                                </p>
+                                {isExpanded && (
+                                  <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line pl-6 pt-2 border-t border-zinc-800/60">
+                                    {acq.description}
+                                  </p>
+                                )}
                               </div>
-                            </li>
+                            </div>
                           );
                         })}
-                      </ul>
+                      </div>
                     ) : (
                       <p className="text-zinc-500">No upcoming acquisitions forecasted within the next 3 years.</p>
                     )}
@@ -890,12 +969,6 @@ export default function Home() {
                       <h4 className="text-sm font-semibold text-zinc-400 uppercase tracking-wider mb-3">Mission</h4>
                       <p className="text-zinc-300 leading-relaxed text-lg">
                         {territory.mission ? territory.mission.value : "Mission information not available."}
-                        {territory.mission && (
-                          <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${territory.mission.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                            {territory.mission.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                            {territory.mission.source}
-                          </span>
-                        )}
                       </p>
                     </div>
 
@@ -908,10 +981,6 @@ export default function Home() {
                               <span className="text-sky-400 mt-1">•</span>
                               <span className="flex-1">
                                 {priority.value}
-                                <span className={`inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${priority.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                                  {priority.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                                  {priority.source}
-                                </span>
                               </span>
                             </li>
                           ))}
@@ -928,9 +997,6 @@ export default function Home() {
                         {territory.prime_contractors.map((prime, i) => (
                           <span key={i} className="px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 flex items-center gap-2">
                             {prime.value}
-                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${prime.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                              {prime.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                            </span>
                           </span>
                         ))}
                       </div>
@@ -961,9 +1027,6 @@ export default function Home() {
                                     <span className="text-zinc-300">{val.name}</span>
                                   )
                                 )}
-                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${person.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                                  {person.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                                </span>
                               </li>
                             );
                           };
@@ -992,9 +1055,6 @@ export default function Home() {
                           <div key={i} className="relative block p-4 bg-zinc-900/60 rounded-xl border border-zinc-800/50 hover:border-sky-500/50 transition-colors group">
                             <div className="flex justify-between items-start">
                               <h4 className="font-semibold text-zinc-200 group-hover:text-sky-400 transition-colors">{loc.value.name}</h4>
-                              <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border align-middle whitespace-nowrap ${loc.source === 'AI Generated' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                                {loc.source === 'AI Generated' ? <Bot className="h-2.5 w-2.5" /> : <Database className="h-2.5 w-2.5" />}
-                              </span>
                             </div>
                             <p className="text-sm text-zinc-400 mt-1">{loc.value.address}</p>
                             <a href={loc.value.map_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-3 text-xs font-medium text-sky-500 w-fit">
