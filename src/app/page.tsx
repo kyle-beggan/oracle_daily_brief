@@ -4,11 +4,12 @@
 import { useEffect, useState, useRef } from "react";
 import { flushSync } from "react-dom";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff, GraduationCap } from "lucide-react";
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AcquisitionForecastItem, getForecastForTerritory, RawApfsRecord } from "@/lib/apfs";
+import { SalesQuizModal } from "@/components/SalesQuizModal";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey =
@@ -92,6 +93,8 @@ export default function Home() {
   const [isDismissing, setIsDismissing] = useState(false);
   const [runTour, setRunTour] = useState(false);
   const [isLightMode, setIsLightMode] = useState(true);
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [quizSessionKey, setQuizSessionKey] = useState(0);
 
   const confirmDismissForecastItem = async () => {
     if (!pendingDismissItem || isDismissing) return;
@@ -192,6 +195,10 @@ export default function Home() {
     {
       target: '.tour-territory-card',
       content: 'Each of your territories has its own card with tabs for the latest news, mission, tech priorities, and more.',
+    },
+    {
+      target: '.tour-networking',
+      content: 'Stay on top of upcoming federal and industry networking events, or click View All to browse the full calendar.',
     },
     {
       target: '.tour-local-conditions',
@@ -642,6 +649,18 @@ export default function Home() {
             ) : (
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
+                  onClick={() => {
+                    setQuizSessionKey((k) => k + 1);
+                    setShowQuizModal(true);
+                  }}
+                  className="flex items-center gap-2 px-3.5 py-2.5 bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 rounded-lg text-sky-400 text-xs font-semibold transition-colors shadow-xl backdrop-blur-md cursor-pointer"
+                  title="Launch Quiz"
+                >
+                  <GraduationCap className="h-4 w-4" />
+                  <span>Launch Quiz</span>
+                </button>
+                <button
                   onClick={() => setRunTour(true)}
                   className="flex items-center justify-center p-2.5 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-zinc-300 transition-colors shadow-xl backdrop-blur-md"
                   title="App Walkthrough"
@@ -668,6 +687,14 @@ export default function Home() {
             )}
           </div>
         </header>
+
+        {/* Salesperson Quiz Modal */}
+        <SalesQuizModal
+          key={quizSessionKey}
+          isOpen={showQuizModal}
+          onClose={() => setShowQuizModal(false)}
+          isLightMode={isLightMode}
+        />
 
         {/* Refresh Confirmation Modal */}
         {showRefreshModal && (
@@ -860,7 +887,7 @@ export default function Home() {
             </div>
 
 
-            <div className="order-2 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
+            <div className="tour-networking order-2 md:order-none bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-semibold text-zinc-400 uppercase tracking-wider">Networking</h3>
                 <a href="/networking" className="text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors">View All &rarr;</a>
@@ -1000,12 +1027,12 @@ export default function Home() {
                   {allTerritoriesExpanded ? (
                     <>
                       <Minimize2 className="h-3.5 w-3.5 text-sky-400" />
-                      <span>Shrink All</span>
+                      <span>All</span>
                     </>
                   ) : (
                     <>
                       <Maximize2 className="h-3.5 w-3.5 text-sky-400" />
-                      <span>Expand All</span>
+                      <span>All</span>
                     </>
                   )}
                 </button>
