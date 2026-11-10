@@ -4,11 +4,12 @@
 import { useEffect, useState, useRef } from "react";
 import { flushSync } from "react-dom";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff, GraduationCap } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff, GraduationCap, X, Briefcase } from "lucide-react";
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AcquisitionForecastItem, getForecastForTerritory, RawApfsRecord } from "@/lib/apfs";
+import { getPrimeContractsForTerritory } from "@/lib/primeContracts";
 import { SalesQuizModal } from "@/components/SalesQuizModal";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
@@ -89,6 +90,11 @@ export default function Home() {
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const [expandedForecastIds, setExpandedForecastIds] = useState<Record<string, boolean>>({});
   const [expandedTerritories, setExpandedTerritories] = useState<Record<string, boolean>>({});
+  const [activePrimeModal, setActivePrimeModal] = useState<{
+    territoryName: string;
+    territoryLogo?: string;
+    primeName: string;
+  } | null>(null);
   const [pendingDismissItem, setPendingDismissItem] = useState<AcquisitionForecastItem | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
   const [runTour, setRunTour] = useState(false);
@@ -696,6 +702,105 @@ export default function Home() {
           isLightMode={isLightMode}
         />
 
+        {/* Prime Contracts Modal */}
+        {activePrimeModal && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm"
+            onClick={() => setActivePrimeModal(null)}
+          >
+            <div
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-zinc-800 bg-zinc-950/50">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 shrink-0">
+                    <Briefcase className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold text-zinc-100">
+                      {activePrimeModal.primeName}
+                    </h2>
+                    <p className="text-xs text-zinc-400">
+                      Prime Contract Vehicles &bull; {activePrimeModal.territoryName}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActivePrimeModal(null)}
+                  className="p-2 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors cursor-pointer"
+                  aria-label="Close Prime Contracts Modal"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto space-y-4 flex-1">
+                {(() => {
+                  const contracts = getPrimeContractsForTerritory(
+                    activePrimeModal.territoryName,
+                    activePrimeModal.primeName
+                  );
+                  return contracts.length > 0 ? (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
+                          Showing {contracts.length} Related Prime {contracts.length === 1 ? "Contract" : "Contracts"}
+                        </span>
+                      </div>
+                      <div className="space-y-3.5">
+                        {contracts.map((contract, cIdx) => (
+                          <div
+                            key={cIdx}
+                            className="p-4 rounded-xl bg-zinc-800/40 border border-zinc-700/50 space-y-2.5"
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              <h3 className="font-semibold text-zinc-100 text-sm sm:text-base flex-1 min-w-[220px]">
+                                {contract.contract_name}
+                              </h3>
+                              <div className="flex flex-wrap items-center gap-2 text-xs shrink-0">
+                                <span className="px-2.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 font-medium">
+                                  Start: {contract.start_date}
+                                </span>
+                                <span className="px-2.5 py-0.5 rounded bg-zinc-900/90 text-zinc-300 border border-zinc-700/60 font-medium">
+                                  End: {contract.end_date}
+                                </span>
+                              </div>
+                            </div>
+                            <p className="text-sm text-zinc-300 leading-relaxed">
+                              {contract.description}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-zinc-500">
+                      No active prime contract details listed for {activePrimeModal.primeName}.
+                    </p>
+                  );
+                })()}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end px-6 py-3.5 border-t border-zinc-800 bg-zinc-950/50">
+                <button
+                  type="button"
+                  onClick={() => setActivePrimeModal(null)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold bg-sky-500 hover:bg-sky-400 ${
+                    isLightMode ? "text-white" : "text-zinc-950"
+                  } transition-colors cursor-pointer`}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Refresh Confirmation Modal */}
         {showRefreshModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm">
@@ -1267,15 +1372,39 @@ export default function Home() {
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="primes" className="mt-0">
+                  <TabsContent value="primes" className="mt-0 space-y-3">
                     {territory.prime_contractors && territory.prime_contractors.length > 0 ? (
-                      <div className="flex flex-wrap gap-2">
-                        {territory.prime_contractors.map((prime, i) => (
-                          <span key={i} className="px-3 py-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-lg text-sm text-zinc-300 flex items-center gap-2">
-                            {prime.value}
-                          </span>
-                        ))}
-                      </div>
+                      <>
+                        <div className="flex flex-wrap gap-2">
+                          {territory.prime_contractors.map((prime, i) => {
+                            const count = getPrimeContractsForTerritory(territory.name, prime.value).length;
+                            return (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() =>
+                                  setActivePrimeModal({
+                                    territoryName: territory.name,
+                                    territoryLogo: territory.logo,
+                                    primeName: prime.value,
+                                  })
+                                }
+                                className="px-3.5 py-2 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 hover:border-sky-500/50 rounded-lg text-sm font-medium text-zinc-300 hover:text-sky-400 flex items-center gap-2 transition-all cursor-pointer group"
+                              >
+                                <span>{prime.value}</span>
+                                {count > 0 && (
+                                  <span className="px-1.5 py-0.5 text-[11px] font-semibold rounded bg-sky-500/15 text-sky-400 border border-sky-500/25">
+                                    {count}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-zinc-500">
+                          Click a prime contractor above to view its active contract vehicles, descriptions, and period of performance dates.
+                        </p>
+                      </>
                     ) : (
                       <p className="text-zinc-500">No prime contractors listed.</p>
                     )}
@@ -1286,23 +1415,31 @@ export default function Home() {
                     {territory.leadership && Object.keys(territory.leadership).length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {Object.entries(territory.leadership).map(([role, nameOrNames], i) => {
+                          const toSalesNavUrl = (personName: string, existingUrl?: string) => {
+                            if (existingUrl && existingUrl.includes('linkedin.com/sales/')) {
+                              return existingUrl;
+                            }
+                            const cleanName = personName.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+                            return `https://www.linkedin.com/sales/search/people?query=(keywords%3A${encodeURIComponent(cleanName + ' ' + territory.name)})`;
+                          };
+
                           const renderPerson = (person: DataItem<string | { name: string; url?: string }>, idx?: number) => {
                             const val = person.value;
                             const isString = typeof val === 'string';
+                            const displayName = isString ? val : val.name;
+                            const salesNavUrl = toSalesNavUrl(displayName, isString ? undefined : val.url);
                             return (
                               <li key={idx} className="font-medium flex items-center gap-2">
-                                {isString ? (
-                                  <span className="text-zinc-300">{val}</span>
-                                ) : (
-                                  val.url ? (
-                                    <a href={val.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 transition-colors w-fit">
-                                      {val.name}
-                                      <LinkIcon className="w-3 h-3 opacity-70" />
-                                    </a>
-                                  ) : (
-                                    <span className="text-zinc-300">{val.name}</span>
-                                  )
-                                )}
+                                <a
+                                  href={salesNavUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title={`View ${displayName} in LinkedIn Sales Navigator`}
+                                  className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 transition-colors w-fit"
+                                >
+                                  {displayName}
+                                  <LinkIcon className="w-3 h-3 opacity-70" />
+                                </a>
                               </li>
                             );
                           };
