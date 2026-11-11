@@ -1,6 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
+import fs from 'fs/promises';
 import path from 'path';
+import {
+  fetchUpdatedPrimeContractsMap,
+  getPrimeContractsForTerritory,
+  PrimeContractItem
+} from '../src/lib/primeContracts';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -169,7 +175,17 @@ async function run() {
     }
   }
 
-  console.log('Syncing updated leadership into recent oracle_daily_briefs...');
+  console.log('Fetching and caching DHS prime contracts to public/data/prime_contracts.json...');
+  const primeContractsMap = await fetchUpdatedPrimeContractsMap();
+  const publicDataDir = path.join(process.cwd(), 'public', 'data');
+  await fs.mkdir(publicDataDir, { recursive: true });
+  await fs.writeFile(
+    path.join(publicDataDir, 'prime_contracts.json'),
+    JSON.stringify(primeContractsMap, null, 2)
+  );
+  console.log('Saved public/data/prime_contracts.json');
+
+  console.log('Syncing updated leadership and prime_contracts into recent oracle_daily_briefs...');
   const { data: briefs, error: briefsErr } = await supabase
     .from('oracle_daily_briefs')
     .select('id, user_id, date, territories')
@@ -187,14 +203,27 @@ async function run() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updatedTerritories = brief.territories.map((t: any) => {
       const match = territoryData[t.name];
-      if (match) {
-        changed = true;
-        return {
-          ...t,
-          leadership: match.leadership
-        };
+      const primesList: string[] = Array.isArray(t.prime_contractors)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? t.prime_contractors.map((p: any) => (typeof p === 'string' ? p : p?.value || ''))
+        : [];
+      const territoryPrimeContracts: Record<string, PrimeContractItem[]> = {};
+      for (const primeName of primesList) {
+        if (!primeName) continue;
+        territoryPrimeContracts[primeName] = getPrimeContractsForTerritory(
+          t.name,
+          primeName,
+          undefined,
+          primeContractsMap
+        );
       }
-      return t;
+
+      changed = true;
+      return {
+        ...t,
+        leadership: match ? match.leadership : t.leadership,
+        prime_contracts: territoryPrimeContracts
+      };
     });
 
     if (changed) {

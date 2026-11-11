@@ -1,0 +1,1070 @@
+{
+  "U.S. Department of Homeland Security Headquarters": {
+    "General Dynamics Information Technology (GDIT)": [
+      {
+        "contract_name": "DHS Data Center and Cloud Optimization (DCCO) Support Services",
+        "description": "Provides enterprise hybrid cloud engineering, data center consolidation, and mission-critical application migration across DHS Headquarters and component environments. GDIT manages core infrastructure operations, cloud landing zones, and automated DevSecOps pipelines supporting department-wide IT modernization.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2028"
+      },
+      {
+        "contract_name": "DHS Enterprise Network & Security Operations (Stennis SOC / NOC)",
+        "description": "Delivers 24x7x365 enterprise network operations, cybersecurity monitoring, and incident response across the DHS OneNet backbone. The vehicle covers zero-trust network architecture enforcement, cloud security telemetry integration, and high-availability mission communications.",
+        "start_date": "Apr 2022",
+        "end_date": "Apr 2027"
+      },
+      {
+        "contract_name": "DHS Office of Biometric Identity Management (OBIM) HART System Integration",
+        "description": "Supports the Homeland Advanced Recognition Technology (HART) cloud platform, providing multimodal biometric matching, database scalability, and high-availability identity services. Work includes integrating facial, iris, and fingerprint records across DHS and interagency law enforcement partners.",
+        "start_date": "Sep 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS HQ Enterprise Identity, Credential, and Access Management (ICAM)",
+        "description": "Engineers and sustains department-wide zero-trust identity federation, privileged access management, and PIV credentialing workflows across unclassified and classified enclaves. The platform enforces fine-grained access control for cloud-hosted applications and enterprise databases.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "DHS OCIO Enterprise Cloud FinOps & Multi-Cloud Brokerage Services",
+        "description": "Provides cloud cost optimization, license management, and automated provisioning governance across DHS commercial and government cloud enclaves. GDIT assists program offices in migrating legacy relational databases and containerized workloads into FedRAMP High cloud regions.",
+        "start_date": "Jun 2023",
+        "end_date": "Jun 2028"
+      }
+    ],
+    "Leidos": [
+      {
+        "contract_name": "DHS Enterprise IT Operations & End-User Services (EITOS)",
+        "description": "Supports DHS Headquarters Office of the Chief Information Officer (OCIO) with enterprise service desk, digital workplace engineering, and unified endpoint management. Leidos modernizes identity access management, cloud collaboration tooling, and automated IT service workflows across HQ directorates.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "DHS OCIO Enterprise Architecture & Cloud Governance IDIQ",
+        "description": "Provides systems engineering, enterprise architecture governance, and multi-cloud integration advisory for DHS mission systems. Work includes evaluating AI readiness, rationalizing legacy database workloads, and establishing zero-trust reference architectures.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "DHS Countering Weapons of Mass Destruction (CWMD) Information Architecture",
+        "description": "Develops and maintains cloud-hosted sensor data aggregation, chem-bio situational awareness portals, and mobile field detection databases for the DHS CWMD office. The contract enables real-time telemetry sharing with port-of-entry and local first-responder networks.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS National Operations Center (NOC) Common Operating Picture Modernization",
+        "description": "Integrates real-time incident feeds, geospatial crisis overlays, and cross-component operational reporting into the DHS Headquarters National Operations Center. Leidos engineers resilient cloud data pipelines and role-based executive briefing dashboards.",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      }
+    ],
+    "Peraton": [
+      {
+        "contract_name": "DHS Data Center 1 (DC1) Hybrid Cloud & Managed Infrastructure",
+        "description": "Operates and modernizes DHS enterprise data center infrastructure and hybrid cloud interconnection services at Stennis Space Center and commercial cloud regions. Peraton leads workload migration, high-availability database hosting, and disaster recovery automation for Tier-1 national security applications.",
+        "start_date": "Dec 2020",
+        "end_date": "Nov 2027"
+      },
+      {
+        "contract_name": "DHS Homeland Security Information Network (HSIN) Modernization",
+        "description": "Maintains and modernizes the department's primary sensitive-but-unclassified information sharing portal connecting federal, state, local, and tribal partners. The contract encompasses cloud-native platform re-architecture, secure identity federation, and real-time analytics integration.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "DHS HQ Classified Network & High-Side Cloud Enclave Engineering",
+        "description": "Delivers secure systems engineering, cross-domain transfer solutions, and classified cloud hosting operations for DHS Headquarters executive and national security offices. Peraton maintains continuous monitoring and ICD 503 compliance across Top Secret and Secret environments.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "DHS Enterprise Communications & Tactical Interoperability Support",
+        "description": "Provides resilient satellite, microwave, and software-defined wide-area network interconnects linking DHS Headquarters Continuity of Operations (COOP) sites with component command centers.",
+        "start_date": "Aug 2021",
+        "end_date": "Aug 2026"
+      }
+    ],
+    "Booz Allen Hamilton": [
+      {
+        "contract_name": "DHS Enterprise Cyber & Zero Trust Modernization Task Order",
+        "description": "Delivers enterprise zero-trust engineering, continuous diagnostics, and AI-enabled threat analytics for the DHS Office of the CISO and OCIO. Booz Allen integrates cross-component security telemetry, automates compliance monitoring, and secures multi-cloud data enclaves.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      },
+      {
+        "contract_name": "DHS Chief Data Officer (CDO) Enterprise Data & AI Strategy Support",
+        "description": "Supports the DHS CDO and CAIO with enterprise data mesh governance, AI pilot engineering, and cross-component data standards. Work focuses on preparing structured and unstructured agency data assets for secure generative AI and decision-support analytics.",
+        "start_date": "Mar 2024",
+        "end_date": "Mar 2029"
+      },
+      {
+        "contract_name": "DHS Office of Program Accountability and Risk Management (PARM) Analytics",
+        "description": "Provides acquisition lifecycle data analytics, technical baseline assessments, and cloud modernization oversight for DHS Major Acquisition Programs (Level 1 and Level 2). Booz Allen builds predictive cost, schedule, and cyber-risk models for executive decision gates.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS Office of Strategy, Policy, and Plans Border & Immigration Data Modeling",
+        "description": "Develops integrated statistical forecasting models and cloud data pipelines that correlate border encounters, adjudication backlogs, and detention capacity across DHS operational components.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      },
+      {
+        "contract_name": "DHS Enterprise DevSecOps & Software Supply Chain Security Framework",
+        "description": "Establishes automated software bill of materials (SBOM) verification, container security scanning, and standardized CI/CD pipelines across DHS Headquarters application portfolios.",
+        "start_date": "Jul 2023",
+        "end_date": "Jul 2028"
+      }
+    ],
+    "CACI": [
+      {
+        "contract_name": "DHS Financial Systems Modernization (FSM) & Enterprise Business Systems",
+        "description": "Provides Agile software engineering, systems integration, and cloud hosting support for DHS core financial, acquisition, and enterprise resource planning systems. CACI modernizes back-office data pipelines, audit readiness reporting, and automated procurement interfaces across headquarters components.",
+        "start_date": "Jul 2021",
+        "end_date": "Jul 2026"
+      },
+      {
+        "contract_name": "DHS Enterprise Network Modernization & Secure Communications (OneNet)",
+        "description": "Delivers wide-area network engineering, software-defined networking (SD-WAN), and encrypted cloud interconnects for DHS Headquarters facilities. The vehicle ensures resilient, low-latency connectivity between DHS operations centers and commercial/government cloud regions.",
+        "start_date": "Nov 2022",
+        "end_date": "Nov 2027"
+      },
+      {
+        "contract_name": "DHS Office of the Chief Security Officer (OCSO) Personnel Vetting Modernization",
+        "description": "Modernizes enterprise security clearance tracking, continuous evaluation interfaces, and insider threat analytics systems for DHS Headquarters and component security offices. Work transitions legacy case repositories into secure cloud database architectures.",
+        "start_date": "Apr 2022",
+        "end_date": "Apr 2027"
+      },
+      {
+        "contract_name": "DHS Chief Human Capital Officer (OCHCO) Workforce Analytics & HR IT Modernization",
+        "description": "Integrates department-wide human capital datasets, recruitment workflows, and law enforcement readiness metrics into a centralized cloud reporting environment supporting 260,000+ DHS personnel.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      }
+    ]
+  },
+  "Homeland Security Operational Analysis Center (HSOAC) & Homeland Security Systems Engineering and Development Institute (HSSEDI)": {
+    "RAND Corporation (HSOAC)": [
+      {
+        "contract_name": "Homeland Security Operational Analysis Center (HSOAC) FFRDC Core IDIQ",
+        "description": "Operates DHS Science & Technology Directorate's Federally Funded Research and Development Center dedicated to operational analysis, policy evaluation, and acquisition studies. RAND delivers independent cost-benefit modeling, AI governance studies, and operational technology assessments across all DHS components.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS S&T Artificial Intelligence & Emerging Threat Risk Assessment Task Orders",
+        "description": "Conducts specialized analytical studies on border technology efficacy, critical infrastructure resilience, and responsible AI deployment across homeland security missions. Work informs executive investment decisions and multi-year acquisition forecasts.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "DHS Component Acquisition Analysis & Alternatives of Analysis (AoA) Support",
+        "description": "Provides independent Analysis of Alternatives (AoA), lifecycle cost estimation, and technical feasibility modeling for major IT, cloud, and sensor procurements at CBP, TSA, USCG, and FEMA.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      }
+    ],
+    "MITRE Corporation (HSSEDI)": [
+      {
+        "contract_name": "Homeland Security Systems Engineering & Development Institute (HSSEDI) FFRDC",
+        "description": "Serves as DHS's primary systems engineering FFRDC, providing independent technical architecture, test and evaluation, and prototype engineering across DHS components. MITRE leads cloud reference architecture design, zero-trust validation, and AI model assurance for mission-critical DHS programs.",
+        "start_date": "May 2020",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "DHS Cross-Component Cloud & Interoperability Engineering Support",
+        "description": "Provides technical systems engineering to align data schemas, API gateways, and multi-cloud security controls across CBP, ICE, USCIS, and CISA. The vehicle accelerates technology transition from R&D prototypes into operational production environments.",
+        "start_date": "Oct 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "CISA & DHS S&T ATT&CK Cyber Threat Modeling & Zero Trust Architecture Testbed",
+        "description": "Develops adversarial cyber emulation frameworks, automated vulnerability correlation models, and zero-trust reference implementations for federal civilian networks and critical infrastructure operators.",
+        "start_date": "Feb 2022",
+        "end_date": "Feb 2027"
+      },
+      {
+        "contract_name": "DHS Biometrics & Autonomous Systems Test and Evaluation Engineering",
+        "description": "Conducts independent algorithmic fairness, accuracy, and latency benchmarking for facial recognition, non-intrusive inspection, and counter-UAS sensor platforms at the Maryland Test Facility (MdTF).",
+        "start_date": "Aug 2023",
+        "end_date": "Aug 2028"
+      }
+    ],
+    "Johns Hopkins APL": [
+      {
+        "contract_name": "DHS S&T National Security & Autonomous Systems R&D Indefinite Delivery Vehicle",
+        "description": "Executes applied research, sensor fusion prototyping, and autonomous maritime/aerial domain awareness engineering for DHS S&T and operational components. APL develops advanced machine learning algorithms, cyber-physical defense tools, and chem-bio detection architectures.",
+        "start_date": "Jun 2021",
+        "end_date": "Jun 2026"
+      },
+      {
+        "contract_name": "DHS Critical Infrastructure Cyber Resilience & AI Assurance Program",
+        "description": "Designs automated cyber defense frameworks and resilient command-and-control architectures for homeland security critical infrastructure. Work includes adversarial AI testing and real-time operational technology (OT) telemetry analytics.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      },
+      {
+        "contract_name": "CISA Integrated Adaptive Cyber Defense (IACD) Automation Engineering",
+        "description": "Engineers security orchestration, automation, and response (SOAR) playbooks and cloud-native threat telemetry standards adopted by federal agencies and financial/energy sector ISACs.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      }
+    ],
+    "Pacific Northwest National Laboratory": [
+      {
+        "contract_name": "DHS S&T Advanced Data Analytics, Chem-Bio & Border Sensor Engineering",
+        "description": "Operates under a DOE/DHS interagency laboratory agreement delivering high-performance data analytics, non-intrusive inspection algorithms, and radiation/nuclear detection systems. PNNL builds scalable scientific computing models and AI-driven anomaly detection tools for border and port security.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS Grid Modernization & Cyber-Physical Vulnerability Analysis Vehicle",
+        "description": "Supports DHS S&T and CISA with predictive modeling of national energy infrastructure, supply chain risk analytics, and automated incident simulation. The vehicle transitions lab-grade analytics into cloud-deployable operational dashboards.",
+        "start_date": "Oct 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "CBP & DHS S&T Non-Intrusive Inspection (NII) X-Ray Anomaly Detection AI",
+        "description": "Develops deep-learning computer vision models trained on millions of cargo and vehicle radiography scans to automatically flag contraband and anomalies at land and sea ports of entry.",
+        "start_date": "Apr 2023",
+        "end_date": "Apr 2028"
+      }
+    ],
+    "Sandia National Laboratories": [
+      {
+        "contract_name": "DHS S&T Systems Analysis, Physical Security & Sensor Testbed Agreement",
+        "description": "Provides national laboratory engineering for border surveillance sensors, aviation screening technology validation, and critical infrastructure threat modeling. Sandia conducts rigorous red-teaming, hardware-in-the-loop simulation, and high-consequence systems engineering for DHS.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS Secure Microelectronics & High-Assurance Cloud Cryptography R&D",
+        "description": "Researches post-quantum cryptography readiness, trusted edge computing hardware, and secure communications protocols for homeland security field operations. Deliverables guide technical requirements for major component procurement vehicles.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "TSA & DHS S&T Explosive Detection Systems (EDS) Algorithm Validation",
+        "description": "Performs physical and computational testing of computed tomography (CT) and millimeter-wave passenger/baggage screening algorithms to reduce false alarms and accelerate checkpoint throughput.",
+        "start_date": "Jul 2022",
+        "end_date": "Jul 2027"
+      }
+    ]
+  },
+  "Federal Emergency Management Agency (FEMA)": {
+    "IBM": [
+      {
+        "contract_name": "FEMA National Flood Insurance Program (NFIP) Pivot & Legacy Modernization",
+        "description": "Modernizes core NFIP policy, claims, and financial data management systems transitioning from legacy mainframe architectures to cloud-hosted database environments. IBM provides enterprise data integration, actuarial analytics support, and high-availability transaction processing.",
+        "start_date": "Sep 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "FEMA Enterprise Cloud & Hybrid Database Infrastructure Support",
+        "description": "Supports FEMA OCIO in managing mission-critical enterprise databases, disaster recovery replication, and automated cloud scaling during surge response events. The vehicle ensures continuous availability for emergency declaration and financial tracking systems.",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      },
+      {
+        "contract_name": "FEMA Risk Rating 2.0 Actuarial Data & Geospatial Calculation Engine",
+        "description": "Sustains and optimizes the cloud computing and database engine powering FEMA's Risk Rating 2.0 flood risk pricing methodology across millions of U.S. properties. Work includes high-concurrency batch processing, API integration with Write-Your-Own insurers, and audit controls.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "FEMA OCIO Enterprise Middleware & Integration Services (EMIS)",
+        "description": "Provides containerized middleware, enterprise service bus modernization, and secure API gateway management connecting FEMA legacy databases with modern cloud SaaS and mobile field applications.",
+        "start_date": "Nov 2022",
+        "end_date": "Nov 2027"
+      }
+    ],
+    "Accenture Federal Services": [
+      {
+        "contract_name": "FEMA Enterprise Data & Analytics Modernization (EDAM)",
+        "description": "Designs and operates FEMA's unified cloud data platform, integrating disaster response, logistics, and recovery datasets into a centralized enterprise analytics environment. Accenture modernizes data ingestion pipelines, real-time situational awareness dashboards, and AI-enabled resource forecasting.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      },
+      {
+        "contract_name": "FEMA Grants Management Modernization (GMM) Agile Delivery",
+        "description": "Provides human-centered design, cloud-native microservices development, and systems integration to unify FEMA's multi-billion-dollar preparedness and hazard mitigation grant programs. The platform streamlines applicant intake, automated eligibility validation, and financial closeout.",
+        "start_date": "Nov 2021",
+        "end_date": "Nov 2026"
+      },
+      {
+        "contract_name": "FEMA GO (Grants Outcomes) Platform Operations & Cloud Engineering",
+        "description": "Delivers DevSecOps, cloud database administration, and feature development for the FEMA GO platform used by state, local, tribal, and territorial governments to apply for and manage federal disaster and resilience grants.",
+        "start_date": "Apr 2022",
+        "end_date": "Apr 2027"
+      },
+      {
+        "contract_name": "FEMA Contact Center & AI Virtual Agent Surge Modernization",
+        "description": "Implements cloud contact center routing, natural language interactive voice response, and AI-assisted agent knowledge tools to handle massive survivor call volume spikes immediately following major hurricane and wildfire declarations.",
+        "start_date": "Sep 2023",
+        "end_date": "Sep 2028"
+      }
+    ],
+    "Deloitte": [
+      {
+        "contract_name": "FEMA Recovery Technology & Individual Assistance System Modernization",
+        "description": "Supports the modernization of disaster survivor registration, case management, and automated assistance adjudication platforms. Deloitte delivers cloud application engineering, mobile field inspection tools, and fraud-prevention analytics across FEMA Recovery directorates.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "FEMA OCIO Cyber Risk Management & Zero Trust Implementation",
+        "description": "Provides continuous security authorization (ATO), identity governance, and cloud security posture management across FEMA's enterprise IT portfolio. Work ensures disaster response applications meet federal zero-trust and FedRAMP High standards.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "FEMA Public Assistance (PA) Grants Portal & Workflow Modernization",
+        "description": "Enhances and maintains the cloud-hosted Public Assistance Grants Portal used to process billions of dollars in emergency debris removal and critical infrastructure reconstruction reimbursements.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "FEMA Federal Insurance and Mitigation Administration (FIMA) Data Analytics",
+        "description": "Delivers predictive flood loss modeling, community resilience analytics, and cloud data warehouse engineering to measure return on investment for pre-disaster mitigation projects.",
+        "start_date": "May 2023",
+        "end_date": "May 2028"
+      }
+    ],
+    "CGI Federal": [
+      {
+        "contract_name": "FEMA Financial Management & Momentum ERP Cloud Modernization",
+        "description": "Maintains and modernizes FEMA's core financial management systems (WebIFMIS / Momentum), supporting disaster relief fund accounting and real-time obligation tracking. CGI Federal leads database performance tuning, cloud hosting migration, and automated federal financial reporting.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "FEMA Logistics Supply Chain Management System (LSCMS) O&M and Modernization",
+        "description": "Operates and enhances FEMA's enterprise supply chain tracking system responsible for mobilizing emergency commodities and equipment nationwide. The contract covers cloud infrastructure optimization, mobile barcode/RFID integration, and real-time inventory analytics.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "FEMA Disaster Relief Fund (DRF) Automated Reconciliation & Audit Support",
+        "description": "Provides automated data integration between FEMA grant adjudication systems, logistics databases, and core financial ledgers to ensure real-time funds control during concurrent national emergencies.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      }
+    ],
+    "Palantir": [
+      {
+        "contract_name": "FEMA Operational Readiness & Disaster Situational Awareness Platform",
+        "description": "Provides an integrated operational data ontology that fuses weather telemetry, critical infrastructure status, supply chain readiness, and survivor assistance metrics during national emergencies. The platform enables real-time executive decision-making and cross-agency incident coordination.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "FEMA National Response Coordination Center (NRCC) Common Operating Picture",
+        "description": "Delivers AI-assisted data fusion and geospatial analytics for the NRCC and regional operations centers. Work focuses on rapid ingestion of multi-source field data and predictive modeling for post-disaster resource allocation.",
+        "start_date": "Apr 2023",
+        "end_date": "Apr 2028"
+      },
+      {
+        "contract_name": "FEMA Incident Workforce Deployment & Readiness Optimization Engine",
+        "description": "Correlates responder qualifications, deployment availability, and real-time disaster staffing requirements across FEMA's Cadre of On-Call Response/Recovery Employees (CORE) to accelerate field mobilization.",
+        "start_date": "Jul 2023",
+        "end_date": "Jul 2028"
+      }
+    ]
+  },
+  "U.S. Immigration and Customs Enforcement (ICE)": {
+    "Palantir": [
+      {
+        "contract_name": "ICE Investigative Case Management (ICM) & FALCON Analytics Support",
+        "description": "Provides enterprise software engineering, data integration, and analytical platform support for Homeland Security Investigations (HSI) criminal and transnational threat investigations. The vehicle connects disparate law enforcement databases into a unified link-analysis and case management environment.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "ICE Enforcement and Removal Operations (ERO) Operational Data Integration",
+        "description": "Supports ICE OCIO and ERO with real-time case tracking, docket analytics, and cross-system data synchronization across field offices. Work emphasizes cloud scalability, role-based access security, and high-concurrency query performance.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "ICE HSI Transnational Crime, Trade Fraud & Illicit Finance Analytics",
+        "description": "Fuses global trade manifest records, financial intelligence, and cross-border supply chain data to support HSI investigations into fentanyl precursor trafficking, customs fraud, and forced labor networks.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "ICE Enterprise Data Ontology & Cross-Component Vetting Integration",
+        "description": "Provides high-speed API and data layer interoperability between ICE case management systems and CBP, USCIS, and DOJ Executive Office for Immigration Review (EOIR) repositories.",
+        "start_date": "Apr 2023",
+        "end_date": "Apr 2028"
+      }
+    ],
+    "Geo Group": [
+      {
+        "contract_name": "ICE Intensive Supervision Appearance Program (ISAP IV) BI Incorporated Vehicle",
+        "description": "Operates ICE's nationwide Alternatives to Detention (ATD) technology and case management program through its BI Incorporated subsidiary. The contract covers GPS telemetry, biometric mobile check-in applications, secure cloud data hosting, and participant compliance reporting.",
+        "start_date": "Mar 2020",
+        "end_date": "Jul 2026"
+      },
+      {
+        "contract_name": "ICE Detention Management, Secure Transportation & Facility IT Operations",
+        "description": "Provides turnkey facility management, secure detainee intake systems, electronic health/detention records integration, and regional transport logistics across multiple ICE Area of Responsibility (AOR) contracts.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "ICE ERO SmartLINK Biometric Mobile Reporting & Telemetry Platform",
+        "description": "Sustains the cloud backend, facial verification algorithms, and automated docket notification services used by hundreds of thousands of non-detained individuals enrolled in ICE supervision programs.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      }
+    ],
+    "CoreCivic": [
+      {
+        "contract_name": "ICE Processing Center Operations & Integrated Facility Management Vehicles",
+        "description": "Manages multi-site detention and processing facilities supporting ICE Enforcement and Removal Operations with integrated intake processing, video teleconferencing (VTC) court infrastructure, and facility security technology.",
+        "start_date": "Nov 2021",
+        "end_date": "Nov 2026"
+      },
+      {
+        "contract_name": "ICE Regional Custody & Secure Digital Communications Support",
+        "description": "Provides operational support, detainee records administration, and network connectivity infrastructure linking regional processing centers with ICE headquarters and federal immigration court systems.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "ICE ERO Dedicated Detention & Virtual Legal Visitation Infrastructure",
+        "description": "Operates secure tablet, kiosk, and high-bandwidth video teleconferencing networks across processing centers to support remote immigration hearings, translation services, and electronic document exchange.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      }
+    ]
+  },
+  "DHS Office of Intelligence & Analysis (I&A)": {
+    "SAIC": [
+      {
+        "contract_name": "DHS I&A Enterprise IT & Classified Cloud Engineering (HSDN / C2S)",
+        "description": "Delivers full-lifecycle systems engineering, classified cloud migration, and cross-domain solution maintenance for the Homeland Security Data Network (HSDN) and Intelligence Community cloud enclaves. SAIC supports high-side database modernization and zero-trust identity controls.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      },
+      {
+        "contract_name": "DHS I&A Intelligence Mission Applications & DevSecOps Support",
+        "description": "Develops and sustains custom intelligence dissemination portals, automated threat alerting workflows, and secure API integrations connecting DHS I&A with state and local fusion centers.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      },
+      {
+        "contract_name": "DHS State and Local Fusion Center Classified Connectivity (HSIN-Intel / HSDN)",
+        "description": "Manages secure network deployment, cryptographic hardware lifecycle, and cloud-hosted collaboration tools across 80+ state and major urban area fusion centers nationwide.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS I&A High-Side Database Consolidation & Cloud Migration",
+        "description": "Migrates legacy on-premises intelligence relational and document databases into accredited Intelligence Community commercial cloud regions with automated failover and audit logging.",
+        "start_date": "Jun 2023",
+        "end_date": "Jun 2028"
+      }
+    ],
+    "BAE Systems": [
+      {
+        "contract_name": "DHS I&A All-Source Intelligence Analysis & Threat Production Vehicle",
+        "description": "Provides specialized intelligence engineering, open-source/classified data fusion, and counterterrorism analytical support across DHS I&A mission centers. BAE Systems integrates geospatial, cyber, and border intelligence streams into high-side analytical repositories.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS High-Side Cross-Domain Data Transfer & Security Engineering",
+        "description": "Maintains accredited cross-domain guards and automated data sanitization pipelines that allow DHS intelligence analysts to move threat indicators securely between Top Secret, Secret (HSDN), and unclassified networks.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "DHS I&A Geospatial Intelligence (GEOINT) & Critical Infrastructure Mapping",
+        "description": "Delivers cloud-hosted geospatial data lakes, satellite imagery processing workflows, and automated change-detection analytics supporting homeland threat assessments and border security operations.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      }
+    ],
+    "ManTech": [
+      {
+        "contract_name": "DHS I&A Data Analytics, AI/ML & Intelligence Systems Modernization",
+        "description": "Engineers advanced data analytics pipelines, natural language processing models, and cloud-native data lakes for the DHS Office of Intelligence and Analysis. ManTech modernizes legacy intelligence repositories to enable rapid multi-INT search and entity resolution.",
+        "start_date": "Jul 2022",
+        "end_date": "Jul 2027"
+      },
+      {
+        "contract_name": "DHS I&A Security Engineering & Continuous Monitoring (ISSO/ISSM Support)",
+        "description": "Provides cybersecurity engineering, ICD 503 accreditation support, and continuous threat monitoring across DHS classified intelligence networks and partner fusion center nodes.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "DHS Counter-Intelligence & Insider Threat Data Analytics Platform",
+        "description": "Develops behavioral analytics, audit log correlation engines, and automated case management workflows protecting classified DHS intelligence equities and personnel.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "DHS I&A Cloud Data Mesh & Automated Ingestion Engineering",
+        "description": "Builds high-throughput streaming data pipelines that normalize structured and unstructured intelligence reports from CBP, ICE, USCG, and IC partners into a unified queryable data layer.",
+        "start_date": "Apr 2023",
+        "end_date": "Apr 2028"
+      }
+    ],
+    "CACI": [
+      {
+        "contract_name": "DHS I&A Signals, Cyber & Counter-Network Intelligence Technical Support",
+        "description": "Delivers specialized data science, dark-web/cyber threat intelligence tooling, and mission application engineering for I&A's Cyber and Transnational Threat mission centers. CACI automates ingestion of high-volume threat telemetry into structured analytical databases.",
+        "start_date": "Sep 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "DHS Intelligence Training, Tradecraft & Knowledge Management Systems",
+        "description": "Supports the DHS Intelligence Enterprise with secure learning management platforms, intelligence tradecraft standardization, and collaborative knowledge bases across component intelligence offices.",
+        "start_date": "Apr 2022",
+        "end_date": "Apr 2027"
+      },
+      {
+        "contract_name": "DHS I&A Economic Security & Supply Chain Threat Intelligence Analytics",
+        "description": "Provides cloud-hosted graph databases and entity-link analytics to map foreign adversarial investments, critical technology supply chain vulnerabilities, and transnational criminal networks.",
+        "start_date": "Nov 2022",
+        "end_date": "Nov 2027"
+      }
+    ],
+    "Novetta (Accenture)": [
+      {
+        "contract_name": "DHS I&A Entity Resolution & Multi-INT Data Fusion Platform",
+        "description": "Provides large-scale identity resolution, machine learning analytics, and cloud data engineering to correlate fragmented threat records across DHS and Intelligence Community datasets. The platform accelerates watchlisting, vetting, and transnational network discovery.",
+        "start_date": "Nov 2021",
+        "end_date": "Nov 2026"
+      },
+      {
+        "contract_name": "DHS Open Source Intelligence (OSINT) & Automated AI Triage Pipeline",
+        "description": "Designs and operates secure cloud collection, multilingual translation, and AI summarization pipelines that process unstructured global data streams for homeland security analysts.",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      },
+      {
+        "contract_name": "DHS I&A Biometric & Identity Intelligence Correlation Engine",
+        "description": "Integrates biographical watchlists with biometric encounter records across DHS screening systems to surface aliases, travel patterns, and high-priority national security threats in real time.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      }
+    ]
+  },
+  "U.S. Coast Guard (USCG)": {
+    "Lockheed Martin": [
+      {
+        "contract_name": "USCG Command, Control and Communications Engineering Center (C3CEN) & SeaWatch",
+        "description": "Develops, integrates, and sustains the Coast Guard's maritime command-and-control software baseline, navigation systems, and tactical C5I suite aboard National Security Cutters and shore command centers. Work includes modernizing shipboard computing and shore-to-cloud tactical data sync.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "USCG MH-60T & Aviation Mission Systems Logistics and Data Integration",
+        "description": "Provides avionics modernization, sensor integration, and predictive maintenance analytics for the Coast Guard rotary-wing fleet, interfacing directly with USCG aviation logistics and readiness databases.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "USCG Minotaur Mission System Architecture & ISR Sensor Fusion",
+        "description": "Integrates radar, electro-optical/infrared, and automatic identification system (AIS) feeds aboard fixed-wing HC-130J and HC-27J aircraft, streaming maritime domain awareness data to shore cloud enclaves.",
+        "start_date": "Jan 2022",
+        "end_date": "Dec 2026"
+      },
+      {
+        "contract_name": "USCG Cyber Command & Tactical Network Modernization Support",
+        "description": "Delivers zero-trust network engineering, ship-to-shore SATCOM optimization, and cybersecurity monitoring for Coast Guard operational and enterprise IT networks.",
+        "start_date": "May 2023",
+        "end_date": "May 2028"
+      }
+    ],
+    "Huntington Ingalls": [
+      {
+        "contract_name": "USCG Legend-Class National Security Cutter (NSC) & C5ISR Integration",
+        "description": "Serves as prime shipbuilder and systems integrator for the Legend-class NSC fleet, including hull, mechanical, electrical, and integrated shipboard C5ISR network infrastructure. HII also delivers lifecycle engineering, cyber hardening of shipboard control systems, and fleet sustainment data services.",
+        "start_date": "May 2021",
+        "end_date": "May 2028"
+      },
+      {
+        "contract_name": "USCG Surface Fleet Hull, Mechanical & Electrical (HM&E) Modernization IDIQ",
+        "description": "Provides engineering, condition-based maintenance analytics, and shipboard network upgrades across Coast Guard cutters to extend service life and improve operational readiness at sea.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "USCG Offshore Patrol Cutter (OPC) & Cutter Fleet Digital Readiness Support",
+        "description": "Supports digital twin engineering, technical data package modernization, and automated maintenance tracking integrated with the Coast Guard Surface Forces Logistics Center (SFLC).",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      },
+      {
+        "contract_name": "Huntington Ingalls — DHS Award HSCG2313CADB014",
+        "description": "Production&delivery of national security cutter (nsc) 6.. Awarded by U.S. Coast Guard under federal contract vehicle HSCG2313CADB014 supporting agency operational and technology requirements.",
+        "start_date": "Apr 2013",
+        "end_date": "Nov 2024"
+      },
+      {
+        "contract_name": "Huntington Ingalls — DHS Award HSCG2316CADB016",
+        "description": "Long lead time material (lltm) for national security cutter (nsc) 9. Awarded by U.S. Coast Guard under federal contract vehicle HSCG2316CADB016 supporting agency operational and technology requirements.",
+        "start_date": "Aug 2016",
+        "end_date": "Jul 2028"
+      }
+    ],
+    "Boeing": [
+      {
+        "contract_name": "USCG Long Range Unmanned Aircraft System (UAS) / ScanEagle ISR Services",
+        "description": "Provides shipboard unmanned aerial intelligence, surveillance, and reconnaissance (ISR) operations through its Insitu subsidiary across the National Security Cutter fleet. The contract covers real-time full-motion video processing, tactical edge computing, and maritime target tracking.",
+        "start_date": "Apr 2022",
+        "end_date": "Apr 2027"
+      },
+      {
+        "contract_name": "USCG Maritime Domain Awareness & Tactical Data Link Engineering",
+        "description": "Supports integration of airborne and surface sensor feeds into Coast Guard C5I networks, enabling automated vessel tracking for drug interdiction and search-and-rescue operations.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "USCG Automated Video Analytics & Edge AI Target Classification",
+        "description": "Deploys computer vision algorithms at the tactical edge to automatically detect go-fast smuggling vessels, dark ships, and persons in the water from cutter-launched UAS video feeds.",
+        "start_date": "Aug 2023",
+        "end_date": "Aug 2028"
+      }
+    ]
+  },
+  "U.S. Citizenship and Immigration Services (USCIS)": {
+    "Accenture": [
+      {
+        "contract_name": "USCIS Electronic Immigration System (ELIS) & Core Case Management Agile Delivery",
+        "description": "Provides scaled Agile software development, cloud-native microservices engineering, and DevSecOps automation for USCIS's primary digital benefit adjudication platform. Accenture supports high-volume applicant portals, automated background check orchestration, and database modernization.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      },
+      {
+        "contract_name": "USCIS Enterprise Data Warehouse & AI/ML Analytics Modernization (RAPID / DBIS)",
+        "description": "Modernizes USCIS enterprise analytics, reporting pipelines, and AI-assisted fraud detection models. Work includes migrating legacy analytical workloads to scalable cloud database architectures and building real-time adjudication backlog dashboards.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      },
+      {
+        "contract_name": "USCIS myUSCIS Digital Customer Experience & Online Filing Modernization",
+        "description": "Develops and scales public-facing cloud web portals, secure document upload repositories, and AI-assisted applicant self-service tools used by millions of immigration benefit petitioners annually.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "USCIS Fraud Detection and National Security (FDNS) Data Systems",
+        "description": "Engineers cloud-hosted case management, link-analysis, and automated vetting integration tools supporting FDNS officers in identifying systematic benefit fraud and national security concerns.",
+        "start_date": "Jun 2023",
+        "end_date": "Jun 2028"
+      }
+    ],
+    "IBM": [
+      {
+        "contract_name": "USCIS Verification Information System (VIS) / E-Verify & SAVE Modernization",
+        "description": "Develops and operates the mission-critical E-Verify and SAVE platforms that process tens of millions of employment eligibility and benefit verification queries annually. IBM delivers cloud architecture modernization, high-throughput database engineering, and automated identity verification workflows.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "USCIS Enterprise Cloud Platform & Mainframe Decommissioning Support",
+        "description": "Supports USCIS OCIO in refactoring legacy mainframe and monolithic database dependencies into resilient, multi-region cloud environments with automated disaster recovery.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "USCIS Person Centric Query Service (PCQS) & Enterprise API Integration",
+        "description": "Maintains and modernizes thefederated query and API brokerage layer allowing adjudicators to retrieve consolidated applicant histories across USCIS, CBP, ICE, and Department of State databases in sub-second response times.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "USCIS Records Digitization & Intelligent Document Processing (IDP) Pipeline",
+        "description": "Implements optical character recognition (OCR), automated form classification, and cloud archival databases to convert paper A-Files into searchable digital case records.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      }
+    ],
+    "GDIT": [
+      {
+        "contract_name": "USCIS Enterprise Infrastructure Operations & End-User Support (NEON / SPARC)",
+        "description": "Manages enterprise IT infrastructure, cloud networking, unified communications, and nationwide field office technology operations for more than 20,000 USCIS personnel. GDIT enforces zero-trust endpoint security, cloud interconnectivity, and automated service desk operations.",
+        "start_date": "Jul 2022",
+        "end_date": "Jul 2027"
+      },
+      {
+        "contract_name": "USCIS Biometrics & Identity Management Systems Integration (CPMS)",
+        "description": "Provides systems engineering and cloud integration for USCIS Customer Profile Management System (CPMS), biometric capture at Application Support Centers, and multimodal identity matching with DHS HART and FBI databases.",
+        "start_date": "Nov 2022",
+        "end_date": "Nov 2027"
+      },
+      {
+        "contract_name": "USCIS Cyber Security Defense & Continuous Diagnostics Operations (CSDS)",
+        "description": "Delivers 24x7 cloud security operations, zero-trust telemetry monitoring, automated threat containment, and FedRAMP/FISMA compliance engineering across USCIS cloud enclaves.",
+        "start_date": "Mar 2022",
+        "end_date": "Mar 2027"
+      },
+      {
+        "contract_name": "USCIS Asylum & Refugee Case Processing Modernization Support",
+        "description": "Supports secure mobile field kits, remote video interview infrastructure, and cloud database synchronization for domestic asylum offices and international refugee processing circuit rides.",
+        "start_date": "Aug 2023",
+        "end_date": "Aug 2028"
+      }
+    ]
+  },
+  "U.S. Customs and Border Protection (CBP)": {
+    "Palantir": [
+      {
+        "contract_name": "CBP National Targeting Center (NTC) Analytical & Data Fusion Platform",
+        "description": "Provides high-scale data integration, entity resolution, and real-time risk scoring across global passenger, cargo, and border crossing datasets for the CBP National Targeting Center. The platform fuses multi-agency intelligence to identify high-risk travelers, illicit fentanyl supply chains, and transnational threats prior to arrival.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "CBP Border Enforcement & Common Operating Picture Data Ontology",
+        "description": "Supports CBP Office of Information and Technology (OIT) with real-time operational data pipelines correlating autonomous tower telemetry, port-of-entry inspections, and field enforcement records.",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      },
+      {
+        "contract_name": "CBP Cargo Supply Chain Risk & Fentanyl Interdiction Analytics",
+        "description": "Integrates commercial shipping manifests, air cargo advance screening (ACAS) filings, and non-intrusive inspection results to flag anomalous consignments and shell-company networks in real time.",
+        "start_date": "Jul 2023",
+        "end_date": "Jul 2028"
+      }
+    ],
+    "Anduril": [
+      {
+        "contract_name": "CBP Autonomous Surveillance Towers (AST) Program of Record",
+        "description": "Deploys and sustains solar-powered Autonomous Surveillance Towers equipped with edge AI computer vision, radar, and thermal optics along the southwest and northern borders. Anduril's Lattice platform automatically detects, classifies, and tracks items of interest at the tactical edge without requiring continuous human monitoring.",
+        "start_date": "Jul 2020",
+        "end_date": "Jul 2027"
+      },
+      {
+        "contract_name": "CBP Counter-UAS & Tactical Edge Sensor Integration IDIQ",
+        "description": "Provides automated sensor fusion, counter-drone detection, and ruggedized edge computing nodes that stream real-time situational awareness data into CBP sector command centers and cloud repositories.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "CBP Border Patrol Mobile Lattice Command & Control Integration",
+        "description": "Delivers tactical mobile applications and satellite/mesh backhaul integration that push automated sensor alerts and geospatial tracks directly to Border Patrol agents in austere field environments.",
+        "start_date": "May 2023",
+        "end_date": "May 2028"
+      },
+      {
+        "contract_name": "Anduril — DHS Award 70B02C26F00000035",
+        "description": "Purchase of towers. Awarded by U.S. Customs and Border Protection under federal contract vehicle 70B02C26F00000035 supporting agency operational and technology requirements.",
+        "start_date": "Dec 2025",
+        "end_date": "Jun 2027"
+      }
+    ],
+    "CACI": [
+      {
+        "contract_name": "CBP BEAGLE (Border Enforcement Applications for Government Leading-Edge Information Technology)",
+        "description": "Serves as CBP's flagship Agile software development and systems integration contract supporting hundreds of mission-critical applications across Border Patrol, Field Operations, and Trade. CACI modernizes the Automated Commercial Environment (ACE), Traveler Verification Service (TVS), and mobile officer applications in the cloud.",
+        "start_date": "Apr 2019",
+        "end_date": "Apr 2027"
+      },
+      {
+        "contract_name": "CBP Enterprise Network, Tactical Communications & Cloud Engineering",
+        "description": "Supports CBP OIT in modernizing high-throughput database backends, API gateways, and secure cloud connectivity for land, air, and sea ports of entry nationwide.",
+        "start_date": "Oct 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "CBP Biometric Entry-Exit & Traveler Verification Service (TVS) Cloud Scaling",
+        "description": "Engineers high-speed cloud facial comparison workflows, airline/airport partner API gateways, and privacy-compliant biometric matching for international air, sea, and pedestrian border crossings.",
+        "start_date": "Feb 2022",
+        "end_date": "Feb 2027"
+      },
+      {
+        "contract_name": "CBP Automated Commercial Environment (ACE) 2.0 Trade Modernization",
+        "description": "Modernizes the core U.S. import/export processing system handling trillions of dollars in annual trade volume, refactoring legacy database schemas into scalable cloud microservices.",
+        "start_date": "Jun 2023",
+        "end_date": "Jun 2028"
+      },
+      {
+        "contract_name": "CACI — DHS Award 70B04C24F00001129",
+        "description": "Border enforcement applications for government leading-edge information technology. Awarded by U.S. Customs and Border Protection under federal contract vehicle 70B04C24F00001129 supporting agency operational and technology requirements.",
+        "start_date": "Sep 2024",
+        "end_date": "Sep 2027"
+      }
+    ]
+  },
+  "U.S. Secret Service (USSS)": {
+    "Peraton": [
+      {
+        "contract_name": "USSS Enterprise IT Infrastructure & Classified Network Modernization",
+        "description": "Provides enterprise network engineering, hybrid cloud hosting, and secure communications support across Secret Service headquarters and domestic/international field offices. Peraton manages high-availability database infrastructure, zero-trust access controls, and protective intelligence systems.",
+        "start_date": "Sep 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "USSS Cyber Fraud & Financial Crimes Analytical Platform Support",
+        "description": "Supports the Secret Service Cyber Investigative Section with large-scale digital forensics storage, blockchain/financial transaction analytics, and cloud data engineering.",
+        "start_date": "Apr 2023",
+        "end_date": "Apr 2028"
+      },
+      {
+        "contract_name": "USSS Protective Mission Command Center & Cloud Continuity Engineering",
+        "description": "Maintains redundant data centers, encrypted cloud failover enclaves, and real-time operational tracking systems supporting continuous Presidential and Vice Presidential protection operations.",
+        "start_date": "Nov 2022",
+        "end_date": "Nov 2027"
+      }
+    ],
+    "GDIT": [
+      {
+        "contract_name": "USSS Information Technology Support Services (ITSS) & Application Modernization",
+        "description": "Delivers full-lifecycle application development, cloud migration, and cybersecurity operations for Secret Service protective and investigative mission systems. GDIT modernizes legacy databases, field agent mobile platforms, and National Special Security Event (NSSE) coordination portals.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "USSS Zero Trust Architecture & Endpoint Security Operations",
+        "description": "Provides 24x7 security operations center (SOC) engineering, identity credentialing integration, and cloud workload protection across Secret Service unclassified and classified enclaves.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "USSS Enterprise Data Management & Investigative Case System Modernization",
+        "description": "Refactors legacy investigative case files, counterfeit currency tracking databases, and protective venue survey repositories into a unified, cloud-hosted relational and vector data architecture.",
+        "start_date": "Aug 2023",
+        "end_date": "Aug 2028"
+      },
+      {
+        "contract_name": "USSS Uniformed Division & Access Control Credential Vetting Platform",
+        "description": "Supports high-availability background vetting interfaces and real-time credential validation systems for visitors, press, and staff entering the White House Complex and Naval Observatory.",
+        "start_date": "Mar 2022",
+        "end_date": "Mar 2027"
+      }
+    ],
+    "Motorola Solutions": [
+      {
+        "contract_name": "USSS Protective Mission Tactical Communications & P25 Radio Modernization",
+        "description": "Supplies and sustains encrypted land mobile radio (LMR) networks, tactical mesh communications, and unified command-center dispatch systems for Presidential and dignitary protection details. The vehicle integrates secure voice, video, and GPS telemetry across fixed and deployable protective packages.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "USSS National Special Security Event (NSSE) Deployable Comms Support",
+        "description": "Provides rapid-deployment encrypted communications kits, interoperability gateways, and real-time situational awareness software linking federal, state, and local law enforcement during major national events.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "USSS Next-Generation Broadband Push-to-Talk & Tactical Video Integration",
+        "description": "Integrates LTE/5G mission-critical push-to-talk (MCPTT) and encrypted body/vehicle video feeds with traditional P25 radio channels for protective advance teams.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      }
+    ],
+    "Science Applications International Corp (SAIC)": [
+      {
+        "contract_name": "USSS Protective Intelligence & Threat Assessment Systems Engineering",
+        "description": "Engineers and sustains mission-critical protective intelligence databases, threat tracking workflows, and multi-agency vetting interfaces for the Secret Service OCIO. SAIC leads cloud readiness refactoring, automated data ingestion, and high-availability disaster recovery.",
+        "start_date": "Aug 2022",
+        "end_date": "Aug 2027"
+      },
+      {
+        "contract_name": "USSS Operational Technology & Counter-Surveillance Systems Integration",
+        "description": "Provides systems integration, sensor data fusion, and secure cloud backhaul for physical and electronic security systems protecting the White House Complex and protected residences.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      },
+      {
+        "contract_name": "USSS Open Source & Protective Threat Triage AI Analytics",
+        "description": "Develops natural language processing and geospatial correlation pipelines to help protective intelligence agents identify, prioritize, and investigate emerging threats against protectees and major venues.",
+        "start_date": "Jul 2023",
+        "end_date": "Jul 2028"
+      }
+    ],
+    "Dell Federal": [
+      {
+        "contract_name": "USSS Enterprise Compute, Ruggedized Edge & Storage Infrastructure Vehicle",
+        "description": "Supplies high-density enterprise storage, hyperconverged private cloud appliances, and ruggedized field workstations supporting Secret Service digital forensics labs and protective command posts. Work includes hardware lifecycle modernization and high-speed storage for cyber crime investigations.",
+        "start_date": "Oct 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "USSS National Computer Forensics Institute (NCFI) Lab Infrastructure",
+        "description": "Provides specialized compute clusters, high-IOPS storage arrays, and virtualization platforms used to train law enforcement and process massive evidentiary datasets.",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      },
+      {
+        "contract_name": "USSS Electronic Crimes Task Force (ECTF) High-Performance Forensics Storage",
+        "description": "Deploys petabyte-scale encrypted storage and GPU-accelerated decryption/forensic workstations across domestic and international Electronic Crimes Task Force field hubs.",
+        "start_date": "Sep 2021",
+        "end_date": "Sep 2026"
+      }
+    ]
+  },
+  "Transportation Security Administration (TSA)": {
+    "Leidos": [
+      {
+        "contract_name": "TSA Checkpoint Property Screening System (CPSS) & Integrated Logistics",
+        "description": "Deploys, integrates, and maintains computed tomography (CT) 3D baggage screening systems, automated screening lanes, and open-architecture threat detection software across hundreds of U.S. airports. Leidos connects checkpoint hardware telemetry to TSA cloud analytics for predictive maintenance and real-time operational monitoring.",
+        "start_date": "Sep 2021",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "TSA Biometric & Credential Authentication Technology (CAT-2) Integration",
+        "description": "Supports engineering and airport deployment of next-generation identity verification podiums that match live traveler facial biometrics against digital credentials and Secure Flight manifests.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "TSA Checked Baggage Explosive Detection System (EDS) Maintenance & Telemetry",
+        "description": "Provides nationwide lifecycle maintenance, software configuration management, and cloud operational availability analytics for inline checked-baggage screening networks at Category X through IV airports.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "TSA Open Architecture & Automated Target Recognition (ATR) Testing",
+        "description": "Integrates third-party AI/ML threat detection algorithms onto standardized checkpoint screening hardware to enable rapid software updates against emerging concealed threats.",
+        "start_date": "Aug 2023",
+        "end_date": "Aug 2028"
+      },
+      {
+        "contract_name": "Leidos — DHS Award 70T04019C9DAP3006",
+        "description": "The purpose of this contract is for leidos to provide the transportation security administration (tsa) with an integrated logistics support (ils) program to sustain government transportation security equipment (tse) owned and operated by tsa.. Awarded by Transportation Security Administration under federal contract vehicle 70T04019C9DAP3006 supporting agency operational and technology requirements.",
+        "start_date": "Oct 2019",
+        "end_date": "Mar 2025"
+      }
+    ],
+    "Peraton": [
+      {
+        "contract_name": "TSA IMPACT (Information Technology Management, Performance Analysis, and Collaborative Technologies)",
+        "description": "Serves as TSA's primary enterprise IT infrastructure and operational support vehicle, managing networks, cloud interconnects, cybersecurity operations, and end-user computing across 430+ federalized airports and headquarters. Peraton modernizes core data center workloads, zero-trust network access, and 24x7 mission service desk operations.",
+        "start_date": "Aug 2021",
+        "end_date": "Aug 2026"
+      },
+      {
+        "contract_name": "TSA Enterprise Cloud & Hybrid Network Modernization Task Order",
+        "description": "Provides cloud migration engineering, high-availability database administration, and SD-WAN connectivity linking airport screening checkpoints to TSA enterprise cloud environments.",
+        "start_date": "Nov 2022",
+        "end_date": "Nov 2027"
+      },
+      {
+        "contract_name": "TSA Security Operations Center (SOC) & Airport Cyber Defense",
+        "description": "Delivers continuous cybersecurity monitoring, zero-trust microsegmentation, and incident response across TSA headquarters, federal air marshal offices, and airport checkpoint networks.",
+        "start_date": "Apr 2022",
+        "end_date": "Apr 2027"
+      }
+    ],
+    "General Dynamics": [
+      {
+        "contract_name": "TSA Secure Flight & Traveler Vetting Application Modernization",
+        "description": "Develops, enhances, and operates TSA's mission-critical Secure Flight passenger prescreening and watchlisting platform processing millions of daily aviation reservations. GDIT leads cloud-native refactoring, high-concurrency database optimization, and real-time risk-based vetting analytics.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "TSA Transportation Threat Assessment & Credentialing (TTAC) Systems",
+        "description": "Modernizes the enrollment, background vetting, and credential management systems supporting TSA PreCheck, TWIC, and Hazardous Materials Endorsement programs.",
+        "start_date": "Feb 2023",
+        "end_date": "Feb 2028"
+      },
+      {
+        "contract_name": "TSA Technology Infrastructure Modernization (TIM) Vetting Database Engineering",
+        "description": "Designs and maintains fault-tolerant, active-active cloud database clusters and high-speed message queues that match airline passenger manifests against federal watchlists in milliseconds.",
+        "start_date": "Oct 2021",
+        "end_date": "Sep 2026"
+      },
+      {
+        "contract_name": "TSA Enterprise Data & Wait-Time Predictive Analytics Platform",
+        "description": "Fuses historical flight schedules, real-time checkpoint lane throughput, and Transportation Security Officer staffing data in the cloud to forecast airport congestion and optimize lane allocation.",
+        "start_date": "Jul 2023",
+        "end_date": "Jul 2028"
+      }
+    ]
+  },
+  "Cybersecurity and Infrastructure Security Agency (CISA)": {
+    "Booz Allen Hamilton": [
+      {
+        "contract_name": "CISA Continuous Diagnostics and Mitigation (CDM) DEFEND & Dashboard Ecosystem",
+        "description": "Serves as a lead prime integrator on CISA's flagship CDM program, deploying automated asset discovery, identity governance, and cloud security posture tools across federal civilian executive branch (.gov) agencies. Booz Allen also engineers the federal-wide CDM cybersecurity analytics dashboard and zero-trust telemetry pipelines.",
+        "start_date": "Aug 2020",
+        "end_date": "Aug 2027"
+      },
+      {
+        "contract_name": "CISA Cyber Analytics and Data System (CADS) & Threat Hunting Support",
+        "description": "Builds and operates high-scale cloud data lakes and AI/ML analytical workbenches that fuse national cyber sensor telemetry, vulnerability disclosures, and incident response data for CISA threat hunters.",
+        "start_date": "May 2022",
+        "end_date": "May 2027"
+      },
+      {
+        "contract_name": "CISA Joint Cyber Defense Collaborative (JCDC) Threat Intelligence Engineering",
+        "description": "Provides cloud collaboration platforms, automated indicator sharing (AIS) pipelines, and cross-sector cyber operational planning support connecting CISA with hyperscalers, telecom providers, and critical infrastructure defenders.",
+        "start_date": "Jan 2023",
+        "end_date": "Dec 2027"
+      },
+      {
+        "contract_name": "CISA Vulnerability Management & Known Exploited Vulnerabilities (KEV) Automation",
+        "description": "Engineers automated attack-surface scanning, internet-exposed asset discovery, and ransomware pre-attack notification workflows that alert critical infrastructure entities before exploitation occurs.",
+        "start_date": "Sep 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "CISA Zero Trust Maturity Model & Cloud Security Technical Assistance",
+        "description": "Delivers hands-on cloud architecture assessments, identity pillar engineering, and purple-team validation exercises assisting federal agencies in meeting OMB M-22-09 zero-trust mandates.",
+        "start_date": "Apr 2023",
+        "end_date": "Apr 2028"
+      }
+    ],
+    "CGI Federal": [
+      {
+        "contract_name": "CISA CDM DEFEND Group Integrator & Federal Agency Cyber Modernization",
+        "description": "Delivers enterprise cybersecurity architecture, cloud boundary protection, and automated vulnerability management across multiple federal agency groups under CISA's CDM DEFEND vehicle. CGI Federal integrates agency-level security feeds into CISA's centralized situational awareness platform.",
+        "start_date": "Jan 2021",
+        "end_date": "Jan 2027"
+      },
+      {
+        "contract_name": "CISA OCIO Enterprise Application & Cloud Database Modernization",
+        "description": "Supports CISA's internal Office of the CIO in modernizing critical infrastructure information-sharing portals, vulnerability management databases, and zero-trust identity services.",
+        "start_date": "Oct 2022",
+        "end_date": "Sep 2027"
+      },
+      {
+        "contract_name": "CISA Chemical Security Assessment Tool (CSAT) & Infrastructure Registry Cloud",
+        "description": "Maintains and secures the high-assurance cloud applications and encrypted databases used by high-risk facilities to submit security vulnerability assessments and site security plans.",
+        "start_date": "Jun 2022",
+        "end_date": "Jun 2027"
+      },
+      {
+        "contract_name": "CISA Cyber Incident Reporting for Critical Infrastructure Act (CIRCIA) Intake Architecture",
+        "description": "Provides Agile software engineering and high-availability cloud database design for CISA's unified cyber incident and ransomware payment reporting portal.",
+        "start_date": "Aug 2023",
+        "end_date": "Aug 2028"
+      }
+    ],
+    "SAIC": [
+      {
+        "contract_name": "CISA Integrated Operations & National Infrastructure Simulation / Risk Analytics",
+        "description": "Provides cloud systems engineering, geospatial risk modeling, and critical infrastructure dependency analytics for CISA's National Risk Management Center and Integrated Operations Division. SAIC modernizes data pipelines that correlate cyber threats with physical infrastructure impact across the 16 critical infrastructure sectors.",
+        "start_date": "Jul 2022",
+        "end_date": "Jul 2027"
+      },
+      {
+        "contract_name": "CISA Emergency Communications & Secure Cloud Engineering Support",
+        "description": "Supports CISA's Emergency Communications Division and OCIO with resilient cloud architecture, priority telecommunications engineering, and automated DevSecOps delivery.",
+        "start_date": "Mar 2023",
+        "end_date": "Mar 2028"
+      },
+      {
+        "contract_name": "CISA Industrial Control Systems (ICS) & Operational Technology Cyber Defense",
+        "description": "Develops specialized ICS/SCADA threat detection analytics, virtualized OT testbeds, and incident response deployment kits protecting national water, energy, and transportation control systems.",
+        "start_date": "Nov 2021",
+        "end_date": "Nov 2026"
+      },
+      {
+        "contract_name": "CISA Regional Operations & Protective Security Advisor (PSA) Field Data Platform",
+        "description": "Sustains mobile inspection applications, GIS vulnerability mapping, and cloud data synchronization used by CISA field personnel across all 10 CISA regions.",
+        "start_date": "May 2023",
+        "end_date": "May 2028"
+      }
+    ]
+  }
+}

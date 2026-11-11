@@ -1213,27 +1213,185 @@ export const PRIME_CONTRACTS_BY_TERRITORY: Record<string, Record<string, PrimeCo
 
 export function getPrimeContractsForTerritory(
   territoryName: string,
-  primeName: string
+  primeName: string,
+  territoryPrimeContracts?: Record<string, PrimeContractItem[]>,
+  globalPrimeContracts?: Record<string, Record<string, PrimeContractItem[]>>
 ): PrimeContractItem[] {
-  const exactTerritory = PRIME_CONTRACTS_BY_TERRITORY[territoryName];
+  const normPrime = primeName.trim().toLowerCase();
+
+  // 1. Check territory-level prime_contracts (from oracle_daily_briefs)
+  if (territoryPrimeContracts) {
+    if (territoryPrimeContracts[primeName]?.length) {
+      return territoryPrimeContracts[primeName].slice(0, 5);
+    }
+    for (const [pKey, contracts] of Object.entries(territoryPrimeContracts)) {
+      const pKeyNorm = pKey.trim().toLowerCase();
+      if (
+        (pKeyNorm === normPrime || pKeyNorm.includes(normPrime) || normPrime.includes(pKeyNorm)) &&
+        contracts?.length
+      ) {
+        return contracts.slice(0, 5);
+      }
+    }
+  }
+
+  // 2. Check global map (from /data/prime_contracts.json or PRIME_CONTRACTS_BY_TERRITORY)
+  const sourceMap = globalPrimeContracts || PRIME_CONTRACTS_BY_TERRITORY;
+  const exactTerritory = sourceMap[territoryName] || PRIME_CONTRACTS_BY_TERRITORY[territoryName];
   if (exactTerritory && exactTerritory[primeName]) {
     return exactTerritory[primeName].slice(0, 5);
   }
 
   const normTerritory = territoryName.trim().toLowerCase();
-  const normPrime = primeName.trim().toLowerCase();
 
-  for (const [tKey, primesMap] of Object.entries(PRIME_CONTRACTS_BY_TERRITORY)) {
-    const tKeyNorm = tKey.trim().toLowerCase();
-    if (tKeyNorm === normTerritory || tKeyNorm.includes(normTerritory) || normTerritory.includes(tKeyNorm)) {
-      for (const [pKey, contracts] of Object.entries(primesMap)) {
-        const pKeyNorm = pKey.trim().toLowerCase();
-        if (pKeyNorm === normPrime || pKeyNorm.includes(normPrime) || normPrime.includes(pKeyNorm)) {
-          return contracts.slice(0, 5);
+  for (const mapToSearch of [sourceMap, PRIME_CONTRACTS_BY_TERRITORY]) {
+    for (const [tKey, primesMap] of Object.entries(mapToSearch)) {
+      const tKeyNorm = tKey.trim().toLowerCase();
+      if (tKeyNorm === normTerritory || tKeyNorm.includes(normTerritory) || normTerritory.includes(tKeyNorm)) {
+        for (const [pKey, contracts] of Object.entries(primesMap)) {
+          const pKeyNorm = pKey.trim().toLowerCase();
+          if (pKeyNorm === normPrime || pKeyNorm.includes(normPrime) || normPrime.includes(pKeyNorm)) {
+            return contracts.slice(0, 5);
+          }
         }
       }
     }
   }
 
   return [];
+}
+
+const TERRITORY_SUBAGENCY_HINTS: Record<string, string[]> = {
+  "U.S. Department of Homeland Security Headquarters": ["Department of Homeland Security", "Office of the Chief Information Officer", "Office of the Secretary"],
+  "Homeland Security Operational Analysis Center (HSOAC) & Homeland Security Systems Engineering and Development Institute (HSSEDI)": ["Science and Technology", "Department of Homeland Security"],
+  "Federal Emergency Management Agency (FEMA)": ["Federal Emergency Management Agency"],
+  "U.S. Immigration and Customs Enforcement (ICE)": ["Immigration and Customs Enforcement"],
+  "DHS Office of Intelligence & Analysis (I&A)": ["Intelligence and Analysis", "Department of Homeland Security"],
+  "U.S. Coast Guard (USCG)": ["U.S. Coast Guard", "Coast Guard"],
+  "U.S. Citizenship and Immigration Services (USCIS)": ["Citizenship and Immigration Services"],
+  "U.S. Customs and Border Protection (CBP)": ["Customs and Border Protection"],
+  "U.S. Secret Service (USSS)": ["U.S. Secret Service", "Secret Service"],
+  "Transportation Security Administration (TSA)": ["Transportation Security Administration"],
+  "Cybersecurity and Infrastructure Security Agency (CISA)": ["Cybersecurity and Infrastructure Security Agency"]
+};
+
+function formatAwardMonthYear(dateStr?: string | null): string {
+  if (!dateStr) return "Active";
+  const parsed = new Date(dateStr);
+  if (isNaN(parsed.getTime())) return dateStr;
+  return parsed.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+}
+
+function cleanPrimeQueryName(primeName: string): string {
+  return primeName
+    .replace(/\s*\([^)]*\)\s*/g, " ")
+    .replace(/\b(Corporation|Corp|Incorporated|Inc|Federal Services|Federal)\b/gi, "")
+    .trim();
+}
+
+export async function fetchUpdatedPrimeContractsMap(): Promise<
+  Record<string, Record<string, PrimeContractItem[]>>
+> {
+  const merged: Record<string, Record<string, PrimeContractItem[]>> = JSON.parse(
+    JSON.stringify(PRIME_CONTRACTS_BY_TERRITORY)
+  );
+
+  const todayIso = new Date().toISOString().split("T")[0];
+  const threeYearsAgoIso = new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .split("T")[0];
+
+  try {
+    // Query USAspending.gov for recent active DHS contract awards to refresh prime vehicle dates & descriptions
+    const response = await fetch("https://api.usaspending.gov/api/v2/search/spending_by_award/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "OracleDailyBrief/1.0"
+      },
+      body: JSON.stringify({
+        fields: [
+          "Award ID",
+          "Recipient Name",
+          "Start Date",
+          "End Date",
+          "Award Amount",
+          "Awarding Sub Agency",
+          "Description"
+        ],
+        filters: {
+          time_period: [{ start_date: threeYearsAgoIso, end_date: todayIso }],
+          award_type_codes: ["A", "B", "C", "D"],
+          agencies: [
+            {
+              type: "awarding",
+              tier: "toptier",
+              name: "Department of Homeland Security"
+            }
+          ]
+        },
+        limit: 100,
+        page: 1,
+        sort: "Award Amount",
+        order: "desc"
+      })
+    });
+
+    if (response.ok) {
+      const payload = await response.json();
+      const results: Array<Record<string, unknown>> = Array.isArray(payload?.results)
+        ? payload.results
+        : [];
+
+      for (const row of results) {
+        const recipient = String(row["Recipient Name"] || "").trim();
+        const subAgency = String(row["Awarding Sub Agency"] || "").trim();
+        const awardId = String(row["Award ID"] || "").trim();
+        const rawDesc = String(row["Description"] || "").trim();
+        const startDate = formatAwardMonthYear(row["Start Date"] as string);
+        const endDate = formatAwardMonthYear(row["End Date"] as string);
+
+        if (!recipient || !awardId || !rawDesc) continue;
+
+        // Match territory by sub-agency hint
+        for (const [territoryName, primesMap] of Object.entries(merged)) {
+          const hints = TERRITORY_SUBAGENCY_HINTS[territoryName] || [];
+          const matchesSubAgency = hints.some((h) =>
+            subAgency.toLowerCase().includes(h.toLowerCase())
+          );
+          if (!matchesSubAgency) continue;
+
+          for (const [primeName, existingList] of Object.entries(primesMap)) {
+            const cleanPrime = cleanPrimeQueryName(primeName).toLowerCase();
+            if (cleanPrime && recipient.toLowerCase().includes(cleanPrime)) {
+              const alreadyExists = existingList.some((c) =>
+                c.contract_name.toLowerCase().includes(awardId.toLowerCase())
+              );
+              if (!alreadyExists && existingList.length < 5) {
+                const readableDesc =
+                  rawDesc.charAt(0).toUpperCase() + rawDesc.slice(1).toLowerCase();
+                existingList.push({
+                  contract_name: `${primeName} — DHS Award ${awardId}`,
+                  description: `${readableDesc}. Awarded by ${subAgency || "DHS"} under federal contract vehicle ${awardId} supporting agency operational and technology requirements.`,
+                  start_date: startDate,
+                  end_date: endDate
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch live USAspending prime contract updates, using baseline:", err);
+  }
+
+  // Ensure each prime list is capped at 5 contracts
+  for (const territoryName of Object.keys(merged)) {
+    for (const primeName of Object.keys(merged[territoryName])) {
+      merged[territoryName][primeName] = merged[territoryName][primeName].slice(0, 5);
+    }
+  }
+
+  return merged;
 }

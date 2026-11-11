@@ -9,7 +9,7 @@ import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AcquisitionForecastItem, getForecastForTerritory, RawApfsRecord } from "@/lib/apfs";
-import { getPrimeContractsForTerritory } from "@/lib/primeContracts";
+import { getPrimeContractsForTerritory, PrimeContractItem } from "@/lib/primeContracts";
 import { SalesQuizModal } from "@/components/SalesQuizModal";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
@@ -40,6 +40,7 @@ interface TerritoryBrief {
   mission?: DataItem<string>;
   tech_priorities?: DataItem<string>[];
   prime_contractors?: DataItem<string>[];
+  prime_contracts?: Record<string, PrimeContractItem[]>;
   leadership?: Record<string, DataItem<string | { name: string; url?: string }> | DataItem<string | { name: string; url?: string }>[]>;
   locations?: DataItem<{ name: string; address: string; map_url: string }>[];
 }
@@ -90,10 +91,14 @@ export default function Home() {
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
   const [expandedForecastIds, setExpandedForecastIds] = useState<Record<string, boolean>>({});
   const [expandedTerritories, setExpandedTerritories] = useState<Record<string, boolean>>({});
+  const [primeContractsCache, setPrimeContractsCache] = useState<
+    Record<string, Record<string, PrimeContractItem[]>> | undefined
+  >(undefined);
   const [activePrimeModal, setActivePrimeModal] = useState<{
     territoryName: string;
     territoryLogo?: string;
     primeName: string;
+    territoryPrimeContracts?: Record<string, PrimeContractItem[]>;
   } | null>(null);
   const [pendingDismissItem, setPendingDismissItem] = useState<AcquisitionForecastItem | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
@@ -285,6 +290,19 @@ export default function Home() {
         }
       } catch (err) {
         console.warn("Could not load cached APFS forecast JSON", err);
+      }
+
+      // Fetch Prime Contracts data (daily pipeline output in public/data/prime_contracts.json)
+      try {
+        const primesRes = await fetch('/data/prime_contracts.json');
+        if (primesRes.ok) {
+          const rawPrimes = await primesRes.json();
+          if (rawPrimes && typeof rawPrimes === 'object') {
+            setPrimeContractsCache(rawPrimes);
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load cached prime contracts JSON", err);
       }
 
       // Fetch all recent briefs
@@ -742,7 +760,9 @@ export default function Home() {
                 {(() => {
                   const contracts = getPrimeContractsForTerritory(
                     activePrimeModal.territoryName,
-                    activePrimeModal.primeName
+                    activePrimeModal.primeName,
+                    activePrimeModal.territoryPrimeContracts,
+                    primeContractsCache
                   );
                   return contracts.length > 0 ? (
                     <>
@@ -1377,7 +1397,12 @@ export default function Home() {
                       <>
                         <div className="flex flex-wrap gap-2">
                           {territory.prime_contractors.map((prime, i) => {
-                            const count = getPrimeContractsForTerritory(territory.name, prime.value).length;
+                            const count = getPrimeContractsForTerritory(
+                              territory.name,
+                              prime.value,
+                              territory.prime_contracts,
+                              primeContractsCache
+                            ).length;
                             return (
                               <button
                                 key={i}
@@ -1387,6 +1412,7 @@ export default function Home() {
                                     territoryName: territory.name,
                                     territoryLogo: territory.logo,
                                     primeName: prime.value,
+                                    territoryPrimeContracts: territory.prime_contracts,
                                   })
                                 }
                                 className="px-3.5 py-2 bg-zinc-800/50 hover:bg-zinc-800 border border-zinc-700/50 hover:border-sky-500/50 rounded-lg text-sm font-medium text-zinc-300 hover:text-sky-400 flex items-center gap-2 transition-all cursor-pointer group"

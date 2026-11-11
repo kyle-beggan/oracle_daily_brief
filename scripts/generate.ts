@@ -3,6 +3,12 @@ import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import { supabase } from './supabase';
 import { getForecastForTerritory, RawApfsRecord } from '../src/lib/apfs';
+import {
+  fetchUpdatedPrimeContractsMap,
+  getPrimeContractsForTerritory,
+  PRIME_CONTRACTS_BY_TERRITORY,
+  PrimeContractItem
+} from '../src/lib/primeContracts';
 
 dotenv.config({ path: '.env.local', override: true });
 
@@ -213,6 +219,26 @@ async function loadApfsForecast(): Promise<RawApfsRecord[]> {
   }
 }
 
+async function loadPrimeContracts(): Promise<Record<string, Record<string, PrimeContractItem[]>>> {
+  const fs = await import('fs/promises');
+  const cachePath = path.join(PUBLIC_DATA_DIR, 'prime_contracts.json');
+
+  try {
+    const updatedMap = await fetchUpdatedPrimeContractsMap();
+    await fs.writeFile(cachePath, JSON.stringify(updatedMap, null, 2));
+    return updatedMap;
+  } catch (err) {
+    console.warn('Could not refresh live prime contracts in generate, falling back to cache:', err);
+  }
+
+  try {
+    const raw = await fs.readFile(cachePath, 'utf-8');
+    return JSON.parse(raw) as Record<string, Record<string, PrimeContractItem[]>>;
+  } catch {
+    return PRIME_CONTRACTS_BY_TERRITORY;
+  }
+}
+
 interface IntelligenceItem {
   relevance_score: number;
   article_id: string;
@@ -387,6 +413,8 @@ async function run() {
   const sources = await loadSources();
   const apfsRecords = await loadApfsForecast();
   console.log(`Loaded ${apfsRecords.length} APFS forecast records.`);
+  const primeContractsMap = await loadPrimeContracts();
+  console.log(`Loaded prime contracts for ${Object.keys(primeContractsMap).length} territories.`);
   const users = await loadUsers();
 
   console.log(`Generating content for ${users.length} users...`);
@@ -426,14 +454,27 @@ async function run() {
         if (gNorm && tNorm && (gNorm === tNorm || gNorm.includes(tNorm) || tNorm.includes(gNorm))) return true;
         return false;
       });
+      const territoryName = t.name as string;
+      const primesList = Array.isArray(t.prime_contractors) ? (t.prime_contractors as string[]) : [];
+      const territoryPrimeContracts: Record<string, PrimeContractItem[]> = {};
+      for (const primeName of primesList) {
+        territoryPrimeContracts[primeName] = getPrimeContractsForTerritory(
+          territoryName,
+          primeName,
+          undefined,
+          primeContractsMap
+        );
+      }
+
       return {
         name: t.name,
         logo: t.logo,
         news: aiMatch ? (aiMatch.news || []) : [],
-        acquisition_forecast: getForecastForTerritory(apfsRecords, t.name as string),
+        acquisition_forecast: getForecastForTerritory(apfsRecords, territoryName),
         mission: t.mission || t.description,
         tech_priorities: t.tech_priorities || [],
-        prime_contractors: t.prime_contractors || [],
+        prime_contractors: primesList,
+        prime_contracts: territoryPrimeContracts,
         leadership: t.leadership || {},
         locations: t.locations || []
       };

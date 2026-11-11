@@ -3,6 +3,7 @@ import path from 'path';
 import Parser from 'rss-parser';
 import { supabase } from './supabase';
 import { cleanApfsText, isTechRelatedApfsRecord, parseApfsDate, RawApfsRecord } from '../src/lib/apfs';
+import { fetchUpdatedPrimeContractsMap } from '../src/lib/primeContracts';
 
 // Types
 interface Source {
@@ -206,8 +207,26 @@ async function fetchApfsApi(source: Source): Promise<Partial<Article>[]> {
   }
 }
 
+// Sync DHS Prime Contracts (USAspending.gov + Baseline Vehicles)
+async function syncPrimeContracts(): Promise<void> {
+  console.log('Syncing DHS prime contracts for all territories...');
+  try {
+    const updatedMap = await fetchUpdatedPrimeContractsMap();
+    const publicDataDir = path.join(process.cwd(), 'public', 'data');
+    await fs.mkdir(publicDataDir, { recursive: true });
+    await fs.writeFile(
+      path.join(publicDataDir, 'prime_contracts.json'),
+      JSON.stringify(updatedMap, null, 2)
+    );
+    console.log('Saved updated DHS prime contracts to public/data/prime_contracts.json');
+  } catch (error) {
+    console.error('Failed to sync prime contracts:', error);
+  }
+}
+
 async function runIngestion() {
   console.log('Starting ingestion pipeline...');
+  await syncPrimeContracts();
   const sources = await loadSources();
   const existingUrls = await loadExistingArticleUrls();
   
