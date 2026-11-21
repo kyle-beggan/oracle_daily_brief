@@ -412,7 +412,7 @@ export default function Home() {
         setSourcesData(sources);
       }
 
-      // Fetch networking events
+      // Fetch networking events (exclude events that have already occurred)
       const { data: events, error: eventsError } = await supabase
         .from('oracle_networking_events')
         .select('*')
@@ -421,7 +421,31 @@ export default function Home() {
       if (eventsError) {
         console.error("Could not load networking events", eventsError);
       } else {
-        setNetworkingEvents(events);
+        const now = new Date();
+        const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const seenEventKeys = new Set<string>();
+        const upcomingEvents = (events || []).filter((ev) => {
+          if (!ev?.event_date || !ev?.name) return false;
+          const isoMatch = String(ev.event_date).match(/^(\d{4}-\d{2}-\d{2})/);
+          let isUpcoming = false;
+          let dateKey = '';
+          if (isoMatch) {
+            isUpcoming = isoMatch[1] >= todayYmd;
+            dateKey = isoMatch[1];
+          } else {
+            const parsed = new Date(ev.event_date);
+            isUpcoming = !isNaN(parsed.getTime()) && parsed >= startOfToday;
+            dateKey = !isNaN(parsed.getTime()) ? parsed.toISOString().slice(0, 10) : '';
+          }
+          if (!isUpcoming) return false;
+          const normName = String(ev.name).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+          const dedupeKey = `${normName}|${dateKey}`;
+          if (seenEventKeys.has(dedupeKey)) return false;
+          seenEventKeys.add(dedupeKey);
+          return true;
+        });
+        setNetworkingEvents(upcomingEvents);
       }
     }
 

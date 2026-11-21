@@ -9,8 +9,18 @@ const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY });
 
 const SOURCES = [
   { name: 'AFCEA DC', url: 'https://dc.afceachapters.org/' },
+  { name: 'HSDF', url: 'https://hsdf.org/events/' },
   // { name: 'GovConWire', url: 'https://www.govconwire.com/events/' }, // often blocked by WAF
 ];
+
+function normalizeEventKey(name: string, dateStr?: string | null): string {
+  const normName = (name || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const datePart = dateStr ? String(dateStr).slice(0, 10) : 'tbd';
+  return `${normName}|${datePart}`;
+}
 
 async function fetchHtmlText(url: string): Promise<string> {
   try {
@@ -35,10 +45,13 @@ async function fetchHtmlText(url: string): Promise<string> {
 async function extractEvents(sourceName: string, sourceUrl: string, rawText: string) {
   if (!rawText) return [];
   console.log(`Extracting events from ${sourceName}...`);
+  const todayIso = new Date().toISOString().slice(0, 10);
   
   const prompt = `
 You are an expert federal technology networking analyst.
-Extract upcoming events relevant to federal IT, defense, and homeland security from the following text.
+Today's date is ${todayIso}.
+Extract upcoming events (occurring on or after ${todayIso}) relevant to federal IT, defense, and homeland security from the following text.
+If an upcoming event lists a month and day without an explicit year, resolve its year to the next upcoming occurrence on or after ${todayIso}.
 Specifically look for events in the Washington DC area.
 Identify any DHS (Department of Homeland Security) involvement if mentioned.
 
@@ -81,7 +94,57 @@ Return a JSON object containing an array of "events" with these keys:
   return data.events || [];
 }
 
+async function cleanupAndLoadExistingKeys(): Promise<Set<string>> {
+  const existingKeys = new Set<string>();
+  const todayYmd = new Date().toISOString().slice(0, 10);
+
+  const { data: rows, error } = await supabase
+    .from('oracle_networking_events')
+    .select('id, name, event_date')
+    .order('event_date', { ascending: true });
+
+  if (error || !rows) {
+    console.error('Error loading existing networking events:', error);
+    return existingKeys;
+  }
+
+  const idsToDelete: string[] = [];
+
+  for (const row of rows) {
+    const dateYmd = row.event_date ? String(row.event_date).slice(0, 10) : '';
+    // Remove past or undated events
+    if (!dateYmd || dateYmd < todayYmd) {
+      idsToDelete.push(row.id);
+      continue;
+    }
+
+    const key = normalizeEventKey(row.name, row.event_date);
+    if (existingKeys.has(key)) {
+      // Duplicate event
+      idsToDelete.push(row.id);
+    } else {
+      existingKeys.add(key);
+    }
+  }
+
+  if (idsToDelete.length > 0) {
+    console.log(`Removing ${idsToDelete.length} past or duplicate networking events from Supabase...`);
+    const { error: delError } = await supabase
+      .from('oracle_networking_events')
+      .delete()
+      .in('id', idsToDelete);
+    if (delError) {
+      console.error('Failed to delete duplicate/past events:', delError);
+    }
+  }
+
+  return existingKeys;
+}
+
 async function ingest() {
+  const existingKeys = await cleanupAndLoadExistingKeys();
+  const todayYmd = new Date().toISOString().slice(0, 10);
+
   for (const source of SOURCES) {
     const rawText = await fetchHtmlText(source.url);
     const events = await extractEvents(source.name, source.url, rawText);
@@ -89,13 +152,29 @@ async function ingest() {
     console.log(`Found ${events.length} events from ${source.name}`);
     
     for (const event of events) {
+      if (!event.event_date || !event.name) continue;
+      const parsedDate = new Date(event.event_date);
+      if (isNaN(parsedDate.getTime())) continue;
+      const isoDate = parsedDate.toISOString();
+      if (isoDate.slice(0, 10) < todayYmd) {
+        console.log(`Skipping past event: ${event.name} (${event.event_date})`);
+        continue;
+      }
+
+      const key = normalizeEventKey(event.name, isoDate);
+      if (existingKeys.has(key)) {
+        console.log(`Skipping duplicate event: ${event.name} (${isoDate.slice(0, 10)})`);
+        continue;
+      }
+      existingKeys.add(key);
+
       console.log(`Inserting: ${event.name}`);
       const { error } = await supabase
         .from('oracle_networking_events')
         .insert({
           name: event.name,
           event_type: event.event_type,
-          event_date: event.event_date ? new Date(event.event_date).toISOString() : null,
+          event_date: isoDate,
           venue: event.venue,
           city: event.city,
           format: event.format,
