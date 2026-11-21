@@ -9,6 +9,11 @@ import {
   PRIME_CONTRACTS_BY_TERRITORY,
   PrimeContractItem
 } from '../src/lib/primeContracts';
+import {
+  getFallbackSalesPlaysForTerritory,
+  makeSalesNavUrl,
+  SalesPlayItem
+} from '../src/lib/salesPlays';
 
 dotenv.config({ path: '.env.local', override: true });
 
@@ -342,6 +347,15 @@ Your task is to review the following intelligence items and produce a JSON respo
    - "prime_contractors": An array of strings listing key prime contractors.
    - "leadership": An object with role titles as keys (e.g. "CIO", "Deputy CIO", "CISO") and { "name": string, "url": string } as values. You MUST ensure the leadership object includes the CIO and Deputy CIO at a minimum, along with any other key stakeholders related to cloud, AI, tech modernization, data, or automation. Links should point to LinkedIn Sales Navigator people search (https://www.linkedin.com/sales/search/people?query=(keywords%3A...)). If no URL is found, use an empty string.
    - "locations": An array of strings listing key office locations.
+   - "sales_plays": An array of 3 to 5 strategic Oracle sales plays tailored to this territory by evaluating BOTH current events (from [Intelligence Items]) AND the territory's technology roadmap (from its tech_priorities and mission in [My Territories]). Each sales play object MUST include:
+     * "title": A concise, compelling title for the sales play.
+     * "source_type": Either "Current Event" (if driven by recent news/events) or "Technology Roadmap" (if driven by the agency's tech priorities/modernization roadmap).
+     * "problem_or_focus_area": 2 sentences describing the specific agency challenge, current event, or technology roadmap initiative.
+     * "oracle_solution": The specific Oracle offering that fits best (e.g. "Oracle Database 26ai with AI Vector Search", "Oracle Cloud Infrastructure (OCI) FedRAMP High", "Oracle Autonomous Data Warehouse", "Oracle Exadata Cloud@Customer", "OCI Roving Edge Infrastructure", "Oracle GoldenGate", "Oracle Interconnect for Azure/AWS").
+     * "value_proposition": 2-3 sentences explaining how the Oracle solution solves the problem and why it is beneficial for the customer to consider over alternatives.
+     * "target_contact_name": The full name of the right executive/stakeholder in the organization (from the territory's leadership list) to reach out to in order to initiate a conversation.
+     * "target_contact_role": That person's official title/role in the agency.
+     * "target_contact_sales_nav_url": That person's LinkedIn Sales Navigator search URL formatted as https://www.linkedin.com/sales/search/people?query=(keywords%3AURL_ENCODED_NAME_AND_AGENCY).
    - Order the bullets with the most recent news on top.
    - IMPORTANT: If an intelligence item has a source URL, you MUST provide the source name and link at the very end of the bullet point in this exact format: <code>(Source Name - <a href="URL" target="_blank" rel="noopener noreferrer">link</a>)</code>.
 
@@ -350,7 +364,7 @@ Here is the context for today:
 [Commute]: ${commuteStr}
 
 [My Territories]:
-${territories.map((t: { id: string; name: string; logo: string }) => `- ID: ${t.id} | Name: ${t.name} (Logo URL: ${t.logo})`).join('\n')}
+${territories.map((t: { id: string; name: string; logo: string; mission?: string; tech_priorities?: string[]; leadership?: Record<string, unknown> }) => `- ID: ${t.id} | Name: ${t.name} (Logo URL: ${t.logo})\n  Mission: ${t.mission || ''}\n  Tech Priorities: ${JSON.stringify(t.tech_priorities || [])}\n  Leadership: ${JSON.stringify(t.leadership || {})}`).join('\n')}
 
 [Intelligence Items]:
 ${JSON.stringify(enrichedIntel, null, 2)}
@@ -466,10 +480,38 @@ async function run() {
         );
       }
 
+      const fallbackPlays = getFallbackSalesPlaysForTerritory(territoryName);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawAiPlays: any[] = Array.isArray(aiMatch?.sales_plays) ? aiMatch.sales_plays : [];
+      const normalizedAiPlays: SalesPlayItem[] = rawAiPlays
+        .filter((p) => p && p.title && p.oracle_solution)
+        .map((p) => ({
+          title: String(p.title),
+          source_type:
+            p.source_type === "Current Event" ||
+            p.source_type === "Technology Roadmap" ||
+            p.source_type === "Acquisition Forecast"
+              ? p.source_type
+              : "Current Event",
+          problem_or_focus_area: String(p.problem_or_focus_area || ""),
+          oracle_solution: String(p.oracle_solution || ""),
+          value_proposition: String(p.value_proposition || ""),
+          target_contact_name: String(p.target_contact_name || ""),
+          target_contact_role: String(p.target_contact_role || "CIO"),
+          target_contact_sales_nav_url:
+            p.target_contact_sales_nav_url && String(p.target_contact_sales_nav_url).includes("linkedin.com/sales/")
+              ? String(p.target_contact_sales_nav_url)
+              : makeSalesNavUrl(String(p.target_contact_name || ""), territoryName)
+        }));
+
+      const salesPlays: SalesPlayItem[] =
+        normalizedAiPlays.length > 0 ? normalizedAiPlays : fallbackPlays;
+
       return {
         name: t.name,
         logo: t.logo,
         news: aiMatch ? (aiMatch.news || []) : [],
+        sales_plays: salesPlays,
         acquisition_forecast: getForecastForTerritory(apfsRecords, territoryName),
         mission: t.mission || t.description,
         tech_priorities: t.tech_priorities || [],

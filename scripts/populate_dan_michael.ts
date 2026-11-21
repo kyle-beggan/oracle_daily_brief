@@ -7,6 +7,9 @@ import {
   getPrimeContractsForTerritory,
   PrimeContractItem
 } from '../src/lib/primeContracts';
+import {
+  buildSalesPlaysFromBriefTerritory
+} from '../src/lib/salesPlays';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -219,10 +222,17 @@ async function run() {
       }
 
       changed = true;
+      const newsStrings: string[] = Array.isArray(t.news)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ? t.news.map((n: any) => (typeof n === 'string' ? n : n?.value || '')).filter(Boolean)
+        : [];
+      const salesPlays = buildSalesPlaysFromBriefTerritory(t.name, newsStrings);
+
       return {
         ...t,
         leadership: match ? match.leadership : t.leadership,
-        prime_contracts: territoryPrimeContracts
+        prime_contracts: territoryPrimeContracts,
+        sales_plays: salesPlays
       };
     });
 

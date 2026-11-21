@@ -10,6 +10,7 @@ import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AcquisitionForecastItem, getForecastForTerritory, RawApfsRecord } from "@/lib/apfs";
 import { getPrimeContractsForTerritory, PrimeContractItem } from "@/lib/primeContracts";
+import { buildSalesPlaysFromBriefTerritory, makeSalesNavUrl, SalesPlayItem } from "@/lib/salesPlays";
 import { SalesQuizModal } from "@/components/SalesQuizModal";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
@@ -36,6 +37,7 @@ interface TerritoryBrief {
   logo: string;
   html?: string;
   news?: DataItem<string>[];
+  sales_plays?: DataItem<SalesPlayItem>[];
   acquisition_forecast?: DataItem<AcquisitionForecastItem>[];
   mission?: DataItem<string>;
   tech_priorities?: DataItem<string>[];
@@ -369,9 +371,20 @@ export default function Home() {
                 (item) => !dismissedApfsIds.has(item.value.id)
               );
 
+              const rawSalesPlays: DataItem<SalesPlayItem>[] =
+                t.sales_plays && Array.isArray(t.sales_plays) && t.sales_plays.length > 0
+                  ? wrapArray<SalesPlayItem>(t.sales_plays)
+                  : wrapArray<SalesPlayItem>(
+                      buildSalesPlaysFromBriefTerritory(
+                        t.name,
+                        news.map((n) => n.value)
+                      )
+                    );
+
               return {
                 ...t,
                 news,
+                sales_plays: rawSalesPlays,
                 acquisition_forecast: forecastItems,
                 mission: t.mission ? wrap(t.mission) : undefined,
                 tech_priorities: wrapArray(t.tech_priorities),
@@ -1214,8 +1227,9 @@ export default function Home() {
                 </div>
 
                 <Tabs defaultValue="news" className="w-full">
-                  <TabsList className="grid grid-cols-2 sm:grid-cols-3 lg:flex w-full h-auto group-data-horizontal/tabs:h-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
-                    <TabsTrigger value="news" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Latest News</TabsTrigger>
+                  <TabsList className="grid grid-cols-2 sm:grid-cols-4 lg:flex w-full h-auto group-data-horizontal/tabs:h-auto bg-zinc-950/50 border border-zinc-800/50 mb-6 p-1 rounded-xl gap-1">
+                    <TabsTrigger value="news" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>News</TabsTrigger>
+                    <TabsTrigger value="sales-plays" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Sales Plays</TabsTrigger>
                     <TabsTrigger value="acquisition-forecast" className={`flex-1 px-2 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Acquisition Forecast</TabsTrigger>
                     <TabsTrigger value="mission-tech" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Mission & Tech</TabsTrigger>
                     <TabsTrigger value="primes" className={`flex-1 px-2.5 py-2 text-xs text-zinc-400 [&:not([data-active])]:hover:text-sky-400 rounded-lg data-active:bg-sky-400 ${isLightMode ? 'data-active:text-white' : 'data-active:text-black'}`}>Primes</TabsTrigger>
@@ -1259,6 +1273,97 @@ export default function Home() {
                         <p className="text-zinc-500">No significant activity to report this week.</p>
                       )}
                     </div>
+                  </TabsContent>
+
+                  <TabsContent value="sales-plays" className="mt-0">
+                    {territory.sales_plays && territory.sales_plays.length > 0 ? (
+                      <div className="space-y-4">
+                        {territory.sales_plays.map((item, i) => {
+                          const play = item.value;
+                          const isEven = i % 2 === 0;
+                          const salesNavUrl =
+                            play.target_contact_sales_nav_url &&
+                            play.target_contact_sales_nav_url.includes("linkedin.com/sales/")
+                              ? play.target_contact_sales_nav_url
+                              : makeSalesNavUrl(play.target_contact_name, territory.name);
+
+                          return (
+                            <div
+                              key={i}
+                              className={`rounded-xl p-5 border transition-colors space-y-3.5 ${
+                                isLightMode
+                                  ? isEven
+                                    ? "bg-[#ffffff] border-[#cbd5e1] hover:border-sky-500/70 shadow-xs"
+                                    : "bg-[#e2e8f0] border-[#94a3b8] hover:border-sky-500/70"
+                                  : isEven
+                                    ? "bg-[#09090b] border-[#27272a] hover:border-sky-500/50"
+                                    : "bg-[#27272a] border-[#52525b] hover:border-sky-500/50"
+                              }`}
+                            >
+                              <div className="flex flex-wrap items-start justify-between gap-3">
+                                <div className="space-y-1 flex-1 min-w-[220px]">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <span
+                                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider border ${
+                                        play.source_type === "Current Event"
+                                          ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                                          : "bg-sky-500/15 text-sky-400 border-sky-500/30"
+                                      }`}
+                                    >
+                                      {play.source_type}
+                                    </span>
+                                    <h4 className="font-bold text-base text-zinc-100">
+                                      {play.title}
+                                    </h4>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <span className="text-xs text-zinc-400 font-medium">Target Contact:</span>
+                                  <a
+                                    href={salesNavUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={`Open ${play.target_contact_name} in LinkedIn Sales Navigator`}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 transition-colors"
+                                  >
+                                    <span>
+                                      {play.target_contact_name} ({play.target_contact_role})
+                                    </span>
+                                    <LinkIcon className="h-3 w-3 opacity-80" />
+                                  </a>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                <div className="p-3.5 rounded-lg bg-zinc-900/50 border border-zinc-800/60 space-y-1">
+                                  <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
+                                    Problem / Focus Area
+                                  </p>
+                                  <p className="text-sm text-zinc-200 leading-relaxed">
+                                    {play.problem_or_focus_area}
+                                  </p>
+                                </div>
+
+                                <div className="p-3.5 rounded-lg bg-zinc-900/50 border border-zinc-800/60 space-y-1.5">
+                                  <p className="text-[11px] font-semibold uppercase tracking-wider text-sky-400">
+                                    Oracle Solution &amp; Customer Benefit
+                                  </p>
+                                  <p className="text-xs font-bold text-sky-300">
+                                    {play.oracle_solution}
+                                  </p>
+                                  <p className="text-sm text-zinc-200 leading-relaxed">
+                                    {play.value_proposition}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className="text-zinc-500">No sales plays formulated for this territory yet.</p>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="acquisition-forecast" className="mt-0">
