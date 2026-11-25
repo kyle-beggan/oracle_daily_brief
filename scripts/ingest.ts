@@ -34,6 +34,19 @@ const parser = new Parser({
 });
 
 async function loadSources(): Promise<Source[]> {
+  // Ensure MeriTalk RSS feed is registered in oracle_sources
+  await supabase.from('oracle_sources').upsert(
+    {
+      id: 'source-meritalk',
+      name: 'MeriTalk',
+      url: 'https://www.meritalk.com/feed/',
+      tier: 2,
+      type: 'rss',
+      is_active: true
+    },
+    { onConflict: 'id' }
+  );
+
   const { data, error } = await supabase.from('oracle_sources').select('*').eq('is_active', true);
   if (error) {
     console.error('Error loading sources from Supabase:', error);
@@ -76,77 +89,160 @@ async function saveArticles(articles: Article[]): Promise<void> {
   }
 }
 
-// Fetch RSS Feeds
+// Fetch RSS Feeds (with automatic fallback to common RSS paths if user entered a base domain URL via the UI)
 async function fetchRss(source: Source): Promise<Partial<Article>[]> {
   console.log(`Fetching RSS for ${source.name} from ${source.url}`);
+  const candidateUrls = [source.url];
   try {
-    const feed = await parser.parseURL(source.url);
-    return feed.items.map(item => ({
-      source_id: source.id,
-      url: item.link || '',
-      title: item.title || 'Untitled',
-      content: item.contentSnippet || item.content || '',
-      published_at: item.isoDate || new Date().toISOString(),
-    }));
-  } catch (error) {
-    console.error(`Failed to fetch RSS for ${source.name}:`, error);
-    return [];
+    const parsed = new URL(source.url);
+    if (parsed.pathname === '/' || parsed.pathname === '') {
+      const origin = parsed.origin;
+      candidateUrls.push(`${origin}/feed/`, `${origin}/rss`, `${origin}/rss.xml`, `${origin}/feed.xml`);
+    }
+  } catch {
+    // ignore URL parse error
   }
+
+  for (const urlToTry of candidateUrls) {
+    try {
+      const feed = await parser.parseURL(urlToTry);
+      return feed.items.map(item => ({
+        source_id: source.id,
+        url: item.link || '',
+        title: item.title || 'Untitled',
+        content: item.contentSnippet || item.content || '',
+        published_at: item.isoDate || new Date().toISOString(),
+      }));
+    } catch (error) {
+      if (urlToTry === candidateUrls[candidateUrls.length - 1]) {
+        console.error(`Failed to fetch RSS for ${source.name}:`, error);
+      }
+    }
+  }
+  return [];
 }
 
-// Fetch SAM.gov API
+// Fetch SAM.gov API (Uses SAM.gov public SGS search endpoint for DHS so it works without a 90-day expiring API key and includes full description text + sub-agency hierarchy)
 async function fetchSamGovApi(source: Source): Promise<Partial<Article>[]> {
-  console.log(`Fetching API for ${source.name} from ${source.url}`);
-  const apiKey = process.env.SAM_API_KEY;
-  
-  if (!apiKey) {
-    console.warn("No SAM_API_KEY found, skipping SAM.gov API fetch.");
-    return [];
-  }
+  console.log(`Fetching SAM.gov DHS opportunities for ${source.name}...`);
 
-  // Calculate dynamic dates (last 7 days)
-  const today = new Date();
-  const lastWeek = new Date(today);
-  lastWeek.setDate(today.getDate() - 7);
-  
-  const formatDate = (date: Date) => {
-    return `${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')}/${date.getFullYear()}`;
-  };
+  // Query SAM.gov public SGS search endpoints for active DHS Sources Sought/RFIs and component opportunities (including acronyms like FEMA, CISA, CBP, USCIS, ICE, TSA, USCG, DHS)
+  const sgsUrls = [
+    'https://sam.gov/api/prod/sgs/v1/search/?index=opp&page=0&mode=search&size=100&is_active=true&sort=-modifiedDate&q=FEMA',
+    'https://sam.gov/api/prod/sgs/v1/search/?index=opp&page=0&mode=search&size=100&is_active=true&sort=-modifiedDate&q=DHS+OR+CISA+OR+CBP+OR+USCIS',
+    'https://sam.gov/api/prod/sgs/v1/search/?index=opp&page=0&mode=search&size=100&is_active=true&sort=-modifiedDate&q=ICE+OR+TSA+OR+USCG+OR+%22Secret+Service%22',
+    'https://sam.gov/api/prod/sgs/v1/search/?index=opp&page=0&mode=search&size=100&is_active=true&sort=-modifiedDate&q=%22HOMELAND+SECURITY%22'
+  ];
 
-  const postedFrom = formatDate(lastWeek);
-  const postedTo = formatDate(today);
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 14);
 
-  // Construct URL
-  const searchUrl = new URL(source.url);
-  searchUrl.searchParams.append('api_key', apiKey);
-  searchUrl.searchParams.append('ptype', 'r'); // RFI
-  searchUrl.searchParams.append('organizationName', 'Department of Homeland Security');
-  searchUrl.searchParams.append('postedFrom', postedFrom);
-  searchUrl.searchParams.append('postedTo', postedTo);
-  searchUrl.searchParams.append('limit', '1000');
+  const allowedNoticeCodes = new Set(['r', 's', 'p', 'o', 'k']); // Sources Sought (RFI), Special Notice, Presolicitation, Solicitation, Combined
 
   try {
-    const response = await fetch(searchUrl.toString());
-    if (!response.ok) {
-      console.error(`SAM API returned ${response.status}: ${await response.text()}`);
-      return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results: any[] = [];
+    const seenNoticeIds = new Set<string>();
+
+    for (const sgsUrl of sgsUrls) {
+      const response = await fetch(sgsUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/hal+json, application/json, */*'
+        }
+      });
+
+      if (!response.ok) {
+        console.error(`SAM.gov SGS API returned ${response.status}: ${await response.text()}`);
+        continue;
+      }
+
+      const data = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pageResults: any[] = data?._embedded?.results || [];
+      for (const opp of pageResults) {
+        const nid = opp._id || opp.noticeId;
+        if (nid && !seenNoticeIds.has(nid)) {
+          seenNoticeIds.add(nid);
+          results.push(opp);
+        }
+      }
     }
-    const data = await response.json();
-    
-    if (!data.opportunitiesData) {
-      console.log('No opportunities found from SAM.gov');
+
+    if (results.length === 0) {
+      console.log('No opportunities found from SAM.gov SGS endpoint');
       return [];
     }
 
-    return data.opportunitiesData.map((opp: Record<string, unknown>) => ({
-      source_id: source.id,
-      url: (opp.uiLink as string) || `https://sam.gov/opp/${opp.noticeId}/view`,
-      title: (opp.title as string) || 'Untitled Opportunity',
-      content: (opp.description as string) || (opp.type as string) || 'No description available',
-      published_at: (opp.publishDate as string) || new Date().toISOString(),
-    }));
+    const items: Partial<Article>[] = [];
+
+    for (const opp of results) {
+      if (opp.isCanceled || opp.isActive === false) continue;
+
+      const hierarchy: Array<{ level?: number; name?: string }> = Array.isArray(opp.organizationHierarchy)
+        ? opp.organizationHierarchy
+        : [];
+      const isDhs = hierarchy.some((h) =>
+        String(h.name || '').toUpperCase().includes('HOMELAND SECURITY')
+      );
+      if (!isDhs) continue;
+
+      const typeCode = String(opp.type?.code || '').toLowerCase();
+      const typeLabel = String(opp.type?.value || 'Opportunity');
+      if (typeCode && !allowedNoticeCodes.has(typeCode)) continue;
+
+      const pubDateStr = opp.modifiedDate || opp.publishDate;
+      const pubDate = pubDateStr ? new Date(pubDateStr) : new Date();
+      if (!isNaN(pubDate.getTime()) && pubDate < cutoff) continue;
+
+      const subAgency =
+        hierarchy.find((h) => h.level === 2)?.name ||
+        hierarchy[hierarchy.length - 1]?.name ||
+        'Department of Homeland Security';
+      const orgPath = hierarchy.map((h) => h.name).filter(Boolean).join(' > ');
+
+      const rawDescHtml =
+        Array.isArray(opp.descriptions) && opp.descriptions.length > 0
+          ? String(opp.descriptions[0].content || '')
+          : '';
+      const cleanDesc = rawDescHtml
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/&rsquo;/gi, "'")
+        .replace(/&ldquo;|&rdquo;/gi, '"')
+        .replace(/&amp;/gi, '&')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Include all DHS Sources Sought (RFIs) / Special Notices, or tech-filtered solicitations
+      const isRfiOrSpecialNotice = typeCode === 'r' || typeCode === 's';
+      if (
+        !isRfiOrSpecialNotice &&
+        !isTechRelatedApfsRecord({
+          id: 0,
+          requirements_title: `${opp.title || ''} ${cleanDesc}`,
+          requirement: cleanDesc
+        })
+      ) {
+        continue;
+      }
+
+      const noticeId = opp._id || opp.noticeId;
+      if (!noticeId) continue;
+
+      items.push({
+        source_id: source.id,
+        url: `https://sam.gov/opp/${noticeId}/view`,
+        title: `[${subAgency} - ${typeLabel}] ${opp.title || 'Untitled Opportunity'}`,
+        content: `Organization: ${orgPath || subAgency}\nNotice Type: ${typeLabel}\nSolicitation Number: ${String(opp.solicitationNumber || 'N/A').trim()}\nResponse Deadline: ${opp.responseDate || 'TBD'}\nDescription: ${cleanDesc || 'No description available'}`,
+        published_at: !isNaN(pubDate.getTime()) ? pubDate.toISOString() : new Date().toISOString()
+      });
+    }
+
+    console.log(`Matched ${items.length} recent DHS SAM.gov opportunities.`);
+    return items;
   } catch (error) {
-    console.error(`Failed to fetch SAM.gov API:`, error);
+    console.error('Failed to fetch SAM.gov API:', error);
     return [];
   }
 }
@@ -229,18 +325,18 @@ async function runIngestion() {
   await syncPrimeContracts();
   const sources = await loadSources();
   const existingUrls = await loadExistingArticleUrls();
-  
+
   const newArticles: Article[] = [];
   const now = new Date().toISOString();
 
   for (const source of sources) {
     let fetchedItems: Partial<Article>[] = [];
-    if (source.type === 'rss') {
+    if (source.type === 'rss' || source.type === 'html') {
       fetchedItems = await fetchRss(source);
     } else if (source.type === 'api') {
       if (source.url.includes('apfs-cloud.dhs.gov')) {
         fetchedItems = await fetchApfsApi(source);
-      } else {
+      } else if (source.id === 'source-sam-gov' || source.url.includes('sam.gov')) {
         fetchedItems = await fetchSamGovApi(source);
       }
     }

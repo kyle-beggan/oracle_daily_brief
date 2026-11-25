@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from "react";
 import { flushSync } from "react-dom";
 import { toast } from "sonner";
-import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff, GraduationCap, X, Briefcase } from "lucide-react";
+import { Play, Pause, Activity, ShieldAlert, Cpu, Cloud, Car, RefreshCw, Link as LinkIcon, ChevronDown, ChevronRight, HelpCircle, Sun, Moon, Minimize2, Maximize2, EyeOff, GraduationCap, X, Briefcase, Plus } from "lucide-react";
 import { Joyride, Step } from "react-joyride";
 import { createClient } from "@supabase/supabase-js";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,6 +91,11 @@ export default function Home() {
 
   const [sourcesData, setSourcesData] = useState<Array<{ name: string; url: string;[key: string]: unknown }>>([]);
   const [isDataSourcesExpanded, setIsDataSourcesExpanded] = useState(false);
+  const [showAddSourceForm, setShowAddSourceForm] = useState(false);
+  const [newSourceName, setNewSourceName] = useState("");
+  const [newSourceUrl, setNewSourceUrl] = useState("");
+  const [newSourceType, setNewSourceType] = useState<"rss" | "html" | "api">("rss");
+  const [isAddingSource, setIsAddingSource] = useState(false);
   const [expandedForecastIds, setExpandedForecastIds] = useState<Record<string, boolean>>({});
   const [expandedTerritories, setExpandedTerritories] = useState<Record<string, boolean>>({});
   const [primeContractsCache, setPrimeContractsCache] = useState<
@@ -108,6 +113,69 @@ export default function Home() {
   const [isLightMode, setIsLightMode] = useState(true);
   const [showQuizModal, setShowQuizModal] = useState(false);
   const [quizSessionKey, setQuizSessionKey] = useState(0);
+
+  const handleAddDataSource = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedName = newSourceName.trim();
+    let trimmedUrl = newSourceUrl.trim();
+    if (!trimmedName || !trimmedUrl || isAddingSource) return;
+
+    if (!/^https?:\/\//i.test(trimmedUrl)) {
+      trimmedUrl = `https://${trimmedUrl}`;
+    }
+
+    try {
+      new URL(trimmedUrl);
+    } catch {
+      toast.error("Please enter a valid URL (e.g. https://www.meritalk.com/feed/)");
+      return;
+    }
+
+    const slug = trimmedName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    const sourceId = `source-${slug || Date.now()}`;
+
+    setIsAddingSource(true);
+    try {
+      const payload = {
+        id: sourceId,
+        name: trimmedName,
+        url: trimmedUrl,
+        tier: 2,
+        type: newSourceType,
+        is_active: true,
+      };
+
+      const { error } = await supabase
+        .from("oracle_sources")
+        .upsert(payload, { onConflict: "id" });
+
+      if (error) {
+        console.error("Failed to add data source:", error);
+        toast.error("Failed to save data source to database.");
+      } else {
+        setSourcesData((prev) => {
+          const filtered = prev.filter(
+            (s) => s.id !== sourceId && s.name.toLowerCase() !== trimmedName.toLowerCase()
+          );
+          return [...filtered, payload].sort((a, b) => a.name.localeCompare(b.name));
+        });
+        setNewSourceName("");
+        setNewSourceUrl("");
+        setNewSourceType("rss");
+        setShowAddSourceForm(false);
+        setIsDataSourcesExpanded(true);
+        toast.success(`Added "${trimmedName}" to daily pipeline data sources.`);
+      }
+    } catch (err) {
+      console.error("Error adding data source:", err);
+      toast.error("Error saving data source.");
+    } finally {
+      setIsAddingSource(false);
+    }
+  };
 
   const confirmDismissForecastItem = async () => {
     if (!pendingDismissItem || isDismissing) return;
@@ -1175,6 +1243,73 @@ export default function Home() {
                   })}
                 </ul>
               )}
+
+              <div className="mt-4 pt-4 border-t border-zinc-800/60">
+                {!showAddSourceForm ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddSourceForm(true);
+                      setIsDataSourcesExpanded(true);
+                    }}
+                    className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-zinc-800/50 hover:bg-zinc-800 text-sky-400 hover:text-sky-300 border border-zinc-700/50 hover:border-sky-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Add Data Source</span>
+                  </button>
+                ) : (
+                  <form onSubmit={handleAddDataSource} className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
+                        New Pipeline Source
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddSourceForm(false)}
+                        className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        placeholder="Source Name (e.g. MeriTalk)"
+                        value={newSourceName}
+                        onChange={(e) => setNewSourceName(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 rounded-lg text-xs bg-zinc-950/70 border border-zinc-700/70 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-sky-500"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Feed or Site URL (e.g. www.meritalk.com/feed/)"
+                        value={newSourceUrl}
+                        onChange={(e) => setNewSourceUrl(e.target.value)}
+                        required
+                        className="w-full px-3 py-2 rounded-lg text-xs bg-zinc-950/70 border border-zinc-700/70 text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-sky-500"
+                      />
+                      <select
+                        value={newSourceType}
+                        onChange={(e) => setNewSourceType(e.target.value as "rss" | "html" | "api")}
+                        className="w-full px-3 py-2 rounded-lg text-xs bg-zinc-950/70 border border-zinc-700/70 text-zinc-200 focus:outline-none focus:border-sky-500"
+                      >
+                        <option value="rss">RSS / Atom Feed</option>
+                        <option value="html">Website (Auto-discover RSS)</option>
+                        <option value="api">JSON API Endpoint</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={isAddingSource}
+                      className={`w-full py-2 px-3 rounded-lg text-xs font-semibold bg-sky-500 hover:bg-sky-400 ${
+                        isLightMode ? "text-white" : "text-zinc-950"
+                      } transition-colors cursor-pointer disabled:opacity-50`}
+                    >
+                      {isAddingSource ? "Saving..." : "Save Data Source"}
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
           </div>
 

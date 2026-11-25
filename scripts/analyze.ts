@@ -37,18 +37,11 @@ interface Territory {
   name: string;
 }
 
-const FED_SOURCES = new Set([
-  'source-nextgov',
-  'source-fedscoop',
-  'source-federalnewsnetwork',
-  'source-orangeslices',
-  'source-govexec-tech',
-  'source-govciomedia',
-  'source-cisa-advisories',
-  'source-defensescoop',
-  'source-executivegov',
-  'source-hsdf',
-  'source-statetech'
+const GENERAL_NEWS_SOURCES = new Set([
+  'source-nyt-us',
+  'source-wapo-national',
+  'source-npr',
+  'source-pbs'
 ]);
 
 const RELEVANT_KEYWORDS = [
@@ -204,7 +197,7 @@ async function runAnalysis() {
   for (const article of unanalyzedArticles) {
     const text = `${article.title} ${article.content}`.toLowerCase();
     const hasKeyword = RELEVANT_KEYWORDS.some(kw => text.includes(kw));
-    const isFedSource = FED_SOURCES.has(article.source_id);
+    const isFedSource = !GENERAL_NEWS_SOURCES.has(article.source_id);
 
     if (isFedSource || hasKeyword) {
       candidatesToAnalyze.push(article);

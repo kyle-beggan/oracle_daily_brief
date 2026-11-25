@@ -73,6 +73,7 @@ const TECH_KEYWORDS = [
   /\benterprise\s+(?:architecture|platform|data|it|system|cloud|cyber)/i,
   /\bautomation\b|\brpa\b/i,
   /\banalytics\b/i,
+  /\b(?:anti-fraud|fraud\s+detection|risk[- ]modeling|entity[- ]resolution|predictive\s+modeling|data\s+matching)\b/i,
 ];
 
 export function isTechRelatedApfsRecord(item: RawApfsRecord): boolean {
